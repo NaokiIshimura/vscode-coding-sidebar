@@ -38,8 +38,11 @@ declare global {
     var __fileListExtensionActivated: boolean | undefined;
 }
 
+console.log('[File List Extension] === EXTENSION LOADING ===');
+console.log('[File List Extension] Current activation status:', globalThis.__fileListExtensionActivated);
+
 if (globalThis.__fileListExtensionActivated) {
-    console.log('[File List Extension] activate() skipped: already activated');
+    console.log('[File List Extension] activate() will be skipped: already activated');
 }
 
 function getOrCreateTreeView<T>(
@@ -66,11 +69,19 @@ function getOrCreateTreeView<T>(
 }
 
 export function activate(context: vscode.ExtensionContext) {
-    if (globalThis.__fileListExtensionActivated) {
+    // デバッグモードでは常に再初期化を許可
+    const isDebugMode = process.env.VSCODE_DEBUG_MODE === 'true' || context.extensionMode === vscode.ExtensionMode.Development;
+
+    if (globalThis.__fileListExtensionActivated && !isDebugMode) {
+        console.log('[File List Extension] Already activated, skipping...');
         return; // 既に初期化済み
     }
+
     globalThis.__fileListExtensionActivated = true;
-    console.log('File List Extension が有効化されました');
+    console.log('[File List Extension] ========================================');
+    console.log('[File List Extension] Extension activation started');
+    console.log('[File List Extension] Extension mode:', context.extensionMode === vscode.ExtensionMode.Development ? 'Development' : 'Production');
+    console.log('[File List Extension] ========================================');
 
     // Initialize core services first
     const logger = DebugLogger.getInstance();
@@ -177,15 +188,26 @@ export function activate(context: vscode.ExtensionContext) {
 
     // TreeViewをProviderに設定
     workspaceExplorerProvider.setTreeView(workspaceView);
+    console.log('[File List Extension] WorkspaceView created and set to provider');
 
     // Register commands for workspace explorer
     workspaceExplorerProvider.registerCommands(context);
+    console.log('[File List Extension] Commands registered for workspace explorer');
+
+    // 現在のアクティブエディタを確認
+    const currentActiveEditor = vscode.window.activeTextEditor;
+    console.log('[File List Extension] Current active editor:', currentActiveEditor ? currentActiveEditor.document.fileName : 'none');
 
     // アクティブエディタの変更を監視して自動ファイル選択機能を実装
+    console.log('[File List Extension] Registering onDidChangeActiveTextEditor listener...');
     const activeEditorDisposable = vscode.window.onDidChangeActiveTextEditor(async (editor) => {
-        console.log('=== Active Editor Changed ===');
-        console.log('Editor:', editor ? editor.document.fileName : 'none');
-        
+        console.log('=== Active Editor Changed Event Fired ===');
+        console.log('Editor exists:', !!editor);
+        if (editor) {
+            console.log('Editor file path:', editor.document.fileName);
+            console.log('Editor URI scheme:', editor.document.uri.scheme);
+        }
+
         workspaceExplorerProvider.updateTitle(editor);
 
         // 設定で自動ファイル選択機能が有効かチェック
@@ -194,18 +216,30 @@ export function activate(context: vscode.ExtensionContext) {
 
         // 自動ファイル選択機能
         if (autoRevealEnabled && editor && editor.document.uri.scheme === 'file') {
-            console.log('Triggering auto file selection in Extension Explorer');
-            
+            console.log('Conditions met, triggering auto file selection...');
+            console.log('WorkspaceView visible:', workspaceView.visible);
+
             // 少し遅延を入れてTreeViewが準備されるのを待つ
             setTimeout(async () => {
+                console.log('Timeout triggered, calling revealActiveFile...');
                 try {
-                    await revealInWorkspaceExplorer(editor.document.fileName);
+                    // 直接EnhancedWorkspaceExplorerProviderのrevealActiveFileメソッドを使用
+                    await workspaceExplorerProvider.revealActiveFile(editor);
+                    console.log('revealActiveFile call completed');
                 } catch (error) {
-                    console.error('Auto file selection failed:', error);
+                    console.error('Auto file selection failed with error:', error);
                 }
             }, 200);
-        } else if (!autoRevealEnabled) {
-            console.log('Auto file selection is disabled by user setting');
+        } else {
+            if (!autoRevealEnabled) {
+                console.log('Auto file selection is disabled by user setting');
+            }
+            if (!editor) {
+                console.log('No editor available');
+            }
+            if (editor && editor.document.uri.scheme !== 'file') {
+                console.log('Not a file scheme:', editor.document.uri.scheme);
+            }
         }
     });
 
@@ -213,16 +247,17 @@ export function activate(context: vscode.ExtensionContext) {
     const visibilityDisposable = workspaceView.onDidChangeVisibility(async () => {
         console.log('=== Workspace Explorer Visibility Changed ===');
         console.log('Visible:', workspaceView.visible);
-        
+
         const autoRevealEnabled = vscode.workspace.getConfiguration('fileListExtension.explorer').get<boolean>('autoRevealActiveFile', true);
-        
+
         if (autoRevealEnabled && workspaceView.visible && vscode.window.activeTextEditor) {
             console.log('View became visible, revealing current active file');
             const activeEditor = vscode.window.activeTextEditor;
             setTimeout(async () => {
                 try {
                     if (activeEditor) {
-                        await revealInWorkspaceExplorer(activeEditor.document.fileName);
+                        // 直接EnhancedWorkspaceExplorerProviderのrevealActiveFileメソッドを使用
+                        await workspaceExplorerProvider.revealActiveFile(activeEditor);
                     }
                 } catch (error) {
                     console.error('Reveal on visibility change failed:', error);
@@ -236,18 +271,33 @@ export function activate(context: vscode.ExtensionContext) {
     // 初期タイトルを設定
     workspaceExplorerProvider.updateTitle(vscode.window.activeTextEditor);
 
+    // テスト用：手動でファイル選択をトリガーするコマンドを追加
+    const testRevealCommand = vscode.commands.registerCommand('fileList.testReveal', async () => {
+        console.log('[File List Extension] Test reveal command triggered');
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+            console.log('[File List Extension] Test: Current file:', editor.document.fileName);
+            await workspaceExplorerProvider.revealActiveFile(editor);
+        } else {
+            console.log('[File List Extension] Test: No active editor');
+        }
+    });
+    context.subscriptions.push(testRevealCommand);
+
     // 初期ファイルの選択（拡張機能起動時）
     const autoRevealEnabled = vscode.workspace.getConfiguration('fileListExtension.explorer').get<boolean>('autoRevealActiveFile', true);
-    
+    console.log('[File List Extension] Initial auto reveal setting:', autoRevealEnabled);
+
     if (autoRevealEnabled && vscode.window.activeTextEditor) {
         console.log('=== Initial File Selection ===');
         const initialActiveEditor = vscode.window.activeTextEditor;
         console.log('Initial active file:', initialActiveEditor.document.fileName);
-        
+
         setTimeout(async () => {
             try {
                 if (initialActiveEditor) {
-                    await revealInWorkspaceExplorer(initialActiveEditor.document.fileName);
+                    // 直接EnhancedWorkspaceExplorerProviderのrevealActiveFileメソッドを使用
+                    await workspaceExplorerProvider.revealActiveFile(initialActiveEditor);
                     console.log('Initial file selection completed');
                 }
             } catch (error) {
@@ -270,7 +320,8 @@ export function activate(context: vscode.ExtensionContext) {
                 setTimeout(async () => {
                     try {
                         if (currentActiveEditor) {
-                            await revealInWorkspaceExplorer(currentActiveEditor.document.fileName);
+                            // 直接EnhancedWorkspaceExplorerProviderのrevealActiveFileメソッドを使用
+                            await workspaceExplorerProvider.revealActiveFile(currentActiveEditor);
                             console.log('Auto reveal re-enabled, selected current active file');
                         }
                     } catch (error) {
@@ -283,6 +334,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     // Disposableを登録
     context.subscriptions.push(activeEditorDisposable, visibilityDisposable, configurationDisposable);
+    console.log('[File List Extension] Event listeners registered successfully');
 
     const treeView = getOrCreateTreeView('fileListExplorer', {
         treeDataProvider: fileListProvider,
@@ -320,9 +372,9 @@ export function activate(context: vscode.ExtensionContext) {
             const selectedItem = e.selection[0];
             console.log('Selected item in details view:', selectedItem.label || selectedItem);
             console.log('Selected item filePath:', selectedItem.filePath);
-            
+
             // 拡張機能のエクスプローラーで選択
-            await revealInWorkspaceExplorer(selectedItem.filePath);
+            await workspaceExplorerProvider.revealFile(selectedItem.filePath);
         }
     });
 
@@ -334,29 +386,15 @@ export function activate(context: vscode.ExtensionContext) {
             const selectedItem = e.selection[0];
             console.log('Selected item in git view:', selectedItem.label || selectedItem);
             console.log('Selected item filePath:', selectedItem.filePath);
-            
+
             // 拡張機能のエクスプローラーで選択
-            await revealInWorkspaceExplorer(selectedItem.filePath);
+            await workspaceExplorerProvider.revealFile(selectedItem.filePath);
         }
     });
 
     // ファイル一覧ペインは基本的なファイル表示のみ（VSCode標準操作なし）
     fileDetailsProvider.registerCommands(context);
 
-    // 拡張機能のエクスプローラーでファイルを選択する関数
-    async function revealInWorkspaceExplorer(filePath: string): Promise<void> {
-        try {
-            console.log('=== Revealing file in Extension Workspace Explorer ===');
-            console.log('Target file path:', filePath);
-            
-            // EnhancedWorkspaceExplorerProviderのrevealFileメソッドを使用
-            await workspaceExplorerProvider.revealFile(filePath);
-            
-            console.log('File revealed successfully in Extension Workspace Explorer');
-        } catch (error) {
-            console.error('Failed to reveal file in Extension Workspace Explorer:', error);
-        }
-    }
 
 
 

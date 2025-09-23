@@ -263,8 +263,9 @@ export class EnhancedWorkspaceExplorerProvider extends EnhancedTreeDataProvider<
 
         try {
             const items = await this.getItemsInDirectory(targetPath);
-            
+
             // Filter items based on display settings
+            // Note: shouldShowFile already handles hidden files based on displayCustomizationService settings
             const filteredItems = items.filter(item => displayCustomizationService.shouldShowFile(item));
             
             const processedItems = this.processItems(filteredItems);
@@ -1366,40 +1367,60 @@ export class EnhancedWorkspaceExplorerProvider extends EnhancedTreeDataProvider<
      * Reveal active file in the explorer
      */
     public async revealActiveFile(editor?: vscode.TextEditor): Promise<void> {
-        if (!editor || editor.document.uri.scheme !== 'file') {
-            console.log('RevealActiveFile: No valid editor or not a file scheme');
+        console.log('=== EnhancedWorkspaceExplorerProvider.revealActiveFile called ===');
+
+        if (!editor) {
+            console.log('RevealActiveFile: No editor provided');
+            return;
+        }
+
+        if (editor.document.uri.scheme !== 'file') {
+            console.log('RevealActiveFile: Not a file scheme:', editor.document.uri.scheme);
             return;
         }
 
         const filePath = editor.document.uri.fsPath;
-        console.log('RevealActiveFile: Attempting to reveal file:', filePath);
-        
+        console.log('RevealActiveFile: Target file path:', filePath);
+        console.log('RevealActiveFile: Workspace root:', this.workspaceRoot);
+        console.log('RevealActiveFile: TreeView available:', !!this.treeView);
+
         try {
             // Check if file is within workspace
-            if (!this.workspaceRoot || !filePath.startsWith(this.workspaceRoot)) {
-                console.log('RevealActiveFile: File is not within workspace root');
+            if (!this.workspaceRoot) {
+                console.log('RevealActiveFile: No workspace root set');
                 return;
             }
 
+            if (!filePath.startsWith(this.workspaceRoot)) {
+                console.log('RevealActiveFile: File is not within workspace root');
+                console.log('  File path:', filePath);
+                console.log('  Workspace root:', this.workspaceRoot);
+                return;
+            }
+
+            console.log('RevealActiveFile: Loading parent directories...');
             // Load parent directories hierarchically to ensure the file can be found
             await this.loadParentDirectoriesHierarchically(filePath);
-            
+
+            console.log('RevealActiveFile: Expanding parent folders...');
             // Expand parent folders step by step
             await this.expandParentFoldersStepByStep(filePath);
-            
+
+            console.log('RevealActiveFile: Finding item in tree...');
             // Find the item in the tree
             const item = await this.findItemByPath(filePath);
             if (item) {
-                console.log('RevealActiveFile: Found item, revealing in tree view:', item.label);
-                
+                console.log('RevealActiveFile: Found item:', item.label, 'at path:', item.filePath);
+
                 // Use the TreeView to reveal and select the item
                 if (this.treeView) {
+                    console.log('RevealActiveFile: Calling TreeView.reveal...');
                     await this.treeView.reveal(item, {
                         select: true,
                         focus: false,
                         expand: true
                     });
-                    
+
                     // Update selection manager
                     this.selectionManager.setSelection([item]);
                     console.log('RevealActiveFile: Successfully revealed and selected file');
@@ -1412,6 +1433,8 @@ export class EnhancedWorkspaceExplorerProvider extends EnhancedTreeDataProvider<
         } catch (error) {
             console.error('RevealActiveFile: Error revealing active file:', error);
         }
+
+        console.log('=== EnhancedWorkspaceExplorerProvider.revealActiveFile completed ===');
     }
 
     /**

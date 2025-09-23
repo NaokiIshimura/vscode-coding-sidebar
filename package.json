@@ -15,6 +15,12 @@
     "Other"
   ],
   "activationEvents": [
+    "onView:workspaceExplorer",
+    "onView:fileListExplorer",
+    "onView:fileListDetails",
+    "onView:gitChanges",
+    "onCommand:fileList.selectFolder",
+    "onCommand:fileList.testReveal",
     "onStartupFinished"
   ],
   "main": "./out/extension.js",
@@ -145,6 +151,11 @@
       {
         "command": "fileListExtension.refresh",
         "title": "ビューを更新",
+        "category": "File List Extension"
+      },
+      {
+        "command": "fileList.testReveal",
+        "title": "Test Reveal Active File",
         "category": "File List Extension"
       },
       {
@@ -476,7 +487,7 @@
       },
       "fileListExtension.explorer.showHiddenFiles": {
         "type": "boolean",
-        "default": false,
+        "default": true,
         "description": "隠しファイルとフォルダを表示する"
       },
       "fileListExtension.explorer.sortOrder": {

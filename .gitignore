@@ -12,8 +12,9 @@ yarn-error.log*
 # VSCode extension development
 .vscode-test/
 *.vsix
-# VSIXファイルはreleasesディレクトリのみ除外対象外
-!releases/*.vsix
+
+# Releases directory (managed by CI/CD)
+releases/
 
 # OS generated files
 .DS_Store

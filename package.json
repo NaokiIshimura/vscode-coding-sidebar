@@ -2,7 +2,7 @@
   "name": "file-list-extension",
   "displayName": "File List Extension",
   "description": "指定したディレクトリ内のファイルを一覧表示するVSCode拡張機能",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "publisher": "nacn",
   "icon": "images/nacn.png",
   "repository": {
@@ -122,6 +122,26 @@
         "command": "fileList.copyRelativePath",
         "title": "相対パスをコピー",
         "icon": "$(copy)"
+      },
+      {
+        "command": "fileList.copy",
+        "title": "コピー",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "fileList.cut",
+        "title": "切り取り",
+        "icon": "$(scissors)"
+      },
+      {
+        "command": "fileList.paste",
+        "title": "貼り付け",
+        "icon": "$(clippy)"
+      },
+      {
+        "command": "fileList.searchInWorkspace",
+        "title": "ワークスペース内を検索",
+        "icon": "$(search)"
       }
     ],
     "views": {
@@ -208,7 +228,12 @@
         {
           "command": "fileList.setupWorkspace",
           "when": "view == workspaceExplorer",
-          "group": "navigation"
+          "group": "navigation@1"
+        },
+        {
+          "command": "fileList.searchInWorkspace",
+          "when": "view == workspaceExplorer",
+          "group": "navigation@2"
         }
       ],
       "view/item/context": [
@@ -256,9 +281,74 @@
           "command": "fileList.copyRelativePath",
           "when": "view == fileListDetails",
           "group": "1_copy"
+        },
+        {
+          "command": "fileList.copy",
+          "when": "view == workspaceExplorer",
+          "group": "1_clipboard@1"
+        },
+        {
+          "command": "fileList.cut",
+          "when": "view == workspaceExplorer",
+          "group": "1_clipboard@2"
+        },
+        {
+          "command": "fileList.paste",
+          "when": "view == workspaceExplorer && viewItem == directory",
+          "group": "1_clipboard@3"
+        },
+        {
+          "command": "fileList.rename",
+          "when": "view == workspaceExplorer",
+          "group": "2_edit@1"
+        },
+        {
+          "command": "fileList.delete",
+          "when": "view == workspaceExplorer",
+          "group": "2_edit@2"
+        },
+        {
+          "command": "fileList.createMemo",
+          "when": "view == workspaceExplorer && viewItem == directory",
+          "group": "3_new@1"
+        },
+        {
+          "command": "fileList.createFolder",
+          "when": "view == workspaceExplorer && viewItem == directory",
+          "group": "3_new@2"
         }
       ]
-    }
+    },
+    "keybindings": [
+      {
+        "command": "fileList.copy",
+        "key": "ctrl+c",
+        "mac": "cmd+c",
+        "when": "focusedView == workspaceExplorer"
+      },
+      {
+        "command": "fileList.cut",
+        "key": "ctrl+x",
+        "mac": "cmd+x",
+        "when": "focusedView == workspaceExplorer"
+      },
+      {
+        "command": "fileList.paste",
+        "key": "ctrl+v",
+        "mac": "cmd+v",
+        "when": "focusedView == workspaceExplorer"
+      },
+      {
+        "command": "fileList.delete",
+        "key": "delete",
+        "when": "focusedView == workspaceExplorer"
+      },
+      {
+        "command": "fileList.rename",
+        "key": "f2",
+        "when": "focusedView == workspaceExplorer"
+      }
+    ]
   },
   "configuration": {
     "title": "File List Extension",
@@ -268,6 +358,64 @@
         "default": "",
         "description": "フォルダツリーのデフォルト相対パス",
         "markdownDescription": "ワークスペースルートからの相対パスを指定します。\n\n**設定方法:**\n1. 拡張機能の編集ボタンから設定\n2. この設定を直接編集\n3. `.vscode/settings.json` に手動で記入\n\n**例:**\n- `src` → プロジェクト/src\n- `docs/api` → プロジェクト/docs/api\n- `.claude` → プロジェクト/.claude\n- 空文字 → プロジェクトルート\n\n**手動設定例:**\n```json\n{\n  \"fileListExtension.defaultRelativePath\": \".claude\"\n}\n```"
+      },
+      "fileListExtension.sortBy": {
+        "type": "string",
+        "enum": [
+          "name",
+          "type",
+          "size",
+          "modified"
+        ],
+        "default": "name",
+        "description": "ファイルのソート基準",
+        "enumDescriptions": [
+          "名前でソート",
+          "種類でソート",
+          "サイズでソート",
+          "更新日時でソート"
+        ]
+      },
+      "fileListExtension.sortOrder": {
+        "type": "string",
+        "enum": [
+          "ascending",
+          "descending"
+        ],
+        "default": "ascending",
+        "description": "ソート順序",
+        "enumDescriptions": [
+          "昇順",
+          "降順"
+        ]
+      },
+      "fileListExtension.showHidden": {
+        "type": "boolean",
+        "default": false,
+        "description": "隠しファイル・フォルダを表示する"
+      },
+      "fileListExtension.viewMode": {
+        "type": "string",
+        "enum": [
+          "tree",
+          "list"
+        ],
+        "default": "tree",
+        "description": "表示モード",
+        "enumDescriptions": [
+          "ツリー表示",
+          "リスト表示"
+        ]
+      },
+      "fileListExtension.autoRefresh": {
+        "type": "boolean",
+        "default": true,
+        "description": "ファイルシステム変更時に自動更新する"
+      },
+      "fileListExtension.showFileIcons": {
+        "type": "boolean",
+        "default": true,
+        "description": "ファイルアイコンを表示する"
       }
     }
   },

@@ -24,6 +24,8 @@ Thumbs.db
 # Development files
 tsconfig.json
 CLAUDE.md
+.claude/
+.serena/
 
 # Test files
 test/

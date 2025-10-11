@@ -3,6 +3,17 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { exec } from 'child_process';
 
+// サービスクラスのインポート
+import { ExplorerManager } from './services/ExplorerManager';
+import { FileOperationService } from './services/FileOperationService';
+import { ClipboardManager } from './services/ClipboardManager';
+import { MultiSelectionManager } from './services/MultiSelectionManager';
+import { KeyboardShortcutHandler } from './services/KeyboardShortcutHandler';
+import { ContextMenuManager } from './services/ContextMenuManager';
+import { DragDropHandler } from './services/DragDropHandler';
+import { SearchService } from './services/SearchService';
+import { ConfigurationProvider } from './services/ConfigurationProvider';
+
 // テンプレートを読み込んで変数を置換する関数
 function loadTemplate(context: vscode.ExtensionContext, variables: { [key: string]: string }): string {
     try {
@@ -150,6 +161,14 @@ async function setupClaudeFolder(workspaceRoot: string): Promise<void> {
 export function activate(context: vscode.ExtensionContext) {
     console.log('File List Extension が有効化されました');
 
+    // サービスクラスの初期化
+    const fileOperationService = new FileOperationService();
+    const explorerManager = new ExplorerManager();
+    const configProvider = new ConfigurationProvider();
+    const searchService = new SearchService();
+    const keyboardHandler = new KeyboardShortcutHandler(explorerManager, context);
+    const contextMenuManager = new ContextMenuManager(explorerManager);
+
     // ステータスバーアイテムを作成
     const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     statusBarItem.text = "$(gear) File List設定";
@@ -160,7 +179,11 @@ export function activate(context: vscode.ExtensionContext) {
 
     // TreeDataProviderを作成
     const workspaceSettingsProvider = new WorkspaceSettingsProvider();
-    const workspaceExplorerProvider = new WorkspaceExplorerProvider();
+    const workspaceExplorerProvider = new WorkspaceExplorerProvider(
+        fileOperationService,
+        configProvider,
+        searchService
+    );
     const fileListProvider = new FileListProvider();
     const fileDetailsProvider = new FileDetailsProvider();
     const gitChangesProvider = new GitChangesProvider();
@@ -221,7 +244,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     const workspaceView = vscode.window.createTreeView('workspaceExplorer', {
         treeDataProvider: workspaceExplorerProvider,
-        showCollapseAll: true
+        showCollapseAll: true,
+        canSelectMany: true,
+        dragAndDropController: workspaceExplorerProvider
     });
 
     // TreeViewをProviderに設定
@@ -604,30 +629,31 @@ export function activate(context: vscode.ExtensionContext) {
         const filePath = path.join(targetPath, fileName);
 
         try {
-            // ファイルが既に存在するかチェック
-            if (fs.existsSync(filePath)) {
-                vscode.window.showErrorMessage(`ファイル ${fileName} は既に存在します`);
-                return;
-            }
-
             // テンプレートを使用してファイル内容を生成
             const variables = {
                 datetime: now.toLocaleString('ja-JP'),
                 filename: fileName,
                 timestamp: timestamp
             };
-            
+
             const content = loadTemplate(context, variables);
-            fs.writeFileSync(filePath, content, 'utf8');
 
-            // ファイル一覧を更新
-            fileDetailsProvider.refresh();
+            // FileOperationServiceを使用してファイル作成
+            const result = await fileOperationService.createFile(filePath, content);
 
-            // 作成したファイルを開く
-            const document = await vscode.workspace.openTextDocument(filePath);
-            await vscode.window.showTextDocument(document);
+            if (result.success) {
+                // ビューを更新
+                fileDetailsProvider.refresh();
+                workspaceExplorerProvider.refresh();
 
-            vscode.window.showInformationMessage(`メモファイル ${fileName} を作成しました`);
+                // 作成したファイルを開く
+                const document = await vscode.workspace.openTextDocument(filePath);
+                await vscode.window.showTextDocument(document);
+
+                vscode.window.showInformationMessage(`メモファイル ${fileName} を作成しました`);
+            } else {
+                throw result.error || new Error('ファイルの作成に失敗しました');
+            }
         } catch (error) {
             vscode.window.showErrorMessage(`メモファイルの作成に失敗しました: ${error}`);
         }
@@ -685,14 +711,19 @@ export function activate(context: vscode.ExtensionContext) {
         const folderPath = path.join(targetPath, trimmedFolderName);
 
         try {
-            // フォルダを作成
-            fs.mkdirSync(folderPath, { recursive: true });
+            // FileOperationServiceを使用してフォルダ作成
+            const result = await fileOperationService.createDirectory(folderPath);
 
-            // ファイル一覧を更新
-            fileDetailsProvider.refresh();
-            fileListProvider.refresh();
+            if (result.success) {
+                // ビューを更新
+                fileDetailsProvider.refresh();
+                fileListProvider.refresh();
+                workspaceExplorerProvider.refresh();
 
-            vscode.window.showInformationMessage(`フォルダ "${trimmedFolderName}" を作成しました`);
+                vscode.window.showInformationMessage(`フォルダ "${trimmedFolderName}" を作成しました`);
+            } else {
+                throw result.error || new Error('フォルダの作成に失敗しました');
+            }
         } catch (error) {
             vscode.window.showErrorMessage(`フォルダの作成に失敗しました: ${error}`);
         }
@@ -735,19 +766,18 @@ export function activate(context: vscode.ExtensionContext) {
         const newPath = path.join(dirPath, newName);
 
         try {
-            // 既に存在するかチェック
-            if (fs.existsSync(newPath)) {
-                vscode.window.showErrorMessage(`${newName} は既に存在します`);
-                return;
+            // FileOperationServiceを使用してリネーム
+            const result = await fileOperationService.renameFile(item.filePath, newPath);
+
+            if (result.success) {
+                // ビューを更新
+                fileDetailsProvider.refresh();
+                workspaceExplorerProvider.refresh();
+
+                vscode.window.showInformationMessage(`${oldName} を ${newName} に変更しました`);
+            } else {
+                throw result.error || new Error('名前の変更に失敗しました');
             }
-
-            // リネーム実行
-            fs.renameSync(item.filePath, newPath);
-
-            // ビューを更新
-            fileDetailsProvider.refresh();
-
-            vscode.window.showInformationMessage(`${oldName} を ${newName} に変更しました`);
         } catch (error) {
             vscode.window.showErrorMessage(`名前の変更に失敗しました: ${error}`);
         }
@@ -775,19 +805,18 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         try {
-            // 削除実行
-            if (item.isDirectory) {
-                // フォルダの場合は再帰的に削除
-                fs.rmSync(item.filePath, { recursive: true, force: true });
+            // FileOperationServiceを使用して削除
+            const result = await fileOperationService.deleteFiles([item.filePath]);
+
+            if (result[0].success) {
+                // ビューを更新
+                fileDetailsProvider.refresh();
+                workspaceExplorerProvider.refresh();
+
+                vscode.window.showInformationMessage(`${itemType} "${itemName}" を削除しました`);
             } else {
-                // ファイルの場合
-                fs.unlinkSync(item.filePath);
+                throw result[0].error || new Error('削除に失敗しました');
             }
-
-            // ビューを更新
-            fileDetailsProvider.refresh();
-
-            vscode.window.showInformationMessage(`${itemType} "${itemName}" を削除しました`);
         } catch (error) {
             vscode.window.showErrorMessage(`削除に失敗しました: ${error}`);
         }
@@ -943,7 +972,160 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage(`相対パスをコピーしました: ${relativePath}`);
     });
 
-    context.subscriptions.push(selectFolderCommand, refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, setupWorkspaceCommand, setupSettingsCommand, setupTemplateCommand, setupClaudeCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMemoCommand, createFolderCommand, renameCommand, deleteCommand, addFileCommand, addFolderCommand, copyRelativePathCommand);
+    // コピーコマンドを登録(workspaceExplorer用)
+    const copyCommand = vscode.commands.registerCommand('fileList.copy', async (item?: FileItem, items?: FileItem[]) => {
+        // 複数選択時はitemsを優先、単一選択時はitemを使用
+        const selectedItems = items && items.length > 0 ? items : (item ? [item] : []);
+
+        if (selectedItems.length === 0) {
+            vscode.window.showErrorMessage('ファイルまたはフォルダが選択されていません');
+            return;
+        }
+
+        try {
+            const paths = selectedItems.map(i => i.filePath);
+            await explorerManager.copyToClipboard(paths);
+
+            if (selectedItems.length === 1) {
+                const itemName = path.basename(selectedItems[0].filePath);
+                vscode.window.showInformationMessage(`"${itemName}" をコピーしました`);
+            } else {
+                vscode.window.showInformationMessage(`${selectedItems.length}個のアイテムをコピーしました`);
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`コピーに失敗しました: ${error}`);
+        }
+    });
+
+    // 切り取りコマンドを登録(workspaceExplorer用)
+    const cutCommand = vscode.commands.registerCommand('fileList.cut', async (item?: FileItem, items?: FileItem[]) => {
+        // 複数選択時はitemsを優先、単一選択時はitemを使用
+        const selectedItems = items && items.length > 0 ? items : (item ? [item] : []);
+
+        if (selectedItems.length === 0) {
+            vscode.window.showErrorMessage('ファイルまたはフォルダが選択されていません');
+            return;
+        }
+
+        try {
+            const paths = selectedItems.map(i => i.filePath);
+            await explorerManager.cutToClipboard(paths);
+
+            if (selectedItems.length === 1) {
+                const itemName = path.basename(selectedItems[0].filePath);
+                vscode.window.showInformationMessage(`"${itemName}" を切り取りました`);
+            } else {
+                vscode.window.showInformationMessage(`${selectedItems.length}個のアイテムを切り取りました`);
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`切り取りに失敗しました: ${error}`);
+        }
+    });
+
+    // 貼り付けコマンドを登録(workspaceExplorer用)
+    const pasteCommand = vscode.commands.registerCommand('fileList.paste', async (item?: FileItem) => {
+        const clipboardManager = explorerManager.getClipboardManager();
+
+        if (!clipboardManager.hasData()) {
+            vscode.window.showErrorMessage('クリップボードが空です');
+            return;
+        }
+
+        // ターゲットパスの決定
+        let targetPath: string;
+        if (item) {
+            if (item.isDirectory) {
+                targetPath = item.filePath;
+            } else {
+                targetPath = path.dirname(item.filePath);
+            }
+        } else {
+            // アイテムが指定されていない場合はワークスペースルートを使用
+            if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
+                vscode.window.showErrorMessage('ワークスペースが開かれていません');
+                return;
+            }
+            targetPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+        }
+
+        try {
+            await explorerManager.pasteFromClipboard(targetPath);
+
+            // ビューを更新
+            workspaceExplorerProvider.refresh();
+
+            vscode.window.showInformationMessage('貼り付けが完了しました');
+        } catch (error) {
+            vscode.window.showErrorMessage(`貼り付けに失敗しました: ${error}`);
+        }
+    });
+
+    // 検索コマンド
+    const searchInWorkspaceCommand = vscode.commands.registerCommand('fileList.searchInWorkspace', async () => {
+        if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
+            vscode.window.showErrorMessage('ワークスペースが開かれていません');
+            return;
+        }
+
+        const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
+
+        // 検索パターンを入力
+        const pattern = await vscode.window.showInputBox({
+            prompt: '検索パターンを入力してください',
+            placeHolder: '例: *.ts, test*, README.md',
+            value: ''
+        });
+
+        if (!pattern) {
+            return;
+        }
+
+        try {
+            const results = await searchService.search(workspaceRoot, {
+                pattern,
+                caseSensitive: false,
+                useRegex: false,
+                includeHidden: configProvider.getShowHidden()
+            });
+
+            // 検索結果をフィルタリング（マッチしたもののみ）
+            const matchedResults = searchService.filterResults(results, true);
+
+            if (matchedResults.length === 0) {
+                vscode.window.showInformationMessage(`"${pattern}" に一致するファイルが見つかりませんでした`);
+                return;
+            }
+
+            // 結果を選択肢として表示
+            const items = matchedResults.map(result => ({
+                label: result.name,
+                description: path.relative(workspaceRoot, path.dirname(result.path)),
+                detail: result.isDirectory ? 'フォルダ' : 'ファイル',
+                path: result.path,
+                isDirectory: result.isDirectory
+            }));
+
+            const selected = await vscode.window.showQuickPick(items, {
+                placeHolder: `${matchedResults.length}件の結果`,
+                matchOnDescription: true,
+                matchOnDetail: true
+            });
+
+            if (selected) {
+                // ファイルの場合は開く、フォルダの場合はエクスプローラーで表示
+                if (!selected.isDirectory) {
+                    const document = await vscode.workspace.openTextDocument(selected.path);
+                    await vscode.window.showTextDocument(document);
+                } else {
+                    vscode.window.showInformationMessage(`フォルダ: ${selected.path}`);
+                }
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`検索に失敗しました: ${error}`);
+        }
+    });
+
+    context.subscriptions.push(selectFolderCommand, refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, setupWorkspaceCommand, setupSettingsCommand, setupTemplateCommand, setupClaudeCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMemoCommand, createFolderCommand, renameCommand, deleteCommand, addFileCommand, addFolderCommand, copyRelativePathCommand, copyCommand, cutCommand, pasteCommand, searchInWorkspaceCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({
@@ -1013,6 +1195,27 @@ async function getFileList(dirPath: string): Promise<FileInfo[]> {
 
 
 
+// ディレクトリを再帰的にコピーする関数
+async function copyDirectory(src: string, dest: string): Promise<void> {
+    // コピー先ディレクトリを作成
+    fs.mkdirSync(dest, { recursive: true });
+
+    const entries = fs.readdirSync(src, { withFileTypes: true });
+
+    for (const entry of entries) {
+        const srcPath = path.join(src, entry.name);
+        const destPath = path.join(dest, entry.name);
+
+        if (entry.isDirectory()) {
+            // サブディレクトリを再帰的にコピー
+            await copyDirectory(srcPath, destPath);
+        } else {
+            // ファイルをコピー
+            fs.copyFileSync(srcPath, destPath);
+        }
+    }
+}
+
 // ファイルサイズをフォーマットする関数
 function formatFileSize(bytes: number): string {
     if (bytes === 0) return '0 B';
@@ -1041,6 +1244,7 @@ class FileListProvider implements vscode.TreeDataProvider<FileItem> {
     private rootPath: string | undefined;
     private treeView: vscode.TreeView<FileItem> | undefined;
     private fileWatcher: vscode.FileSystemWatcher | undefined;
+    private itemCache: Map<string, FileItem[]> = new Map();  // パスをキーとしたFileItemのキャッシュ
 
     constructor() { }
 
@@ -1101,6 +1305,7 @@ class FileListProvider implements vscode.TreeDataProvider<FileItem> {
     }
 
     refresh(): void {
+        this.itemCache.clear();  // キャッシュをクリア
         this._onDidChangeTreeData.fire();
     }
 
@@ -1115,16 +1320,25 @@ class FileListProvider implements vscode.TreeDataProvider<FileItem> {
 
         const targetPath = element ? element.resourceUri!.fsPath : this.rootPath;
 
+        // キャッシュに存在する場合は返す
+        if (this.itemCache.has(targetPath)) {
+            return Promise.resolve(this.itemCache.get(targetPath)!);
+        }
+
         try {
             const files = this.getFilesInDirectory(targetPath);
-            return Promise.resolve(files.map(file => new FileItem(
+            const items = files.map(file => new FileItem(
                 file.name,
                 file.isDirectory ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None,
                 file.path,
                 file.isDirectory,
                 file.size,
                 file.modified
-            )));
+            ));
+
+            // キャッシュに保存
+            this.itemCache.set(targetPath, items);
+            return Promise.resolve(items);
         } catch (error) {
             vscode.window.showErrorMessage(`ディレクトリの読み取りに失敗しました: ${error}`);
             return Promise.resolve([]);
@@ -1176,6 +1390,7 @@ class FileDetailsProvider implements vscode.TreeDataProvider<FileItem>, vscode.T
     private treeView: vscode.TreeView<FileItem> | undefined;
     private fileWatcher: vscode.FileSystemWatcher | undefined;
     private selectedItem: FileItem | undefined;
+    private itemCache: Map<string, FileItem[]> = new Map();  // パスをキーとしたFileItemのキャッシュ
 
     constructor() {
         // プロジェクトルートパスを取得
@@ -1277,6 +1492,7 @@ class FileDetailsProvider implements vscode.TreeDataProvider<FileItem>, vscode.T
     }
 
     refresh(): void {
+        this.itemCache.clear();  // キャッシュをクリア
         this._onDidChangeTreeData.fire();
     }
 
@@ -1370,38 +1586,27 @@ class FileDetailsProvider implements vscode.TreeDataProvider<FileItem>, vscode.T
             return Promise.resolve([]);
         }
 
-        if (!element) {
-            // ルートレベル: ファイル一覧を直接表示（ヘッダーなし）
-            try {
-                const files = this.getFilesInDirectory(this.rootPath);
-                const fileItems = files.map(file => new FileItem(
-                    file.name,
-                    file.isDirectory ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.None,
-                    file.path,
-                    file.isDirectory,
-                    file.size,
-                    file.modified
-                ));
-                return Promise.resolve(fileItems);
-            } catch (error) {
-                vscode.window.showErrorMessage(`ディレクトリの読み取りに失敗しました: ${error}`);
-                return Promise.resolve([]);
-            }
-        }
+        const targetPath = element ? element.resourceUri!.fsPath : this.rootPath;
 
-        // 通常のフォルダ展開
-        const targetPath = element.resourceUri!.fsPath;
+        // キャッシュに存在する場合は返す
+        if (this.itemCache.has(targetPath)) {
+            return Promise.resolve(this.itemCache.get(targetPath)!);
+        }
 
         try {
             const files = this.getFilesInDirectory(targetPath);
-            return Promise.resolve(files.map(file => new FileItem(
+            const fileItems = files.map(file => new FileItem(
                 file.name,
                 file.isDirectory ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.None,
                 file.path,
                 file.isDirectory,
                 file.size,
                 file.modified
-            )));
+            ));
+
+            // キャッシュに保存
+            this.itemCache.set(targetPath, fileItems);
+            return Promise.resolve(fileItems);
         } catch (error) {
             vscode.window.showErrorMessage(`ディレクトリの読み取りに失敗しました: ${error}`);
             return Promise.resolve([]);
@@ -1452,19 +1657,21 @@ class FileItem extends vscode.TreeItem {
         public readonly filePath: string,
         public readonly isDirectory: boolean,
         public readonly size: number,
-        public readonly modified: Date
+        public readonly modified: Date,
+        showFileIcons: boolean = true
     ) {
         super(label, collapsibleState);
 
         this.resourceUri = vscode.Uri.file(filePath);
         this.contextValue = isDirectory ? 'directory' : 'file';
 
-        // アイコンを設定（ヘッダー項目の場合は設定しない）
-        if (this.contextValue !== 'header') {
+        // アイコンを設定（設定が有効な場合のみ）
+        if (showFileIcons && this.contextValue !== 'header') {
             if (isDirectory) {
                 this.iconPath = new vscode.ThemeIcon('folder');
             } else {
-                this.iconPath = new vscode.ThemeIcon('file');
+                // ファイル種類に応じたアイコンを設定
+                this.iconPath = this.getFileIcon(label);
             }
         }
 
@@ -1480,6 +1687,48 @@ class FileItem extends vscode.TreeItem {
                 arguments: [this.resourceUri]
             };
         }
+    }
+
+    /**
+     * ファイル種類に応じたアイコンを取得
+     */
+    private getFileIcon(fileName: string): vscode.ThemeIcon {
+        const ext = path.extname(fileName).toLowerCase();
+
+        // 拡張子に応じてアイコンを選択
+        const iconMap: { [key: string]: string } = {
+            '.ts': 'symbol-method',
+            '.tsx': 'symbol-method',
+            '.js': 'symbol-function',
+            '.jsx': 'symbol-function',
+            '.json': 'json',
+            '.md': 'markdown',
+            '.txt': 'file-text',
+            '.py': 'symbol-class',
+            '.java': 'symbol-class',
+            '.cpp': 'symbol-class',
+            '.c': 'symbol-class',
+            '.h': 'symbol-class',
+            '.css': 'symbol-color',
+            '.scss': 'symbol-color',
+            '.html': 'symbol-misc',
+            '.xml': 'symbol-misc',
+            '.yml': 'settings-gear',
+            '.yaml': 'settings-gear',
+            '.sh': 'terminal',
+            '.bat': 'terminal',
+            '.png': 'file-media',
+            '.jpg': 'file-media',
+            '.jpeg': 'file-media',
+            '.gif': 'file-media',
+            '.svg': 'file-media',
+            '.pdf': 'file-pdf',
+            '.zip': 'file-zip',
+            '.git': 'git-branch',
+            '.gitignore': 'git-branch'
+        };
+
+        return new vscode.ThemeIcon(iconMap[ext] || 'file');
     }
 }
 
@@ -1951,15 +2200,87 @@ interface GitChange {
 }
 
 // ワークスペースエクスプローラープロバイダー
-class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem> {
+class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDragAndDropController<FileItem> {
     private _onDidChangeTreeData: vscode.EventEmitter<FileItem | undefined | null | void> = new vscode.EventEmitter<FileItem | undefined | null | void>();
     readonly onDidChangeTreeData: vscode.Event<FileItem | undefined | null | void> = this._onDidChangeTreeData.event;
     private treeView: vscode.TreeView<FileItem> | undefined;
     private itemCache: Map<string, FileItem> = new Map();  // パスをキーとしたFileItemのキャッシュ
     private fileWatcher: vscode.FileSystemWatcher | undefined;
 
-    constructor() {
+    // サービスクラス
+    private dragDropHandler: DragDropHandler<FileItem>;
+    private multiSelectionManager: MultiSelectionManager;
+    private configurationProvider: ConfigurationProvider;
+    private searchService: SearchService;
+
+    // ドラッグ&ドロップのMIMEタイプ
+    readonly dropMimeTypes = ['application/vnd.code.tree.fileItem', 'text/uri-list'];
+    readonly dragMimeTypes = ['application/vnd.code.tree.fileItem'];
+
+    constructor(
+        private fileOperationService: FileOperationService,
+        configurationProvider: ConfigurationProvider,
+        searchService: SearchService
+    ) {
+        this.configurationProvider = configurationProvider;
+        this.searchService = searchService;
+        this.dragDropHandler = new DragDropHandler(fileOperationService);
+        this.multiSelectionManager = new MultiSelectionManager();
         this.setupFileWatcher();
+        this.setupConfigurationWatcher();
+    }
+
+    /**
+     * 設定変更を監視
+     */
+    private setupConfigurationWatcher(): void {
+        this.configurationProvider.onConfigurationChanged((e) => {
+            // 表示に影響する設定が変更された場合は更新
+            if (e.affectsConfiguration('fileListExtension.sortBy') ||
+                e.affectsConfiguration('fileListExtension.sortOrder') ||
+                e.affectsConfiguration('fileListExtension.showFileIcons')) {
+                this.refresh();
+            }
+
+            // autoRefresh設定が変更された場合はファイルウォッチャーを再設定
+            if (e.affectsConfiguration('fileListExtension.autoRefresh')) {
+                this.setupFileWatcher();
+            }
+        });
+    }
+
+    /**
+     * ドラッグ開始処理
+     */
+    handleDrag(
+        source: readonly FileItem[],
+        dataTransfer: vscode.DataTransfer,
+        token: vscode.CancellationToken
+    ): void | Thenable<void> {
+        this.dragDropHandler.handleDrag(source, dataTransfer, token);
+    }
+
+    /**
+     * ドロップ処理
+     */
+    async handleDrop(
+        target: FileItem | undefined,
+        dataTransfer: vscode.DataTransfer,
+        token: vscode.CancellationToken
+    ): Promise<void> {
+        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+
+        await this.dragDropHandler.handleDrop(
+            target,
+            dataTransfer,
+            token,
+            (item: FileItem) => item.filePath,
+            (item: FileItem) => item.isDirectory,
+            workspaceRoot
+        );
+
+        // ドロップ後にツリーを更新
+        this.refresh();
     }
 
     setTreeView(treeView: vscode.TreeView<FileItem>): void {
@@ -2076,6 +2397,11 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem> {
             this.fileWatcher = undefined;
         }
 
+        // autoRefresh設定が無効の場合は監視しない
+        if (!this.configurationProvider.getAutoRefresh()) {
+            return;
+        }
+
         // ワークスペースフォルダがある場合のみ監視
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
             const watchPattern = new vscode.RelativePattern(vscode.workspace.workspaceFolders[0], '**/*');
@@ -2138,13 +2464,15 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem> {
         if (!element) {
             const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
             const rootName = path.basename(workspaceRoot);
+            const showFileIcons = this.configurationProvider.getShowFileIcons();
             const rootItem = new FileItem(
                 rootName,
                 vscode.TreeItemCollapsibleState.Expanded,
                 workspaceRoot,
                 true,
                 0,
-                new Date()
+                new Date(),
+                showFileIcons
             );
             // ルートアイテムをキャッシュに保存
             this.itemCache.set(workspaceRoot, rootItem);
@@ -2161,6 +2489,11 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem> {
             const files = await fs.promises.readdir(dirPath);
             const items: FileItem[] = [];
 
+            // 設定を取得
+            const sortBy = this.configurationProvider.getSortBy();
+            const sortOrder = this.configurationProvider.getSortOrder();
+            const showFileIcons = this.configurationProvider.getShowFileIcons();
+
             for (const file of files) {
                 const filePath = path.join(dirPath, file);
                 try {
@@ -2176,7 +2509,8 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem> {
                         filePath,
                         isDirectory,
                         stat.size || 0,
-                        stat.mtime || new Date()
+                        stat.mtime || new Date(),
+                        showFileIcons
                     );
                     // アイテムをキャッシュに保存
                     this.itemCache.set(filePath, item);
@@ -2186,17 +2520,50 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem> {
                 }
             }
 
-            // ディレクトリを先に、その後ファイルをアルファベット順にソート
-            return items.sort((a, b) => {
-                if (a.isDirectory !== b.isDirectory) {
-                    return a.isDirectory ? -1 : 1;
-                }
-                return a.label!.toString().localeCompare(b.label!.toString());
-            });
+            // 設定に基づいてソート
+            return this.sortItems(items, sortBy, sortOrder);
         } catch (error) {
             console.error(`ディレクトリ読み取りエラー: ${dirPath}`, error);
             return [];
         }
+    }
+
+    /**
+     * 設定に基づいてアイテムをソート
+     */
+    private sortItems(items: FileItem[], sortBy: string, sortOrder: string): FileItem[] {
+        return items.sort((a, b) => {
+            // ディレクトリを常に先に表示
+            if (a.isDirectory !== b.isDirectory) {
+                return a.isDirectory ? -1 : 1;
+            }
+
+            let comparison = 0;
+
+            switch (sortBy) {
+                case 'name':
+                    comparison = a.label!.toString().localeCompare(b.label!.toString());
+                    break;
+                case 'type':
+                    const extA = path.extname(a.label!.toString());
+                    const extB = path.extname(b.label!.toString());
+                    comparison = extA.localeCompare(extB);
+                    if (comparison === 0) {
+                        comparison = a.label!.toString().localeCompare(b.label!.toString());
+                    }
+                    break;
+                case 'size':
+                    comparison = (a.size || 0) - (b.size || 0);
+                    break;
+                case 'modified':
+                    const timeA = a.modified?.getTime() || 0;
+                    const timeB = b.modified?.getTime() || 0;
+                    comparison = timeA - timeB;
+                    break;
+            }
+
+            return sortOrder === 'ascending' ? comparison : -comparison;
+        });
     }
 }
 

@@ -185,7 +185,7 @@ export function activate(context: vscode.ExtensionContext) {
         searchService
     );
     const fileListProvider = new FileListProvider();
-    const fileDetailsProvider = new FileDetailsProvider();
+    const fileDetailsProvider = new FileDetailsProvider(fileListProvider);
     const gitChangesProvider = new GitChangesProvider();
 
     // プロジェクトルートを設定
@@ -395,6 +395,21 @@ export function activate(context: vscode.ExtensionContext) {
             // フォルダツリーにパスが設定されていない場合は、ファイル一覧ペインの親フォルダへ移動
             fileDetailsProvider.goToParentFolder();
         }
+    });
+
+    // フォルダ選択リセットコマンドを登録
+    const resetFolderSelectionCommand = vscode.commands.registerCommand('fileList.resetFolderSelection', async () => {
+        const rootPath = fileListProvider.getRootPath();
+
+        if (!rootPath) {
+            vscode.window.showInformationMessage('フォルダツリーのルートが設定されていません');
+            return;
+        }
+
+        fileListProvider.resetActiveFolder();
+        fileDetailsProvider.setRootPath(rootPath);
+
+        vscode.window.showInformationMessage('フォルダ選択をリセットしました');
     });
 
     // 相対パス設定コマンドを登録
@@ -1125,7 +1140,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(selectFolderCommand, refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, setupWorkspaceCommand, setupSettingsCommand, setupTemplateCommand, setupClaudeCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMemoCommand, createFolderCommand, renameCommand, deleteCommand, addFileCommand, addFolderCommand, copyRelativePathCommand, copyCommand, cutCommand, pasteCommand, searchInWorkspaceCommand);
+    context.subscriptions.push(selectFolderCommand, refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, resetFolderSelectionCommand, setRelativePathCommand, openSettingsCommand, setupWorkspaceCommand, setupSettingsCommand, setupTemplateCommand, setupClaudeCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMemoCommand, createFolderCommand, renameCommand, deleteCommand, addFileCommand, addFolderCommand, copyRelativePathCommand, copyCommand, cutCommand, pasteCommand, searchInWorkspaceCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({
@@ -1245,6 +1260,7 @@ class FileListProvider implements vscode.TreeDataProvider<FileItem> {
     private treeView: vscode.TreeView<FileItem> | undefined;
     private fileWatcher: vscode.FileSystemWatcher | undefined;
     private itemCache: Map<string, FileItem[]> = new Map();  // パスをキーとしたFileItemのキャッシュ
+    private activeFolderPath: string | undefined;
 
     constructor() { }
 
@@ -1254,6 +1270,7 @@ class FileListProvider implements vscode.TreeDataProvider<FileItem> {
 
     setRootPath(path: string): void {
         this.rootPath = path;
+        this.activeFolderPath = path;
         this.updateTitle();
         this.setupFileWatcher();
         this.refresh();
@@ -1327,14 +1344,27 @@ class FileListProvider implements vscode.TreeDataProvider<FileItem> {
 
         try {
             const files = this.getFilesInDirectory(targetPath);
-            const items = files.map(file => new FileItem(
-                file.name,
-                file.isDirectory ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None,
-                file.path,
-                file.isDirectory,
-                file.size,
-                file.modified
-            ));
+            const items = files.map(file => {
+                const isDirectory = file.isDirectory;
+                const collapsibleState = isDirectory
+                    ? vscode.TreeItemCollapsibleState.Collapsed
+                    : vscode.TreeItemCollapsibleState.None;
+                const item = new FileItem(
+                    file.name,
+                    collapsibleState,
+                    file.path,
+                    isDirectory,
+                    file.size,
+                    file.modified
+                );
+
+                if (isDirectory && this.activeFolderPath === file.path) {
+                    item.description = '選択中';
+                    item.tooltip = `${item.tooltip}\n現在のフォルダです`;
+                }
+
+                return item;
+            });
 
             // キャッシュに保存
             this.itemCache.set(targetPath, items);
@@ -1343,6 +1373,84 @@ class FileListProvider implements vscode.TreeDataProvider<FileItem> {
             vscode.window.showErrorMessage(`ディレクトリの読み取りに失敗しました: ${error}`);
             return Promise.resolve([]);
         }
+    }
+
+    setActiveFolder(path: string | undefined, force: boolean = false): void {
+        if (path && this.rootPath && !path.startsWith(this.rootPath)) {
+            return;
+        }
+
+        if (!force && this.activeFolderPath === path) {
+            return;
+        }
+
+        this.activeFolderPath = path;
+        this.refresh();
+        void this.revealActiveFolder();
+    }
+
+    async getParent(element: FileItem): Promise<FileItem | undefined> {
+        if (!element || !element.isDirectory || !this.rootPath) {
+            return undefined;
+        }
+
+        const parentPath = path.dirname(element.filePath);
+
+        if (!parentPath || parentPath === element.filePath || parentPath === this.rootPath) {
+            return undefined;
+        }
+
+        if (!parentPath.startsWith(this.rootPath)) {
+            return undefined;
+        }
+
+        try {
+            const stat = fs.statSync(parentPath);
+            return new FileItem(
+                path.basename(parentPath),
+                vscode.TreeItemCollapsibleState.Collapsed,
+                parentPath,
+                true,
+                0,
+                stat.mtime
+            );
+        } catch (error) {
+            console.error('親フォルダの取得に失敗しました:', error);
+            return undefined;
+        }
+    }
+
+    private async revealActiveFolder(): Promise<void> {
+        if (!this.treeView || !this.activeFolderPath) {
+            return;
+        }
+
+        try {
+            const stat = fs.statSync(this.activeFolderPath);
+            const item = new FileItem(
+                path.basename(this.activeFolderPath),
+                this.activeFolderPath === this.rootPath
+                    ? vscode.TreeItemCollapsibleState.Expanded
+                    : vscode.TreeItemCollapsibleState.Collapsed,
+                this.activeFolderPath,
+                stat.isDirectory(),
+                stat.isDirectory() ? 0 : stat.size,
+                stat.mtime
+            );
+
+            await this.treeView.reveal(item, { select: true, focus: false, expand: true });
+        } catch (error) {
+            console.error('フォルダ選択の表示に失敗しました:', error);
+        }
+    }
+
+    resetActiveFolder(): void {
+        if (!this.rootPath) {
+            this.setActiveFolder(undefined, true);
+            return;
+        }
+
+        this.setActiveFolder(this.rootPath, true);
     }
 
     private getFilesInDirectory(dirPath: string): FileInfo[] {
@@ -1392,7 +1500,7 @@ class FileDetailsProvider implements vscode.TreeDataProvider<FileItem>, vscode.T
     private selectedItem: FileItem | undefined;
     private itemCache: Map<string, FileItem[]> = new Map();  // パスをキーとしたFileItemのキャッシュ
 
-    constructor() {
+    constructor(private readonly folderTreeProvider: FileListProvider) {
         // プロジェクトルートパスを取得
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
             this.projectRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
@@ -1407,6 +1515,7 @@ class FileDetailsProvider implements vscode.TreeDataProvider<FileItem>, vscode.T
         this.rootPath = dirPath;
         this.updateTitle();
         this.refresh();
+        this.folderTreeProvider.setActiveFolder(dirPath);
     }
 
     setRootPath(path: string): void {
@@ -1414,12 +1523,13 @@ class FileDetailsProvider implements vscode.TreeDataProvider<FileItem>, vscode.T
         this.updateTitle();
         this.setupFileWatcher();
         this.refresh();
+        this.folderTreeProvider.setActiveFolder(path);
     }
 
     private updateTitle(): void {
         if (this.treeView && this.rootPath) {
             const folderName = path.basename(this.rootPath);
-            this.treeView.title = `ファイル一覧 - ${folderName}`;
+            this.treeView.title = `markdown一覧 - ${folderName}`;
         }
     }
 
@@ -1620,24 +1730,35 @@ class FileDetailsProvider implements vscode.TreeDataProvider<FileItem>, vscode.T
             const entries = fs.readdirSync(dirPath, { withFileTypes: true });
 
             for (const entry of entries) {
+                // フォルダを除外し、ファイルのみを対象にする
+                if (entry.isDirectory()) {
+                    continue;
+                }
+
                 const fullPath = path.join(dirPath, entry.name);
                 const stat = fs.statSync(fullPath);
+
+                // シンボリックリンクなどで実体がフォルダの場合も除外
+                if (stat.isDirectory()) {
+                    continue;
+                }
+
+                // mdファイルのみを表示対象にする
+                if (path.extname(entry.name).toLowerCase() !== '.md') {
+                    continue;
+                }
 
                 files.push({
                     name: entry.name,
                     path: fullPath,
-                    isDirectory: entry.isDirectory(),
-                    size: entry.isFile() ? stat.size : 0,
+                    isDirectory: false,
+                    size: stat.size,
                     modified: stat.mtime
                 });
             }
 
-            // ディレクトリを先に、その後ファイルを名前順でソート
-            files.sort((a, b) => {
-                if (a.isDirectory && !b.isDirectory) return -1;
-                if (!a.isDirectory && b.isDirectory) return 1;
-                return a.name.localeCompare(b.name);
-            });
+            // ファイルのみなので名前順でソート
+            files.sort((a, b) => a.name.localeCompare(b.name));
 
         } catch (error) {
             throw new Error(`ディレクトリの読み取りに失敗しました: ${error}`);
@@ -1663,6 +1784,7 @@ class FileItem extends vscode.TreeItem {
         super(label, collapsibleState);
 
         this.resourceUri = vscode.Uri.file(filePath);
+        this.id = filePath;
         this.contextValue = isDirectory ? 'directory' : 'file';
 
         // アイコンを設定（設定が有効な場合のみ）

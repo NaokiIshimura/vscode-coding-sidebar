@@ -185,7 +185,7 @@ export function activate(context: vscode.ExtensionContext) {
         searchService
     );
     const fileListProvider = new FileListProvider();
-    const fileDetailsProvider = new FileDetailsProvider();
+    const fileDetailsProvider = new FileDetailsProvider(fileListProvider);
     const gitChangesProvider = new GitChangesProvider();
 
     // プロジェクトルートを設定
@@ -1245,6 +1245,7 @@ class FileListProvider implements vscode.TreeDataProvider<FileItem> {
     private treeView: vscode.TreeView<FileItem> | undefined;
     private fileWatcher: vscode.FileSystemWatcher | undefined;
     private itemCache: Map<string, FileItem[]> = new Map();  // パスをキーとしたFileItemのキャッシュ
+    private activeFolderPath: string | undefined;
 
     constructor() { }
 
@@ -1254,6 +1255,7 @@ class FileListProvider implements vscode.TreeDataProvider<FileItem> {
 
     setRootPath(path: string): void {
         this.rootPath = path;
+        this.activeFolderPath = path;
         this.updateTitle();
         this.setupFileWatcher();
         this.refresh();
@@ -1327,14 +1329,27 @@ class FileListProvider implements vscode.TreeDataProvider<FileItem> {
 
         try {
             const files = this.getFilesInDirectory(targetPath);
-            const items = files.map(file => new FileItem(
-                file.name,
-                file.isDirectory ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None,
-                file.path,
-                file.isDirectory,
-                file.size,
-                file.modified
-            ));
+            const items = files.map(file => {
+                const isDirectory = file.isDirectory;
+                const collapsibleState = isDirectory
+                    ? vscode.TreeItemCollapsibleState.Collapsed
+                    : vscode.TreeItemCollapsibleState.None;
+                const item = new FileItem(
+                    file.name,
+                    collapsibleState,
+                    file.path,
+                    isDirectory,
+                    file.size,
+                    file.modified
+                );
+
+                if (isDirectory && this.activeFolderPath === file.path) {
+                    item.description = '選択中';
+                    item.tooltip = `${item.tooltip}\n現在のフォルダです`;
+                }
+
+                return item;
+            });
 
             // キャッシュに保存
             this.itemCache.set(targetPath, items);
@@ -1342,6 +1357,73 @@ class FileListProvider implements vscode.TreeDataProvider<FileItem> {
         } catch (error) {
             vscode.window.showErrorMessage(`ディレクトリの読み取りに失敗しました: ${error}`);
             return Promise.resolve([]);
+        }
+    }
+
+    setActiveFolder(path: string | undefined): void {
+        if (path && this.rootPath && !path.startsWith(this.rootPath)) {
+            return;
+        }
+
+        if (this.activeFolderPath === path) {
+            return;
+        }
+
+        this.activeFolderPath = path;
+        this.refresh();
+        void this.revealActiveFolder();
+    }
+
+    async getParent(element: FileItem): Promise<FileItem | undefined> {
+        if (!element || !element.isDirectory || !this.rootPath) {
+            return undefined;
+        }
+
+        const parentPath = path.dirname(element.filePath);
+
+        if (!parentPath || parentPath === element.filePath || parentPath === this.rootPath) {
+            return undefined;
+        }
+
+        if (!parentPath.startsWith(this.rootPath)) {
+            return undefined;
+        }
+
+        try {
+            const stat = fs.statSync(parentPath);
+            return new FileItem(
+                path.basename(parentPath),
+                vscode.TreeItemCollapsibleState.Collapsed,
+                parentPath,
+                true,
+                0,
+                stat.mtime
+            );
+        } catch (error) {
+            console.error('親フォルダの取得に失敗しました:', error);
+            return undefined;
+        }
+    }
+
+    private async revealActiveFolder(): Promise<void> {
+        if (!this.treeView || !this.activeFolderPath || this.activeFolderPath === this.rootPath) {
+            return;
+        }
+
+        try {
+            const stat = fs.statSync(this.activeFolderPath);
+            const item = new FileItem(
+                path.basename(this.activeFolderPath),
+                vscode.TreeItemCollapsibleState.Collapsed,
+                this.activeFolderPath,
+                stat.isDirectory(),
+                stat.isDirectory() ? 0 : stat.size,
+                stat.mtime
+            );
+
+            await this.treeView.reveal(item, { select: true, focus: false, expand: true });
+        } catch (error) {
+            console.error('フォルダ選択の表示に失敗しました:', error);
         }
     }
 
@@ -1392,7 +1474,7 @@ class FileDetailsProvider implements vscode.TreeDataProvider<FileItem>, vscode.T
     private selectedItem: FileItem | undefined;
     private itemCache: Map<string, FileItem[]> = new Map();  // パスをキーとしたFileItemのキャッシュ
 
-    constructor() {
+    constructor(private readonly folderTreeProvider: FileListProvider) {
         // プロジェクトルートパスを取得
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
             this.projectRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
@@ -1407,6 +1489,7 @@ class FileDetailsProvider implements vscode.TreeDataProvider<FileItem>, vscode.T
         this.rootPath = dirPath;
         this.updateTitle();
         this.refresh();
+        this.folderTreeProvider.setActiveFolder(dirPath);
     }
 
     setRootPath(path: string): void {
@@ -1414,6 +1497,7 @@ class FileDetailsProvider implements vscode.TreeDataProvider<FileItem>, vscode.T
         this.updateTitle();
         this.setupFileWatcher();
         this.refresh();
+        this.folderTreeProvider.setActiveFolder(path);
     }
 
     private updateTitle(): void {
@@ -1674,6 +1758,7 @@ class FileItem extends vscode.TreeItem {
         super(label, collapsibleState);
 
         this.resourceUri = vscode.Uri.file(filePath);
+        this.id = filePath;
         this.contextValue = isDirectory ? 'directory' : 'file';
 
         // アイコンを設定（設定が有効な場合のみ）

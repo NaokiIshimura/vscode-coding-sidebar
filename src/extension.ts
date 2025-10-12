@@ -1419,7 +1419,7 @@ class FileDetailsProvider implements vscode.TreeDataProvider<FileItem>, vscode.T
     private updateTitle(): void {
         if (this.treeView && this.rootPath) {
             const folderName = path.basename(this.rootPath);
-            this.treeView.title = `ファイル一覧 - ${folderName}`;
+            this.treeView.title = `markdown一覧 - ${folderName}`;
         }
     }
 
@@ -1620,24 +1620,35 @@ class FileDetailsProvider implements vscode.TreeDataProvider<FileItem>, vscode.T
             const entries = fs.readdirSync(dirPath, { withFileTypes: true });
 
             for (const entry of entries) {
+                // フォルダを除外し、ファイルのみを対象にする
+                if (entry.isDirectory()) {
+                    continue;
+                }
+
                 const fullPath = path.join(dirPath, entry.name);
                 const stat = fs.statSync(fullPath);
+
+                // シンボリックリンクなどで実体がフォルダの場合も除外
+                if (stat.isDirectory()) {
+                    continue;
+                }
+
+                // mdファイルのみを表示対象にする
+                if (path.extname(entry.name).toLowerCase() !== '.md') {
+                    continue;
+                }
 
                 files.push({
                     name: entry.name,
                     path: fullPath,
-                    isDirectory: entry.isDirectory(),
-                    size: entry.isFile() ? stat.size : 0,
+                    isDirectory: false,
+                    size: stat.size,
                     modified: stat.mtime
                 });
             }
 
-            // ディレクトリを先に、その後ファイルを名前順でソート
-            files.sort((a, b) => {
-                if (a.isDirectory && !b.isDirectory) return -1;
-                if (!a.isDirectory && b.isDirectory) return 1;
-                return a.name.localeCompare(b.name);
-            });
+            // ファイルのみなので名前順でソート
+            files.sort((a, b) => a.name.localeCompare(b.name));
 
         } catch (error) {
             throw new Error(`ディレクトリの読み取りに失敗しました: ${error}`);

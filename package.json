@@ -2,7 +2,7 @@
   "name": "file-list-extension",
   "displayName": "File List Extension",
   "description": "指定したディレクトリ内のファイルを一覧表示するVSCode拡張機能",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "nacn",
   "icon": "images/nacn.png",
   "repository": {
@@ -44,6 +44,11 @@
         "command": "fileList.goToParent",
         "title": "親フォルダへ移動",
         "icon": "$(arrow-up)"
+      },
+      {
+        "command": "fileList.resetFolderSelection",
+        "title": "フォルダ選択をリセット",
+        "icon": "$(home)"
       },
       {
         "command": "fileList.setRelativePath",
@@ -196,19 +201,19 @@
           "group": "navigation@3"
         },
         {
-          "command": "fileList.selectFolder",
+          "command": "fileList.resetFolderSelection",
           "when": "view == fileListExplorer",
           "group": "navigation@4"
+        },
+        {
+          "command": "fileList.selectFolder",
+          "when": "view == fileListExplorer",
+          "group": "navigation@5"
         },
         {
           "command": "fileList.createMemo",
           "when": "view == fileListDetails",
           "group": "navigation@1"
-        },
-        {
-          "command": "fileList.createFolder",
-          "when": "view == fileListDetails",
-          "group": "navigation@2"
         },
         {
           "command": "fileList.refresh",
@@ -271,11 +276,6 @@
           "command": "fileList.delete",
           "when": "view == fileListDetails",
           "group": "3_edit@2"
-        },
-        {
-          "command": "fileList.addFolder",
-          "when": "view == fileListDetails && viewItem == directory",
-          "group": "2_workspace@2"
         },
         {
           "command": "fileList.copyRelativePath",

@@ -397,6 +397,21 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    // フォルダ選択リセットコマンドを登録
+    const resetFolderSelectionCommand = vscode.commands.registerCommand('fileList.resetFolderSelection', async () => {
+        const rootPath = fileListProvider.getRootPath();
+
+        if (!rootPath) {
+            vscode.window.showInformationMessage('フォルダツリーのルートが設定されていません');
+            return;
+        }
+
+        fileListProvider.resetActiveFolder();
+        fileDetailsProvider.setRootPath(rootPath);
+
+        vscode.window.showInformationMessage('フォルダ選択をリセットしました');
+    });
+
     // 相対パス設定コマンドを登録
     const setRelativePathCommand = vscode.commands.registerCommand('fileList.setRelativePath', async () => {
         if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
@@ -1125,7 +1140,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(selectFolderCommand, refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, setupWorkspaceCommand, setupSettingsCommand, setupTemplateCommand, setupClaudeCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMemoCommand, createFolderCommand, renameCommand, deleteCommand, addFileCommand, addFolderCommand, copyRelativePathCommand, copyCommand, cutCommand, pasteCommand, searchInWorkspaceCommand);
+    context.subscriptions.push(selectFolderCommand, refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, resetFolderSelectionCommand, setRelativePathCommand, openSettingsCommand, setupWorkspaceCommand, setupSettingsCommand, setupTemplateCommand, setupClaudeCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMemoCommand, createFolderCommand, renameCommand, deleteCommand, addFileCommand, addFolderCommand, copyRelativePathCommand, copyCommand, cutCommand, pasteCommand, searchInWorkspaceCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({
@@ -1360,12 +1375,12 @@ class FileListProvider implements vscode.TreeDataProvider<FileItem> {
         }
     }
 
-    setActiveFolder(path: string | undefined): void {
+    setActiveFolder(path: string | undefined, force: boolean = false): void {
         if (path && this.rootPath && !path.startsWith(this.rootPath)) {
             return;
         }
 
-        if (this.activeFolderPath === path) {
+        if (!force && this.activeFolderPath === path) {
             return;
         }
 
@@ -1406,7 +1421,7 @@ class FileListProvider implements vscode.TreeDataProvider<FileItem> {
     }
 
     private async revealActiveFolder(): Promise<void> {
-        if (!this.treeView || !this.activeFolderPath || this.activeFolderPath === this.rootPath) {
+        if (!this.treeView || !this.activeFolderPath) {
             return;
         }
 
@@ -1414,7 +1429,9 @@ class FileListProvider implements vscode.TreeDataProvider<FileItem> {
             const stat = fs.statSync(this.activeFolderPath);
             const item = new FileItem(
                 path.basename(this.activeFolderPath),
-                vscode.TreeItemCollapsibleState.Collapsed,
+                this.activeFolderPath === this.rootPath
+                    ? vscode.TreeItemCollapsibleState.Expanded
+                    : vscode.TreeItemCollapsibleState.Collapsed,
                 this.activeFolderPath,
                 stat.isDirectory(),
                 stat.isDirectory() ? 0 : stat.size,
@@ -1425,6 +1442,15 @@ class FileListProvider implements vscode.TreeDataProvider<FileItem> {
         } catch (error) {
             console.error('フォルダ選択の表示に失敗しました:', error);
         }
+    }
+
+    resetActiveFolder(): void {
+        if (!this.rootPath) {
+            this.setActiveFolder(undefined, true);
+            return;
+        }
+
+        this.setActiveFolder(this.rootPath, true);
     }
 
     private getFilesInDirectory(dirPath: string): FileInfo[] {

@@ -46,6 +46,11 @@
         "icon": "$(arrow-up)"
       },
       {
+        "command": "fileList.resetFolderSelection",
+        "title": "フォルダ選択をリセット",
+        "icon": "$(home)"
+      },
+      {
         "command": "fileList.setRelativePath",
         "title": "相対パスを設定",
         "icon": "$(edit)"
@@ -196,9 +201,14 @@
           "group": "navigation@3"
         },
         {
-          "command": "fileList.selectFolder",
+          "command": "fileList.resetFolderSelection",
           "when": "view == fileListExplorer",
           "group": "navigation@4"
+        },
+        {
+          "command": "fileList.selectFolder",
+          "when": "view == fileListExplorer",
+          "group": "navigation@5"
         },
         {
           "command": "fileList.createMemo",

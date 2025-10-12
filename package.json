@@ -206,11 +206,6 @@
           "group": "navigation@1"
         },
         {
-          "command": "fileList.createFolder",
-          "when": "view == fileListDetails",
-          "group": "navigation@2"
-        },
-        {
           "command": "fileList.refresh",
           "when": "view == fileListDetails",
           "group": "navigation@3"
@@ -271,11 +266,6 @@
           "command": "fileList.delete",
           "when": "view == fileListDetails",
           "group": "3_edit@2"
-        },
-        {
-          "command": "fileList.addFolder",
-          "when": "view == fileListDetails && viewItem == directory",
-          "group": "2_workspace@2"
         },
         {
           "command": "fileList.copyRelativePath",

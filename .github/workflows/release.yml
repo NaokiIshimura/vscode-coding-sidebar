@@ -52,7 +52,7 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add releases/file-list-extension-${VERSION}.vsix
+          git add -f releases/file-list-extension-${VERSION}.vsix
           git commit -m "chore: add VSIX package v${VERSION}" || echo "No changes to commit"
           git push || echo "Nothing to push"
 

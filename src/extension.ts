@@ -824,6 +824,35 @@ export function activate(context: vscode.ExtensionContext) {
             const result = await fileOperationService.deleteFiles([item.filePath]);
 
             if (result[0].success) {
+                // フォルダを削除した場合は選択状態を親フォルダへ移す
+                let treeUpdated = false;
+
+                if (item.isDirectory) {
+                    const rootPath = fileListProvider.getRootPath();
+                    if (rootPath) {
+                        if (item.filePath === rootPath) {
+                            fileListProvider.resetActiveFolder();
+                            treeUpdated = true;
+                        } else {
+                            const parentPath = path.dirname(item.filePath);
+                            if (parentPath && parentPath.startsWith(rootPath) && fs.existsSync(parentPath)) {
+                                fileListProvider.setActiveFolder(parentPath, true);
+                                treeUpdated = true;
+                            } else {
+                                fileListProvider.resetActiveFolder();
+                                treeUpdated = true;
+                            }
+                        }
+                    } else {
+                        fileListProvider.resetActiveFolder();
+                        treeUpdated = true;
+                    }
+                }
+
+                if (!treeUpdated) {
+                    fileListProvider.refresh();
+                }
+
                 // ビューを更新
                 fileDetailsProvider.refresh();
                 workspaceExplorerProvider.refresh();
@@ -834,71 +863,6 @@ export function activate(context: vscode.ExtensionContext) {
             }
         } catch (error) {
             vscode.window.showErrorMessage(`削除に失敗しました: ${error}`);
-        }
-    });
-
-    // ファイルを追加コマンドを登録（フォルダツリーview用）
-    const addFileCommand = vscode.commands.registerCommand('fileList.addFile', async (item?: FileItem) => {
-        let targetPath: string;
-
-        // コンテキストメニューから呼ばれた場合
-        if (item) {
-            if (item.isDirectory) {
-                targetPath = item.filePath;
-            } else {
-                targetPath = path.dirname(item.filePath);
-            }
-        } else {
-            // フォルダツリーviewで現在選択されているフォルダまたはルートフォルダを使用
-            const currentPath = fileListProvider.getRootPath();
-            if (!currentPath) {
-                vscode.window.showErrorMessage('フォルダが開かれていません');
-                return;
-            }
-            targetPath = currentPath;
-        }
-
-        // 現在の日時を YYYYMMDDHHMM 形式で取得
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hour = String(now.getHours()).padStart(2, '0');
-        const minute = String(now.getMinutes()).padStart(2, '0');
-        const second = String(now.getSeconds()).padStart(2, '0');
-
-        const timestamp = `${year}${month}${day}${hour}${minute}${second}`;
-        const fileName = `${timestamp}.md`;
-        const filePath = path.join(targetPath, fileName);
-
-        try {
-            // ファイルが既に存在するかチェック
-            if (fs.existsSync(filePath)) {
-                vscode.window.showErrorMessage(`ファイル ${fileName} は既に存在します`);
-                return;
-            }
-
-            // テンプレートを使用してファイル内容を生成
-            const variables = {
-                datetime: now.toLocaleString('ja-JP'),
-                filename: fileName,
-                timestamp: timestamp
-            };
-            
-            const content = loadTemplate(context, variables);
-            fs.writeFileSync(filePath, content, 'utf8');
-
-            // ビューを更新
-            fileDetailsProvider.refresh();
-            fileListProvider.refresh();
-
-            // 作成したファイルを開く
-            const document = await vscode.workspace.openTextDocument(filePath);
-            await vscode.window.showTextDocument(document);
-
-            vscode.window.showInformationMessage(`ファイル ${fileName} を作成しました`);
-        } catch (error) {
-            vscode.window.showErrorMessage(`ファイルの作成に失敗しました: ${error}`);
         }
     });
 
@@ -962,6 +926,16 @@ export function activate(context: vscode.ExtensionContext) {
         } catch (error) {
             vscode.window.showErrorMessage(`フォルダの作成に失敗しました: ${error}`);
         }
+    });
+
+    // フォルダ削除コマンドを登録（フォルダツリーview用）
+    const deleteFolderCommand = vscode.commands.registerCommand('fileList.deleteFolder', async (item?: FileItem) => {
+        if (!item || !item.isDirectory) {
+            vscode.window.showErrorMessage('フォルダが選択されていません');
+            return;
+        }
+
+        await vscode.commands.executeCommand('fileList.delete', item);
     });
 
     // 相対パスをコピーコマンドを登録
@@ -1140,7 +1114,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(selectFolderCommand, refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, resetFolderSelectionCommand, setRelativePathCommand, openSettingsCommand, setupWorkspaceCommand, setupSettingsCommand, setupTemplateCommand, setupClaudeCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMemoCommand, createFolderCommand, renameCommand, deleteCommand, addFileCommand, addFolderCommand, copyRelativePathCommand, copyCommand, cutCommand, pasteCommand, searchInWorkspaceCommand);
+    context.subscriptions.push(selectFolderCommand, refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, resetFolderSelectionCommand, setRelativePathCommand, openSettingsCommand, setupWorkspaceCommand, setupSettingsCommand, setupTemplateCommand, setupClaudeCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMemoCommand, createFolderCommand, renameCommand, deleteCommand, addFolderCommand, deleteFolderCommand, copyRelativePathCommand, copyCommand, cutCommand, pasteCommand, searchInWorkspaceCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({
@@ -1479,7 +1453,13 @@ class FileListProvider implements vscode.TreeDataProvider<FileItem> {
             files.sort((a, b) => a.name.localeCompare(b.name));
 
         } catch (error) {
-            throw new Error(`ディレクトリの読み取りに失敗しました: ${error}`);
+            const err = error as NodeJS.ErrnoException;
+            if (err && err.code === 'ENOENT') {
+                return [];
+            }
+
+            const message = err && err.message ? err.message : String(error);
+            throw new Error(`ディレクトリの読み取りに失敗しました: ${message}`);
         }
 
         return files;
@@ -1761,7 +1741,13 @@ class FileDetailsProvider implements vscode.TreeDataProvider<FileItem>, vscode.T
             files.sort((a, b) => a.name.localeCompare(b.name));
 
         } catch (error) {
-            throw new Error(`ディレクトリの読み取りに失敗しました: ${error}`);
+            const err = error as NodeJS.ErrnoException;
+            if (err && err.code === 'ENOENT') {
+                return [];
+            }
+
+            const message = err && err.message ? err.message : String(error);
+            throw new Error(`ディレクトリの読み取りに失敗しました: ${message}`);
         }
 
         return files;

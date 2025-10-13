@@ -2,7 +2,7 @@
   "name": "file-list-extension",
   "displayName": "File List Extension",
   "description": "指定したディレクトリ内のファイルを一覧表示するVSCode拡張機能",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "nacn",
   "icon": "images/nacn.png",
   "repository": {
@@ -119,9 +119,9 @@
         "icon": "$(new-folder)"
       },
       {
-        "command": "fileList.addFile",
-        "title": "ファイルを追加",
-        "icon": "$(new-file)"
+        "command": "fileList.deleteFolder",
+        "title": "フォルダを削除",
+        "icon": "$(trash)"
       },
       {
         "command": "fileList.copyRelativePath",
@@ -248,14 +248,14 @@
           "group": "inline"
         },
         {
-          "command": "fileList.addFile",
-          "when": "view == fileListExplorer && viewItem == directory",
-          "group": "2_workspace"
-        },
-        {
           "command": "fileList.addFolder",
           "when": "view == fileListExplorer && viewItem == directory",
           "group": "2_workspace@2"
+        },
+        {
+          "command": "fileList.deleteFolder",
+          "when": "view == fileListExplorer && viewItem == directory",
+          "group": "2_workspace@3"
         },
         {
           "command": "fileList.showInPanel",

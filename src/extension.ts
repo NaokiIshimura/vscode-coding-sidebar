@@ -630,16 +630,15 @@ export function activate(context: vscode.ExtensionContext) {
             targetPath = currentPath;
         }
 
-        // 現在の日時を YYYYMMDDHHMM 形式で取得
+        // 現在の日時を YYYY-MM-DD-HH-MM 形式で取得
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const day = String(now.getDate()).padStart(2, '0');
         const hour = String(now.getHours()).padStart(2, '0');
         const minute = String(now.getMinutes()).padStart(2, '0');
-        const second = String(now.getSeconds()).padStart(2, '0');
 
-        const timestamp = `${year}${month}${day}${hour}${minute}${second}`;
+        const timestamp = `${year}-${month}-${day}-${hour}-${minute}`;
         const fileName = `${timestamp}.md`;
         const filePath = path.join(targetPath, fileName);
 

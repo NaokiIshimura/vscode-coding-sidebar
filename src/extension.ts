@@ -607,8 +607,8 @@ export function activate(context: vscode.ExtensionContext) {
         gitChangesProvider.refresh();
     });
 
-    // ファイルを作成するコマンドを登録
-    const createMemoCommand = vscode.commands.registerCommand('fileList.createMemo', async (item?: FileItem) => {
+    // markdownファイルを作成するコマンドを登録
+    const createMarkdownFileCommand = vscode.commands.registerCommand('fileList.createMarkdownFile', async (item?: FileItem) => {
         let targetPath: string;
 
         // 優先順位に従って作成先を決定
@@ -1113,7 +1113,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(selectFolderCommand, refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, resetFolderSelectionCommand, setRelativePathCommand, openSettingsCommand, setupWorkspaceCommand, setupSettingsCommand, setupTemplateCommand, setupClaudeCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMemoCommand, createFolderCommand, renameCommand, deleteCommand, addFolderCommand, deleteFolderCommand, copyRelativePathCommand, copyCommand, cutCommand, pasteCommand, searchInWorkspaceCommand);
+    context.subscriptions.push(selectFolderCommand, refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, resetFolderSelectionCommand, setRelativePathCommand, openSettingsCommand, setupWorkspaceCommand, setupSettingsCommand, setupTemplateCommand, setupClaudeCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFolderCommand, renameCommand, deleteCommand, addFolderCommand, deleteFolderCommand, copyRelativePathCommand, copyCommand, cutCommand, pasteCommand, searchInWorkspaceCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({

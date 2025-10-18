@@ -94,7 +94,7 @@
         "icon": "$(refresh)"
       },
       {
-        "command": "fileList.createMemo",
+        "command": "fileList.createMarkdownFile",
         "title": "markdownファイルを作成",
         "icon": "$(new-file)"
       },
@@ -211,7 +211,7 @@
           "group": "navigation@5"
         },
         {
-          "command": "fileList.createMemo",
+          "command": "fileList.createMarkdownFile",
           "when": "view == fileListDetails",
           "group": "navigation@1"
         },
@@ -268,7 +268,7 @@
           "group": "inline"
         },
         {
-          "command": "fileList.createMemo",
+          "command": "fileList.createMarkdownFile",
           "when": "view == fileListDetails && viewItem == directory",
           "group": "2_workspace"
         },
@@ -313,7 +313,7 @@
           "group": "2_edit@2"
         },
         {
-          "command": "fileList.createMemo",
+          "command": "fileList.createMarkdownFile",
           "when": "view == workspaceExplorer && viewItem == directory",
           "group": "3_new@1"
         },

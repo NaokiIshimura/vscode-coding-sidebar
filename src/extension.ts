@@ -673,6 +673,87 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    // 任意のファイルを作成するコマンドを登録
+    const createFileCommand = vscode.commands.registerCommand('fileList.createFile', async (item?: FileItem) => {
+        let targetDirectory: string | undefined;
+
+        if (item) {
+            targetDirectory = item.isDirectory ? item.filePath : path.dirname(item.filePath);
+        } else {
+            targetDirectory = fileDetailsProvider.getCurrentPath()
+                || fileListProvider.getRootPath()
+                || vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+        }
+
+        if (!targetDirectory) {
+            vscode.window.showErrorMessage('ファイルを作成するフォルダを特定できませんでした');
+            return;
+        }
+
+        try {
+            if (!fs.existsSync(targetDirectory) || !fs.statSync(targetDirectory).isDirectory()) {
+                vscode.window.showErrorMessage('対象フォルダにアクセスできません');
+                return;
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`対象フォルダにアクセスできません: ${error}`);
+            return;
+        }
+
+        const fileName = await vscode.window.showInputBox({
+            prompt: '新しいファイルの名前を入力してください',
+            placeHolder: 'example.txt',
+            validateInput: (value: string) => {
+                const trimmed = value.trim();
+
+                if (!trimmed) {
+                    return 'ファイル名を入力してください';
+                }
+
+                if (trimmed.includes('/') || trimmed.includes('\\')) {
+                    return 'フォルダを含むパスは指定できません';
+                }
+
+                if (!fileOperationService.validateFileName(trimmed)) {
+                    return '使用できない文字が含まれています';
+                }
+
+                const candidatePath = path.join(targetDirectory!, trimmed);
+                if (fs.existsSync(candidatePath)) {
+                    return `ファイル "${trimmed}" は既に存在します`;
+                }
+
+                return null;
+            }
+        });
+
+        if (!fileName) {
+            return;
+        }
+
+        const trimmedFileName = fileName.trim();
+        const newFilePath = path.join(targetDirectory, trimmedFileName);
+
+        try {
+            const result = await fileOperationService.createFile(newFilePath);
+
+            if (result.success) {
+                fileDetailsProvider.refresh();
+                fileListProvider.refresh();
+                workspaceExplorerProvider.refresh();
+
+                const document = await vscode.workspace.openTextDocument(newFilePath);
+                await vscode.window.showTextDocument(document);
+
+                vscode.window.showInformationMessage(`ファイル "${trimmedFileName}" を作成しました`);
+            } else {
+                throw result.error || new Error('ファイルの作成に失敗しました');
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`ファイルの作成に失敗しました: ${error}`);
+        }
+    });
+
     // フォルダを作成するコマンドを登録
     const createFolderCommand = vscode.commands.registerCommand('fileList.createFolder', async (item?: FileItem) => {
         let targetPath: string;
@@ -1113,7 +1194,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(selectFolderCommand, refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, resetFolderSelectionCommand, setRelativePathCommand, openSettingsCommand, setupWorkspaceCommand, setupSettingsCommand, setupTemplateCommand, setupClaudeCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFolderCommand, renameCommand, deleteCommand, addFolderCommand, deleteFolderCommand, copyRelativePathCommand, copyCommand, cutCommand, pasteCommand, searchInWorkspaceCommand);
+    context.subscriptions.push(selectFolderCommand, refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, resetFolderSelectionCommand, setRelativePathCommand, openSettingsCommand, setupWorkspaceCommand, setupSettingsCommand, setupTemplateCommand, setupClaudeCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addFolderCommand, deleteFolderCommand, copyRelativePathCommand, copyCommand, cutCommand, pasteCommand, searchInWorkspaceCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({

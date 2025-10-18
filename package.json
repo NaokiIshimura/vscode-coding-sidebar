@@ -258,6 +258,11 @@
           "group": "2_workspace@3"
         },
         {
+          "command": "fileList.copyRelativePath",
+          "when": "view == fileListExplorer",
+          "group": "1_copy"
+        },
+        {
           "command": "fileList.showInPanel",
           "when": "view == fileListDetails && viewItem == directory",
           "group": "inline"

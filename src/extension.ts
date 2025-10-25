@@ -630,7 +630,7 @@ export function activate(context: vscode.ExtensionContext) {
             targetPath = currentPath;
         }
 
-        // 現在の日時を YYYY-MMDD-HHMM 形式で取得
+        // 現在の日時を YYYY_MMDD_HHMM 形式で取得
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -638,7 +638,7 @@ export function activate(context: vscode.ExtensionContext) {
         const hour = String(now.getHours()).padStart(2, '0');
         const minute = String(now.getMinutes()).padStart(2, '0');
 
-        const timestamp = `${year}-${month}${day}-${hour}${minute}`;
+        const timestamp = `${year}_${month}${day}_${hour}${minute}`;
         const fileName = `${timestamp}.md`;
         const filePath = path.join(targetPath, fileName);
 
@@ -1019,7 +1019,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // 相対パスをコピーコマンドを登録
-    const copyRelativePathCommand = vscode.commands.registerCommand('fileList.copyRelativePath', async (item?: FileItem) => {
+    const copyRelativePathCommand = vscode.commands.registerCommand('fileList.copyRelativePath', async (item?: FileItem | vscode.Uri) => {
         if (!item) {
             vscode.window.showErrorMessage('ファイルまたはフォルダが選択されていません');
             return;
@@ -1033,8 +1033,11 @@ export function activate(context: vscode.ExtensionContext) {
 
         const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
 
+        // ファイルパスを取得（UriオブジェクトとFileItemの両方に対応）
+        const filePath = item instanceof vscode.Uri ? item.fsPath : (item as FileItem).filePath;
+
         // 相対パスを計算
-        const relativePath = path.relative(workspaceRoot, item.filePath);
+        const relativePath = path.relative(workspaceRoot, filePath);
 
         // クリップボードにコピー
         await vscode.env.clipboard.writeText(relativePath);

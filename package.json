@@ -2,12 +2,12 @@
   "name": "ai-coding-sidebar",
   "displayName": "AI Coding Sidebar",
   "description": "AIコーディングツールとの連携を強化するサイドバー拡張機能。ファイルとフォルダを効率的に閲覧・管理し、AIとのコーディング作業をスムーズに。",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "nacn",
   "icon": "images/nacn.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/NaokiIshimura/vscode-panel.git"
+    "url": "https://github.com/NaokiIshimura/vscode-ai-coding-sidebar.git"
   },
   "engines": {
     "vscode": "^1.74.0"

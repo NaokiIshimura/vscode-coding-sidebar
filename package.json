@@ -2,7 +2,7 @@
   "name": "file-list-extension",
   "displayName": "File List Extension",
   "description": "指定したディレクトリ内のファイルを一覧表示するVSCode拡張機能",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "publisher": "nacn",
   "icon": "images/nacn.png",
   "repository": {

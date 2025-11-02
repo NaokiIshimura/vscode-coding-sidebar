@@ -66,19 +66,19 @@
         "icon": "$(gear)"
       },
       {
-        "command": "fileList.setupSettings",
-        "title": "settings.jsonを作成/編集",
-        "icon": "$(gear)"
+        "command": "fileList.openUserSettings",
+        "title": "ユーザ設定を開く",
+        "icon": "$(settings)"
+      },
+      {
+        "command": "fileList.openWorkspaceSettings",
+        "title": "ワークスペース設定を開く",
+        "icon": "$(settings-gear)"
       },
       {
         "command": "fileList.setupTemplate",
         "title": "テンプレートをカスタマイズ",
         "icon": "$(file-text)"
-      },
-      {
-        "command": "fileList.setupClaude",
-        "title": ".claudeフォルダを設定",
-        "icon": "$(folder)"
       },
       {
         "command": "fileList.openGitFile",
@@ -158,7 +158,7 @@
       "fileListView": [
         {
           "id": "workspaceSettings",
-          "name": "ワークスペース設定",
+          "name": "設定",
           "visibility": "collapsed"
         },
         {
@@ -363,74 +363,73 @@
         "key": "f2",
         "when": "focusedView == workspaceExplorer"
       }
-    ]
-  },
-  "configuration": {
-    "title": "File List Extension",
-    "properties": {
-      "fileListExtension.defaultRelativePath": {
-        "type": "string",
-        "default": "",
-        "description": "フォルダツリーのデフォルト相対パス",
-        "markdownDescription": "ワークスペースルートからの相対パスを指定します。\n\n**設定方法:**\n1. 拡張機能の編集ボタンから設定\n2. この設定を直接編集\n3. `.vscode/settings.json` に手動で記入\n\n**例:**\n- `src` → プロジェクト/src\n- `docs/api` → プロジェクト/docs/api\n- `.claude` → プロジェクト/.claude\n- 空文字 → プロジェクトルート\n\n**手動設定例:**\n```json\n{\n  \"fileListExtension.defaultRelativePath\": \".claude\"\n}\n```"
-      },
-      "fileListExtension.sortBy": {
-        "type": "string",
-        "enum": [
-          "name",
-          "type",
-          "size",
-          "modified"
-        ],
-        "default": "name",
-        "description": "ファイルのソート基準",
-        "enumDescriptions": [
-          "名前でソート",
-          "種類でソート",
-          "サイズでソート",
-          "更新日時でソート"
-        ]
-      },
-      "fileListExtension.sortOrder": {
-        "type": "string",
-        "enum": [
-          "ascending",
-          "descending"
-        ],
-        "default": "ascending",
-        "description": "ソート順序",
-        "enumDescriptions": [
-          "昇順",
-          "降順"
-        ]
-      },
-      "fileListExtension.showHidden": {
-        "type": "boolean",
-        "default": false,
-        "description": "隠しファイル・フォルダを表示する"
-      },
-      "fileListExtension.viewMode": {
-        "type": "string",
-        "enum": [
-          "tree",
-          "list"
-        ],
-        "default": "tree",
-        "description": "表示モード",
-        "enumDescriptions": [
-          "ツリー表示",
-          "リスト表示"
-        ]
-      },
-      "fileListExtension.autoRefresh": {
-        "type": "boolean",
-        "default": true,
-        "description": "ファイルシステム変更時に自動更新する"
-      },
-      "fileListExtension.showFileIcons": {
-        "type": "boolean",
-        "default": true,
-        "description": "ファイルアイコンを表示する"
+    ],
+    "configuration": {
+      "title": "File List Extension",
+      "properties": {
+        "fileListExtension.defaultRelativePath": {
+          "type": "string",
+          "default": "",
+          "description": "フォルダツリーのデフォルト相対パス"
+        },
+        "fileListExtension.sortBy": {
+          "type": "string",
+          "enum": [
+            "name",
+            "type",
+            "size",
+            "modified"
+          ],
+          "default": "name",
+          "description": "ファイルのソート基準",
+          "enumDescriptions": [
+            "名前でソート",
+            "種類でソート",
+            "サイズでソート",
+            "更新日時でソート"
+          ]
+        },
+        "fileListExtension.sortOrder": {
+          "type": "string",
+          "enum": [
+            "ascending",
+            "descending"
+          ],
+          "default": "ascending",
+          "description": "ソート順序",
+          "enumDescriptions": [
+            "昇順",
+            "降順"
+          ]
+        },
+        "fileListExtension.showHidden": {
+          "type": "boolean",
+          "default": false,
+          "description": "隠しファイル・フォルダを表示する"
+        },
+        "fileListExtension.viewMode": {
+          "type": "string",
+          "enum": [
+            "tree",
+            "list"
+          ],
+          "default": "tree",
+          "description": "表示モード",
+          "enumDescriptions": [
+            "ツリー表示",
+            "リスト表示"
+          ]
+        },
+        "fileListExtension.autoRefresh": {
+          "type": "boolean",
+          "default": true,
+          "description": "ファイルシステム変更時に自動更新する"
+        },
+        "fileListExtension.showFileIcons": {
+          "type": "boolean",
+          "default": true,
+          "description": "ファイルアイコンを表示する"
+        }
       }
     }
   },

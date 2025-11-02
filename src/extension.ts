@@ -560,13 +560,28 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // 個別の設定コマンドを登録
-    const setupSettingsCommand = vscode.commands.registerCommand('fileList.setupSettings', async () => {
-        if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
-            vscode.window.showErrorMessage('ワークスペースが開かれていません');
-            return;
+    const openUserSettingsCommand = vscode.commands.registerCommand('fileList.openUserSettings', async () => {
+        try {
+            // ユーザ設定を開き、fileListExtensionでフィルタする
+            await vscode.commands.executeCommand(
+                'workbench.action.openGlobalSettings',
+                'fileListExtension'
+            );
+        } catch (error) {
+            vscode.window.showErrorMessage('ユーザ設定を開けませんでした');
         }
-        const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
-        await setupSettingsJson(workspaceRoot);
+    });
+
+    const openWorkspaceSettingsCommand = vscode.commands.registerCommand('fileList.openWorkspaceSettings', async () => {
+        try {
+            // ワークスペース設定を開き、fileListExtensionでフィルタする
+            await vscode.commands.executeCommand(
+                'workbench.action.openWorkspaceSettings',
+                'fileListExtension'
+            );
+        } catch (error) {
+            vscode.window.showErrorMessage('ワークスペース設定を開けませんでした');
+        }
     });
 
     const setupTemplateCommand = vscode.commands.registerCommand('fileList.setupTemplate', async () => {
@@ -576,15 +591,6 @@ export function activate(context: vscode.ExtensionContext) {
         }
         const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
         await setupTemplate(workspaceRoot);
-    });
-
-    const setupClaudeCommand = vscode.commands.registerCommand('fileList.setupClaude', async () => {
-        if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
-            vscode.window.showErrorMessage('ワークスペースが開かれていません');
-            return;
-        }
-        const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
-        await setupClaudeFolder(workspaceRoot);
     });
 
     // Gitファイルを開くコマンドを登録
@@ -1194,7 +1200,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(selectFolderCommand, refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, resetFolderSelectionCommand, setRelativePathCommand, openSettingsCommand, setupWorkspaceCommand, setupSettingsCommand, setupTemplateCommand, setupClaudeCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addFolderCommand, deleteFolderCommand, copyRelativePathCommand, copyCommand, cutCommand, pasteCommand, searchInWorkspaceCommand);
+    context.subscriptions.push(selectFolderCommand, refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, resetFolderSelectionCommand, setRelativePathCommand, openSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addFolderCommand, deleteFolderCommand, copyRelativePathCommand, copyCommand, cutCommand, pasteCommand, searchInWorkspaceCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({
@@ -2766,17 +2772,22 @@ class GitHeadContentProvider implements vscode.TextDocumentContentProvider {
 
 // ワークスペース設定アイテムクラス
 class WorkspaceSettingItem extends vscode.TreeItem {
+    public readonly children?: WorkspaceSettingItem[];
+
     constructor(
         public readonly label: string,
         public readonly description: string,
-        public readonly command: vscode.Command,
-        public readonly iconPath: vscode.ThemeIcon
+        public readonly command: vscode.Command | undefined,
+        public readonly iconPath: vscode.ThemeIcon,
+        children?: WorkspaceSettingItem[],
+        collapsibleState?: vscode.TreeItemCollapsibleState
     ) {
-        super(label, vscode.TreeItemCollapsibleState.None);
+        super(label, collapsibleState || vscode.TreeItemCollapsibleState.None);
         this.description = description;
         this.command = command;
         this.iconPath = iconPath;
         this.tooltip = description;
+        this.children = children;
     }
 }
 
@@ -2797,38 +2808,60 @@ class WorkspaceSettingsProvider implements vscode.TreeDataProvider<WorkspaceSett
 
     getChildren(element?: WorkspaceSettingItem): Thenable<WorkspaceSettingItem[]> {
         if (!element) {
-            // ルートレベルの設定項目を返す
+            // ルートレベル: グローバルとワークスペースの2つの親項目を返す
             return Promise.resolve([
+                // グローバル（親項目）
                 new WorkspaceSettingItem(
-                    'settings.jsonを作成/編集',
-                    'ワークスペース設定ファイルを作成または編集',
-                    {
-                        command: 'fileList.setupSettings',
-                        title: 'settings.jsonを作成/編集'
-                    },
-                    new vscode.ThemeIcon('gear')
+                    'グローバル',
+                    'ユーザレベルの設定',
+                    undefined,
+                    new vscode.ThemeIcon('account'),
+                    [
+                        new WorkspaceSettingItem(
+                            'ユーザ設定を開く',
+                            'File List Extensionのユーザ設定を開く',
+                            {
+                                command: 'fileList.openUserSettings',
+                                title: 'ユーザ設定を開く'
+                            },
+                            new vscode.ThemeIcon('settings')
+                        )
+                    ],
+                    vscode.TreeItemCollapsibleState.Collapsed
                 ),
+                // ワークスペース（親項目）
                 new WorkspaceSettingItem(
-                    '.claudeフォルダを設定',
-                    'defaultRelativePathを.claudeに設定',
-                    {
-                        command: 'fileList.setupClaude',
-                        title: '.claudeフォルダを設定'
-                    },
-                    new vscode.ThemeIcon('folder')
-                ),
-                new WorkspaceSettingItem(
-                    'テンプレートをカスタマイズ',
-                    'ファイル作成時のテンプレートをカスタマイズ',
-                    {
-                        command: 'fileList.setupTemplate',
-                        title: 'テンプレートをカスタマイズ'
-                    },
-                    new vscode.ThemeIcon('file-text')
+                    'ワークスペース',
+                    'ワークスペースレベルの設定',
+                    undefined,
+                    new vscode.ThemeIcon('folder-opened'),
+                    [
+                        new WorkspaceSettingItem(
+                            'ワークスペース設定を開く',
+                            'File List Extensionのワークスペース設定を開く',
+                            {
+                                command: 'fileList.openWorkspaceSettings',
+                                title: 'ワークスペース設定を開く'
+                            },
+                            new vscode.ThemeIcon('settings-gear')
+                        ),
+                        new WorkspaceSettingItem(
+                            'テンプレートをカスタマイズ',
+                            'ファイル作成時のテンプレートをカスタマイズ',
+                            {
+                                command: 'fileList.setupTemplate',
+                                title: 'テンプレートをカスタマイズ'
+                            },
+                            new vscode.ThemeIcon('file-text')
+                        )
+                    ],
+                    vscode.TreeItemCollapsibleState.Collapsed
                 )
             ]);
+        } else {
+            // 子レベル: 親項目の子要素を返す
+            return Promise.resolve(element.children || []);
         }
-        return Promise.resolve([]);
     }
 }
 

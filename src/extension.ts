@@ -18,7 +18,7 @@ import { ConfigurationProvider } from './services/ConfigurationProvider';
 function loadTemplate(context: vscode.ExtensionContext, variables: { [key: string]: string }): string {
     try {
         let templatePath: string;
-        
+
         // 1. ワークスペースの.vscode/templates/file.mdを優先
         const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
         if (workspaceRoot) {
@@ -32,22 +32,22 @@ function loadTemplate(context: vscode.ExtensionContext, variables: { [key: strin
         } else {
             templatePath = path.join(context.extensionPath, 'templates', 'file.md');
         }
-        
+
         if (fs.existsSync(templatePath)) {
             let content = fs.readFileSync(templatePath, 'utf8');
-            
+
             // 変数を置換
             for (const [key, value] of Object.entries(variables)) {
                 const regex = new RegExp(`{{${key}}}`, 'g');
                 content = content.replace(regex, value);
             }
-            
+
             return content;
         }
     } catch (error) {
         console.error(`テンプレートの読み込みに失敗しました: ${error}`);
     }
-    
+
     // テンプレートが見つからない場合のデフォルト
     return `作成日時: ${variables.datetime}\n\n---\n\n\n`;
 }
@@ -64,7 +64,7 @@ async function setupSettingsJson(workspaceRoot: string): Promise<void> {
         }
 
         let settings: any = {};
-        
+
         // 既存のsettings.jsonを読み込み
         if (fs.existsSync(settingsPath)) {
             try {
@@ -195,18 +195,18 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
-        
+
         // 設定から相対パスを取得
         const config = vscode.workspace.getConfiguration('fileListExtension');
         const defaultRelativePath = config.get<string>('defaultRelativePath');
-        
+
         let targetPath: string;
-        
+
         if (defaultRelativePath && defaultRelativePath.trim()) {
             // 相対パスを絶対パスに変換
             const relativePath = defaultRelativePath.trim();
             targetPath = path.resolve(workspaceRoot, relativePath);
-            
+
             // パスの存在確認
             try {
                 const stat = fs.statSync(targetPath);
@@ -222,9 +222,9 @@ export function activate(context: vscode.ExtensionContext) {
             // ワークスペースルートを使用
             targetPath = workspaceRoot;
         }
-        
+
         fileListProvider.setRootPath(targetPath);
-        
+
         // ファイル一覧ペインにも同じパスを設定（パスが存在する場合のみ）
         try {
             const stat = fs.statSync(targetPath);
@@ -381,7 +381,7 @@ export function activate(context: vscode.ExtensionContext) {
         const currentPath = fileListProvider.getRootPath();
         if (currentPath) {
             const parentPath = path.dirname(currentPath);
-            
+
             // プロジェクトルートより上には移動しない
             const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
             if (workspaceRoot && parentPath.startsWith(workspaceRoot) && parentPath !== currentPath) {
@@ -421,7 +421,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
         const currentPath = fileListProvider.getRootPath() || workspaceRoot;
-        
+
         // 現在のパスから相対パスを計算
         const currentRelativePath = path.relative(workspaceRoot, currentPath);
         const displayPath = currentRelativePath === '' ? '.' : currentRelativePath;
@@ -443,11 +443,11 @@ export function activate(context: vscode.ExtensionContext) {
                 // 相対パスを絶対パスに変換
                 targetPath = path.resolve(workspaceRoot, trimmedPath);
             }
-            
+
             // パスの存在確認（エラーでも続行）
             let pathExists = false;
             let isDirectory = false;
-            
+
             try {
                 const stat = fs.statSync(targetPath);
                 pathExists = true;
@@ -456,32 +456,32 @@ export function activate(context: vscode.ExtensionContext) {
                 // パスが存在しない場合でも続行
                 pathExists = false;
             }
-            
+
             if (pathExists && !isDirectory) {
                 vscode.window.showErrorMessage(`指定されたパスはディレクトリではありません: ${targetPath}`);
                 return;
             }
-            
+
             if (!pathExists) {
                 const continueChoice = await vscode.window.showWarningMessage(
                     `指定されたパスが見つかりません:\n相対パス: ${trimmedPath}\n絶対パス: ${targetPath}\n\n続行しますか？`,
                     'はい',
                     'いいえ'
                 );
-                
+
                 if (continueChoice !== 'はい') {
                     return;
                 }
             }
-            
+
             // パスを設定（存在しなくても設定）
             fileListProvider.setRootPath(targetPath);
-            
+
             // ファイル一覧ペインにも同じパスを設定（存在する場合のみ）
             if (pathExists) {
                 fileDetailsProvider.setRootPath(targetPath);
             }
-            
+
             // 設定に保存するかユーザーに確認
             const relativePathToSave = trimmedPath === '' || trimmedPath === '.' ? '' : trimmedPath;
             const saveChoice = await vscode.window.showInformationMessage(
@@ -489,13 +489,13 @@ export function activate(context: vscode.ExtensionContext) {
                 'はい',
                 'いいえ'
             );
-            
+
             if (saveChoice === 'はい') {
                 const config = vscode.workspace.getConfiguration('fileListExtension');
                 await config.update('defaultRelativePath', relativePathToSave, vscode.ConfigurationTarget.Workspace);
                 vscode.window.showInformationMessage('設定に保存しました');
             }
-            
+
             // 設定したフォルダを選択状態にする（存在する場合のみ）
             if (pathExists) {
                 setTimeout(async () => {
@@ -564,7 +564,7 @@ export function activate(context: vscode.ExtensionContext) {
         try {
             // ユーザ設定を開き、fileListExtensionでフィルタする
             await vscode.commands.executeCommand(
-                'workbench.action.openGlobalSettings',
+                'workbench.action.openSettings',
                 'fileListExtension'
             );
         } catch (error) {
@@ -1227,7 +1227,7 @@ async function selectInitialFolder(treeView: vscode.TreeView<FileItem>, rootPath
             0,
             new Date()
         );
-        
+
         // ルートフォルダを選択状態にする
         await treeView.reveal(rootItem, { select: true, focus: false, expand: true });
     } catch (error) {
@@ -2005,7 +2005,7 @@ class GitChangesProvider implements vscode.TreeDataProvider<GitFileItem> {
         }
 
         const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
-        
+
         try {
             if (item.status === 'Untracked') {
                 // 新規ファイルの場合は空ファイルとの差分を表示
@@ -2021,7 +2021,7 @@ class GitChangesProvider implements vscode.TreeDataProvider<GitFileItem> {
 
             // 通常の変更ファイルの差分を表示
             await this.showFileDiff(workspaceRoot, item.relativePath, item.filePath);
-            
+
         } catch (error) {
             vscode.window.showErrorMessage(`差分の表示に失敗しました: ${error}`);
         }
@@ -2053,15 +2053,15 @@ class GitChangesProvider implements vscode.TreeDataProvider<GitFileItem> {
                     const registration = vscode.workspace.registerTextDocumentContentProvider('git-head', provider);
 
                     // 差分を表示
-                    await vscode.commands.executeCommand('vscode.diff', 
-                        headUri, 
-                        currentUri, 
+                    await vscode.commands.executeCommand('vscode.diff',
+                        headUri,
+                        currentUri,
                         `${path.basename(relativePath)} (HEAD ↔ Working Tree)`
                     );
 
                     // 一定時間後にプロバイダーを削除
                     setTimeout(() => registration.dispose(), 30000);
-                    
+
                     resolve();
                 } catch (diffError) {
                     reject(diffError);
@@ -2090,13 +2090,13 @@ class GitChangesProvider implements vscode.TreeDataProvider<GitFileItem> {
 
                     const headProvider = new GitHeadContentProvider(stdout);
                     const emptyProvider = new GitHeadContentProvider('');
-                    
+
                     const headRegistration = vscode.workspace.registerTextDocumentContentProvider('git-head-deleted', headProvider);
                     const emptyRegistration = vscode.workspace.registerTextDocumentContentProvider('git-empty', emptyProvider);
 
-                    await vscode.commands.executeCommand('vscode.diff', 
-                        headUri, 
-                        emptyUri, 
+                    await vscode.commands.executeCommand('vscode.diff',
+                        headUri,
+                        emptyUri,
                         `${path.basename(relativePath)} (HEAD ↔ Deleted)`
                     );
 
@@ -2104,7 +2104,7 @@ class GitChangesProvider implements vscode.TreeDataProvider<GitFileItem> {
                         headRegistration.dispose();
                         emptyRegistration.dispose();
                     }, 30000);
-                    
+
                     resolve();
                 } catch (diffError) {
                     reject(diffError);
@@ -2122,16 +2122,16 @@ class GitChangesProvider implements vscode.TreeDataProvider<GitFileItem> {
             const emptyProvider = new GitHeadContentProvider('');
             const emptyRegistration = vscode.workspace.registerTextDocumentContentProvider('git-empty-untracked', emptyProvider);
 
-            await vscode.commands.executeCommand('vscode.diff', 
-                emptyUri, 
-                currentUri, 
+            await vscode.commands.executeCommand('vscode.diff',
+                emptyUri,
+                currentUri,
                 `${path.basename(relativePath)} (Empty ↔ Working Tree)`
             );
 
             setTimeout(() => {
                 emptyRegistration.dispose();
             }, 30000);
-            
+
         } catch (error) {
             // 差分表示に失敗した場合は通常のファイルを開く
             const document = await vscode.workspace.openTextDocument(filePath);
@@ -2201,27 +2201,27 @@ class GitChangesProvider implements vscode.TreeDataProvider<GitFileItem> {
                 }
 
                 console.log('Git status output:', JSON.stringify(stdout));
-                
+
                 const changes: GitChange[] = [];
                 const lines = stdout.trim().split('\n').filter(line => line.length > 0);
 
                 for (const line of lines) {
                     console.log('Processing git status line:', JSON.stringify(line));
-                    
+
                     // git status --porcelain の形式: XY filename
                     // X: インデックスの状態, Y: ワーキングツリーの状態
                     const match = line.match(/^(..)(.*)$/);
                     if (match) {
                         const status = match[1];
                         let relativePath = match[2];
-                        
+
                         console.log('Regex match - Status:', JSON.stringify(status), 'Path part:', JSON.stringify(relativePath));
-                        
+
                         // 先頭のスペースを除去
                         relativePath = relativePath.replace(/^\s+/, '');
-                        
+
                         console.log('After space removal:', JSON.stringify(relativePath));
-                        
+
                         // 引用符で囲まれている場合は除去
                         if (relativePath.startsWith('"') && relativePath.endsWith('"')) {
                             relativePath = relativePath.slice(1, -1);
@@ -2229,10 +2229,10 @@ class GitChangesProvider implements vscode.TreeDataProvider<GitFileItem> {
                             relativePath = relativePath.replace(/\\(.)/g, '$1');
                             console.log('After quote removal:', JSON.stringify(relativePath));
                         }
-                        
+
                         // 改行文字やその他の制御文字を除去
                         relativePath = relativePath.trim();
-                        
+
                         if (relativePath) {
                             const fullPath = path.join(workspaceRoot, relativePath);
 
@@ -2277,12 +2277,12 @@ class GitChangesProvider implements vscode.TreeDataProvider<GitFileItem> {
         if (workingStatus === 'M') return 'Modified';
         if (workingStatus === 'D') return 'Deleted';
         if (status === '??') return 'Untracked';
-        
+
         return 'Changed';
     }
 
-    private async getFilesInDirectory(dirPath: string): Promise<{name: string, path: string, relativePath: string, isDirectory: boolean}[]> {
-        const files: {name: string, path: string, relativePath: string, isDirectory: boolean}[] = [];
+    private async getFilesInDirectory(dirPath: string): Promise<{ name: string, path: string, relativePath: string, isDirectory: boolean }[]> {
+        const files: { name: string, path: string, relativePath: string, isDirectory: boolean }[] = [];
 
         if (!vscode.workspace.workspaceFolders) {
             return files;
@@ -2330,7 +2330,7 @@ class GitFileItem extends vscode.TreeItem {
         public readonly isDirectory: boolean = false
     ) {
         super(label, isDirectory ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
-        
+
         this.resourceUri = vscode.Uri.file(filePath);
         this.contextValue = isDirectory ? 'gitDirectory' : 'gitFile';
 
@@ -2766,7 +2766,7 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem>, vs
 
 // GitのHEADバージョンのコンテンツプロバイダー
 class GitHeadContentProvider implements vscode.TextDocumentContentProvider {
-    constructor(private content: string) {}
+    constructor(private content: string) { }
 
     provideTextDocumentContent(uri: vscode.Uri): string {
         return this.content;
@@ -2799,7 +2799,7 @@ class WorkspaceSettingsProvider implements vscode.TreeDataProvider<WorkspaceSett
     private _onDidChangeTreeData: vscode.EventEmitter<WorkspaceSettingItem | undefined | null | void> = new vscode.EventEmitter<WorkspaceSettingItem | undefined | null | void>();
     readonly onDidChangeTreeData: vscode.Event<WorkspaceSettingItem | undefined | null | void> = this._onDidChangeTreeData.event;
 
-    constructor() {}
+    constructor() { }
 
     refresh(): void {
         this._onDidChangeTreeData.fire();

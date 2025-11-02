@@ -61,11 +61,6 @@
         "icon": "$(settings-gear)"
       },
       {
-        "command": "fileList.setupWorkspace",
-        "title": "ワークスペース設定",
-        "icon": "$(gear)"
-      },
-      {
         "command": "fileList.openUserSettings",
         "title": "ユーザ設定を開く",
         "icon": "$(settings)"
@@ -236,14 +231,9 @@
           "group": "navigation"
         },
         {
-          "command": "fileList.setupWorkspace",
-          "when": "view == workspaceExplorer",
-          "group": "navigation@1"
-        },
-        {
           "command": "fileList.searchInWorkspace",
           "when": "view == workspaceExplorer",
-          "group": "navigation@2"
+          "group": "navigation@1"
         }
       ],
       "view/item/context": [

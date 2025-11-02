@@ -79,7 +79,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.TAG }}
-          name: File List Extension v${{ env.VERSION }}
+          name: v${{ env.VERSION }}
           draft: false
           prerelease: false
           files: file-list-extension-${{ env.VERSION }}.vsix

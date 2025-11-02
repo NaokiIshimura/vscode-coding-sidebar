@@ -20,7 +20,7 @@ npm run package
 - **重要**: PR作成前に必ずVSIXパッケージを作成する
 - パッケージサイズとファイル構成を確認
 - エラーなく完了することを確認
-- `releases/file-list-extension-*.vsix` が生成されることを確認
+- `releases/ai-coding-sidebar-*.vsix` が生成されることを確認
 
 #### 3. 🔄 変更のコミット・プッシュ
 ```bash

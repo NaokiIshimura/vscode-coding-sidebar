@@ -1,4 +1,4 @@
-# VSCode File List Extension
+# VSCode AI Coding Sidebar
 
 ## プロジェクト概要
 VSCode拡張機能として、ディレクトリ内のファイルを一覧表示し、Git変更ファイルの管理機能を提供します。
@@ -71,7 +71,7 @@ npm run compile
 ### 3. デバッグ時の動作
 - 新しいVSCodeウィンドウ（Extension Development Host）が開く
 - このウィンドウで拡張機能がロードされた状態になる
-- アクティビティバーに「File List」アイコンが表示される
+- アクティビティバーに「AI Coding Sidebar」アイコンが表示される
 
 ### 4. デバッグ機能
 - **ブレークポイント**: `src/extension.ts`にブレークポイントを設定可能

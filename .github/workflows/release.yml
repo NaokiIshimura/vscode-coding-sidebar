@@ -45,13 +45,13 @@ jobs:
 
       - name: Package VSIX
         run: |
-          vsce package --allow-missing-repository --no-dependencies --out file-list-extension-${VERSION}.vsix
+          vsce package --allow-missing-repository --no-dependencies --out ai-coding-sidebar-${VERSION}.vsix
 
       - name: Upload VSIX asset (release event)
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: file-list-extension-${{ env.VERSION }}.vsix
+          files: ai-coding-sidebar-${{ env.VERSION }}.vsix
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -59,8 +59,8 @@ jobs:
         if: github.event_name != 'release'
         uses: actions/upload-artifact@v4
         with:
-          name: file-list-extension-${{ env.VERSION }}
-          path: file-list-extension-${{ env.VERSION }}.vsix
+          name: ai-coding-sidebar-${{ env.VERSION }}
+          path: ai-coding-sidebar-${{ env.VERSION }}.vsix
 
       - name: Check if release exists
         if: github.event_name != 'release'
@@ -82,7 +82,7 @@ jobs:
           name: v${{ env.VERSION }}
           draft: false
           prerelease: false
-          files: file-list-extension-${{ env.VERSION }}.vsix
+          files: ai-coding-sidebar-${{ env.VERSION }}.vsix
           body: |
             ## File List Extension v${{ env.VERSION }}
 
@@ -90,7 +90,7 @@ jobs:
 
             ### インストール方法
             ```bash
-            code --install-extension file-list-extension-${{ env.VERSION }}.vsix
+            code --install-extension ai-coding-sidebar-${{ env.VERSION }}.vsix
             ```
 
             詳細な変更内容は [CHANGELOG.md](https://github.com/NaokiIshimura/vscode-panel/blob/${{ env.TAG }}/CHANGELOG.md) をご覧ください。

@@ -1,4 +1,4 @@
-# File List Extension
+# AI Coding Sidebar
 
 ワークスペース内のファイルとフォルダを効率的に閲覧できるVSCode拡張機能です。
 
@@ -33,7 +33,7 @@
 ## 使用方法
 
 ### 基本操作
-1. アクティビティバーの「File List」アイコンをクリック
+1. アクティビティバーの「AI Coding Sidebar」アイコンをクリック
 2. フォルダツリーペインでフォルダを選択
 3. ファイル一覧ペインでファイルとフォルダを確認
 4. ファイルを右クリック → 「相対パスをコピー」でワークスペースからの相対パスをクリップボードにコピー
@@ -55,7 +55,7 @@
 
 #### 方法3: 設定画面から
 1. フォルダツリーペインの設定アイコンをクリック
-2. `fileListExtension.defaultRelativePath` を編集
+2. `aiCodingSidebar.defaultRelativePath` を編集
 
 ### 相対パスの例
 - `src` → プロジェクト/src
@@ -115,13 +115,13 @@
 
 ### 利用可能な設定
 
-#### fileListExtension.defaultRelativePath
+#### aiCodingSidebar.defaultRelativePath
 - **説明**: フォルダツリーのデフォルト相対パス
 - **型**: string
 - **デフォルト値**: `""`（プロジェクトルート）
 - **例**: `"src"`, `".claude"`, `"docs/api"`
 
-#### fileListExtension.sortBy
+#### aiCodingSidebar.sortBy
 - **説明**: ファイルのソート基準
 - **型**: string
 - **デフォルト値**: `"name"`
@@ -131,7 +131,7 @@
   - `"size"`: サイズでソート
   - `"modified"`: 更新日時でソート
 
-#### fileListExtension.sortOrder
+#### aiCodingSidebar.sortOrder
 - **説明**: ソート順序
 - **型**: string
 - **デフォルト値**: `"ascending"`
@@ -139,22 +139,22 @@
   - `"ascending"`: 昇順
   - `"descending"`: 降順
 
-#### fileListExtension.showHidden
+#### aiCodingSidebar.showHidden
 - **説明**: 隠しファイル・フォルダを表示する
 - **型**: boolean
 - **デフォルト値**: `false`
 
-#### fileListExtension.showFileIcons
+#### aiCodingSidebar.showFileIcons
 - **説明**: ファイルアイコンを表示する
 - **型**: boolean
 - **デフォルト値**: `true`
 
-#### fileListExtension.autoRefresh
+#### aiCodingSidebar.autoRefresh
 - **説明**: ファイルシステム変更時に自動更新する
 - **型**: boolean
 - **デフォルト値**: `true`
 
-#### fileListExtension.viewMode
+#### aiCodingSidebar.viewMode
 - **説明**: 表示モード
 - **型**: string
 - **デフォルト値**: `"tree"`
@@ -168,13 +168,13 @@
 
 ```json
 {
-  "fileListExtension.defaultRelativePath": ".claude",
-  "fileListExtension.sortBy": "modified",
-  "fileListExtension.sortOrder": "descending",
-  "fileListExtension.showHidden": false,
-  "fileListExtension.showFileIcons": true,
-  "fileListExtension.autoRefresh": true,
-  "fileListExtension.viewMode": "tree"
+  "aiCodingSidebar.defaultRelativePath": ".claude",
+  "aiCodingSidebar.sortBy": "modified",
+  "aiCodingSidebar.sortOrder": "descending",
+  "aiCodingSidebar.showHidden": false,
+  "aiCodingSidebar.showFileIcons": true,
+  "aiCodingSidebar.autoRefresh": true,
+  "aiCodingSidebar.viewMode": "tree"
 }
 ```
 
@@ -211,7 +211,7 @@ npm run watch
 
 ### デバッグ中の操作
 - 新しいVSCodeウィンドウ（Extension Development Host）が開く
-- アクティビティバーに「File List」アイコンが表示される
+- アクティビティバーに「AI Coding Sidebar」アイコンが表示される
 - ブレークポイントの設定、変数の検査、ステップ実行が可能
 - `Ctrl+R` / `Cmd+R` で拡張機能をリロード
 
@@ -229,14 +229,14 @@ npm run watch
 1. [GitHubのReleasesページ](https://github.com/NaokiIshimura/vscode-panel/releases)から最新のVSIXファイルをダウンロード
 2. コマンドラインからインストール:
    ```bash
-   code --install-extension file-list-extension-0.0.1.vsix
+   code --install-extension ai-coding-sidebar-0.0.1.vsix
    ```
 3. VS Codeを再起動
 
 #### ローカルビルド版を使用する場合:
 ```bash
 # releasesディレクトリから直接インストール（バージョン0.0.1）
-code --install-extension releases/file-list-extension-0.0.1.vsix
+code --install-extension releases/ai-coding-sidebar-0.0.1.vsix
 ```
 
 #### 自分でパッケージを作成する場合:
@@ -250,7 +250,7 @@ code --install-extension releases/file-list-extension-0.0.1.vsix
    ```
 3. 生成されたVSIXファイルをインストール:
    ```bash
-   code --install-extension releases/file-list-extension-0.0.1.vsix
+   code --install-extension releases/ai-coding-sidebar-0.0.1.vsix
    ```
 4. VS Codeを再起動
 
@@ -280,12 +280,12 @@ npm run version:major   # 0.0.1 → 1.0.0
 
 ### コマンドラインから
 ```bash
-code --uninstall-extension file-list-extension
+code --uninstall-extension ai-coding-sidebar
 ```
 
 ### VSCode内から
 1. 拡張機能サイドバーを開く（`Ctrl+Shift+X` / `Cmd+Shift+X`）
-2. インストール済みの拡張機能から「File List」を検索
+2. インストール済みの拡張機能から「AI Coding Sidebar」を検索
 3. アンインストールボタンをクリック
 
 ## 要件

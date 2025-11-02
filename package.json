@@ -1,8 +1,8 @@
 {
-  "name": "file-list-extension",
-  "displayName": "File List Extension",
+  "name": "ai-coding-sidebar",
+  "displayName": "AI Coding Sidebar",
   "description": "指定したディレクトリ内のファイルを一覧表示するVSCode拡張機能",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "publisher": "nacn",
   "icon": "images/nacn.png",
   "repository": {
@@ -22,135 +22,135 @@
   "contributes": {
     "commands": [
       {
-        "command": "fileList.selectFolder",
+        "command": "aiCodingSidebar.selectFolder",
         "title": "フォルダを選択",
         "icon": "$(folder-opened)"
       },
       {
-        "command": "fileList.refresh",
+        "command": "aiCodingSidebar.refresh",
         "title": "更新",
         "icon": "$(refresh)"
       },
       {
-        "command": "fileList.showInPanel",
+        "command": "aiCodingSidebar.showInPanel",
         "title": "ファイル一覧に表示",
         "icon": "$(list-tree)"
       },
       {
-        "command": "fileList.openFolder",
+        "command": "aiCodingSidebar.openFolder",
         "title": "フォルダを開く"
       },
       {
-        "command": "fileList.goToParent",
+        "command": "aiCodingSidebar.goToParent",
         "title": "親フォルダへ移動",
         "icon": "$(arrow-up)"
       },
       {
-        "command": "fileList.resetFolderSelection",
+        "command": "aiCodingSidebar.resetFolderSelection",
         "title": "フォルダ選択をリセット",
         "icon": "$(home)"
       },
       {
-        "command": "fileList.setRelativePath",
+        "command": "aiCodingSidebar.setRelativePath",
         "title": "相対パスを設定",
         "icon": "$(edit)"
       },
       {
-        "command": "fileList.openSettings",
+        "command": "aiCodingSidebar.openSettings",
         "title": "設定を開く",
         "icon": "$(settings-gear)"
       },
       {
-        "command": "fileList.openUserSettings",
+        "command": "aiCodingSidebar.openUserSettings",
         "title": "ユーザ設定を開く",
         "icon": "$(settings)"
       },
       {
-        "command": "fileList.openWorkspaceSettings",
+        "command": "aiCodingSidebar.openWorkspaceSettings",
         "title": "ワークスペース設定を開く",
         "icon": "$(settings-gear)"
       },
       {
-        "command": "fileList.setupTemplate",
+        "command": "aiCodingSidebar.setupTemplate",
         "title": "テンプレートをカスタマイズ",
         "icon": "$(file-text)"
       },
       {
-        "command": "fileList.openGitFile",
+        "command": "aiCodingSidebar.openGitFile",
         "title": "Gitファイルを開く"
       },
       {
-        "command": "fileList.showGitDiff",
+        "command": "aiCodingSidebar.showGitDiff",
         "title": "Git差分を表示"
       },
       {
-        "command": "fileList.refreshGitChanges",
+        "command": "aiCodingSidebar.refreshGitChanges",
         "title": "Git変更を更新",
         "icon": "$(refresh)"
       },
       {
-        "command": "fileList.createMarkdownFile",
+        "command": "aiCodingSidebar.createMarkdownFile",
         "title": "markdownファイルを作成",
         "icon": "$(new-file)"
       },
       {
-        "command": "fileList.createFile",
+        "command": "aiCodingSidebar.createFile",
         "title": "ファイルを作成",
         "icon": "$(new-file)"
       },
       {
-        "command": "fileList.createFolder",
+        "command": "aiCodingSidebar.createFolder",
         "title": "フォルダを作成",
         "icon": "$(new-folder)"
       },
       {
-        "command": "fileList.rename",
+        "command": "aiCodingSidebar.rename",
         "title": "名前の変更...",
         "icon": "$(edit)"
       },
       {
-        "command": "fileList.delete",
+        "command": "aiCodingSidebar.delete",
         "title": "削除",
         "icon": "$(trash)"
       },
       {
-        "command": "fileList.addFolder",
+        "command": "aiCodingSidebar.addFolder",
         "title": "フォルダを追加",
         "icon": "$(new-folder)"
       },
       {
-        "command": "fileList.deleteFolder",
+        "command": "aiCodingSidebar.deleteFolder",
         "title": "フォルダを削除",
         "icon": "$(trash)"
       },
       {
-        "command": "fileList.copyRelativePath",
+        "command": "aiCodingSidebar.copyRelativePath",
         "title": "相対パスをコピー",
         "icon": "$(copy)"
       },
       {
-        "command": "fileList.copy",
+        "command": "aiCodingSidebar.copy",
         "title": "コピー",
         "icon": "$(copy)"
       },
       {
-        "command": "fileList.cut",
+        "command": "aiCodingSidebar.cut",
         "title": "切り取り",
         "icon": "$(scissors)"
       },
       {
-        "command": "fileList.paste",
+        "command": "aiCodingSidebar.paste",
         "title": "貼り付け",
         "icon": "$(clippy)"
       },
       {
-        "command": "fileList.searchInWorkspace",
+        "command": "aiCodingSidebar.searchInWorkspace",
         "title": "ワークスペース内を検索",
         "icon": "$(search)"
       }
     ],
     "views": {
-      "fileListView": [
+      "aiCodingSidebarView": [
         {
           "id": "workspaceSettings",
           "name": "設定",
@@ -161,11 +161,11 @@
           "name": "エクスプローラー"
         },
         {
-          "id": "fileListExplorer",
+          "id": "aiCodingSidebarExplorer",
           "name": "フォルダツリー"
         },
         {
-          "id": "fileListDetails",
+          "id": "aiCodingSidebarDetails",
           "name": "ファイル一覧"
         },
         {
@@ -177,8 +177,8 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "fileListView",
-          "title": "File List",
+          "id": "aiCodingSidebarView",
+          "title": "AI Coding Sidebar",
           "icon": "$(note)"
         }
       ]
@@ -186,144 +186,144 @@
     "menus": {
       "view/title": [
         {
-          "command": "fileList.addFolder",
-          "when": "view == fileListExplorer",
+          "command": "aiCodingSidebar.addFolder",
+          "when": "view == aiCodingSidebarExplorer",
           "group": "navigation@1"
         },
         {
-          "command": "fileList.refresh",
-          "when": "view == fileListExplorer",
+          "command": "aiCodingSidebar.refresh",
+          "when": "view == aiCodingSidebarExplorer",
           "group": "navigation@2"
         },
         {
-          "command": "fileList.goToParent",
-          "when": "view == fileListExplorer",
+          "command": "aiCodingSidebar.goToParent",
+          "when": "view == aiCodingSidebarExplorer",
           "group": "navigation@3"
         },
         {
-          "command": "fileList.resetFolderSelection",
-          "when": "view == fileListExplorer",
+          "command": "aiCodingSidebar.resetFolderSelection",
+          "when": "view == aiCodingSidebarExplorer",
           "group": "navigation@4"
         },
         {
-          "command": "fileList.selectFolder",
-          "when": "view == fileListExplorer",
+          "command": "aiCodingSidebar.selectFolder",
+          "when": "view == aiCodingSidebarExplorer",
           "group": "navigation@5"
         },
         {
-          "command": "fileList.createMarkdownFile",
-          "when": "view == fileListDetails",
+          "command": "aiCodingSidebar.createMarkdownFile",
+          "when": "view == aiCodingSidebarDetails",
           "group": "navigation@1"
         },
         {
-          "command": "fileList.refresh",
-          "when": "view == fileListDetails",
+          "command": "aiCodingSidebar.refresh",
+          "when": "view == aiCodingSidebarDetails",
           "group": "navigation@3"
         },
         {
-          "command": "fileList.goToParent",
-          "when": "view == fileListDetails",
+          "command": "aiCodingSidebar.goToParent",
+          "when": "view == aiCodingSidebarDetails",
           "group": "navigation@4"
         },
         {
-          "command": "fileList.refreshGitChanges",
+          "command": "aiCodingSidebar.refreshGitChanges",
           "when": "view == gitChanges",
           "group": "navigation"
         },
         {
-          "command": "fileList.searchInWorkspace",
+          "command": "aiCodingSidebar.searchInWorkspace",
           "when": "view == workspaceExplorer",
           "group": "navigation@1"
         }
       ],
       "view/item/context": [
         {
-          "command": "fileList.showInPanel",
-          "when": "view == fileListExplorer && viewItem == directory",
+          "command": "aiCodingSidebar.showInPanel",
+          "when": "view == aiCodingSidebarExplorer && viewItem == directory",
           "group": "inline"
         },
         {
-          "command": "fileList.addFolder",
-          "when": "view == fileListExplorer && viewItem == directory",
+          "command": "aiCodingSidebar.addFolder",
+          "when": "view == aiCodingSidebarExplorer && viewItem == directory",
           "group": "2_workspace@2"
         },
         {
-          "command": "fileList.deleteFolder",
-          "when": "view == fileListExplorer && viewItem == directory",
+          "command": "aiCodingSidebar.deleteFolder",
+          "when": "view == aiCodingSidebarExplorer && viewItem == directory",
           "group": "2_workspace@3"
         },
         {
-          "command": "fileList.copyRelativePath",
-          "when": "view == fileListExplorer",
+          "command": "aiCodingSidebar.copyRelativePath",
+          "when": "view == aiCodingSidebarExplorer",
           "group": "1_copy"
         },
         {
-          "command": "fileList.showInPanel",
-          "when": "view == fileListDetails && viewItem == directory",
+          "command": "aiCodingSidebar.showInPanel",
+          "when": "view == aiCodingSidebarDetails && viewItem == directory",
           "group": "inline"
         },
         {
-          "command": "fileList.createMarkdownFile",
-          "when": "view == fileListDetails && viewItem == directory",
+          "command": "aiCodingSidebar.createMarkdownFile",
+          "when": "view == aiCodingSidebarDetails && viewItem == directory",
           "group": "2_workspace"
         },
         {
-          "command": "fileList.rename",
-          "when": "view == fileListDetails",
+          "command": "aiCodingSidebar.rename",
+          "when": "view == aiCodingSidebarDetails",
           "group": "3_edit@1"
         },
         {
-          "command": "fileList.delete",
-          "when": "view == fileListDetails",
+          "command": "aiCodingSidebar.delete",
+          "when": "view == aiCodingSidebarDetails",
           "group": "3_edit@2"
         },
         {
-          "command": "fileList.copyRelativePath",
-          "when": "view == fileListDetails",
+          "command": "aiCodingSidebar.copyRelativePath",
+          "when": "view == aiCodingSidebarDetails",
           "group": "1_copy"
         },
         {
-          "command": "fileList.copy",
+          "command": "aiCodingSidebar.copy",
           "when": "view == workspaceExplorer",
           "group": "1_clipboard@1"
         },
         {
-          "command": "fileList.cut",
+          "command": "aiCodingSidebar.cut",
           "when": "view == workspaceExplorer",
           "group": "1_clipboard@2"
         },
         {
-          "command": "fileList.paste",
+          "command": "aiCodingSidebar.paste",
           "when": "view == workspaceExplorer && viewItem == directory",
           "group": "1_clipboard@3"
         },
         {
-          "command": "fileList.copyRelativePath",
+          "command": "aiCodingSidebar.copyRelativePath",
           "when": "view == workspaceExplorer",
           "group": "1_copy"
         },
         {
-          "command": "fileList.rename",
+          "command": "aiCodingSidebar.rename",
           "when": "view == workspaceExplorer",
           "group": "2_edit@1"
         },
         {
-          "command": "fileList.delete",
+          "command": "aiCodingSidebar.delete",
           "when": "view == workspaceExplorer",
           "group": "2_edit@2"
         },
         {
-          "command": "fileList.createMarkdownFile",
+          "command": "aiCodingSidebar.createMarkdownFile",
           "when": "view == workspaceExplorer && viewItem == directory",
           "group": "3_new@1"
         },
         {
-          "command": "fileList.createFile",
+          "command": "aiCodingSidebar.createFile",
           "when": "view == workspaceExplorer && viewItem == directory",
           "group": "3_new@2"
         },
         {
-          "command": "fileList.createFolder",
+          "command": "aiCodingSidebar.createFolder",
           "when": "view == workspaceExplorer && viewItem == directory",
           "group": "3_new@3"
         }
@@ -331,43 +331,43 @@
     },
     "keybindings": [
       {
-        "command": "fileList.copy",
+        "command": "aiCodingSidebar.copy",
         "key": "ctrl+c",
         "mac": "cmd+c",
         "when": "focusedView == workspaceExplorer"
       },
       {
-        "command": "fileList.cut",
+        "command": "aiCodingSidebar.cut",
         "key": "ctrl+x",
         "mac": "cmd+x",
         "when": "focusedView == workspaceExplorer"
       },
       {
-        "command": "fileList.paste",
+        "command": "aiCodingSidebar.paste",
         "key": "ctrl+v",
         "mac": "cmd+v",
         "when": "focusedView == workspaceExplorer"
       },
       {
-        "command": "fileList.delete",
+        "command": "aiCodingSidebar.delete",
         "key": "delete",
         "when": "focusedView == workspaceExplorer"
       },
       {
-        "command": "fileList.rename",
+        "command": "aiCodingSidebar.rename",
         "key": "f2",
         "when": "focusedView == workspaceExplorer"
       }
     ],
     "configuration": {
-      "title": "File List Extension",
+      "title": "AI Coding Sidebar",
       "properties": {
-        "fileListExtension.defaultRelativePath": {
+        "aiCodingSidebar.defaultRelativePath": {
           "type": "string",
           "default": "",
           "description": "フォルダツリーのデフォルト相対パス"
         },
-        "fileListExtension.sortBy": {
+        "aiCodingSidebar.sortBy": {
           "type": "string",
           "enum": [
             "name",
@@ -384,7 +384,7 @@
             "更新日時でソート"
           ]
         },
-        "fileListExtension.sortOrder": {
+        "aiCodingSidebar.sortOrder": {
           "type": "string",
           "enum": [
             "ascending",
@@ -397,12 +397,12 @@
             "降順"
           ]
         },
-        "fileListExtension.showHidden": {
+        "aiCodingSidebar.showHidden": {
           "type": "boolean",
           "default": false,
           "description": "隠しファイル・フォルダを表示する"
         },
-        "fileListExtension.viewMode": {
+        "aiCodingSidebar.viewMode": {
           "type": "string",
           "enum": [
             "tree",
@@ -415,12 +415,12 @@
             "リスト表示"
           ]
         },
-        "fileListExtension.autoRefresh": {
+        "aiCodingSidebar.autoRefresh": {
           "type": "boolean",
           "default": true,
           "description": "ファイルシステム変更時に自動更新する"
         },
-        "fileListExtension.showFileIcons": {
+        "aiCodingSidebar.showFileIcons": {
           "type": "boolean",
           "default": true,
           "description": "ファイルアイコンを表示する"

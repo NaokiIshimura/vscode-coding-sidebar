@@ -76,8 +76,8 @@ async function setupSettingsJson(workspaceRoot: string): Promise<void> {
         }
 
         // デフォルト設定を追加
-        if (!settings.hasOwnProperty('fileListExtension.defaultRelativePath')) {
-            settings['fileListExtension.defaultRelativePath'] = '.claude';
+        if (!settings.hasOwnProperty('aiCodingSidebar.defaultRelativePath')) {
+            settings['aiCodingSidebar.defaultRelativePath'] = '.claude';
         }
 
         // settings.jsonに書き込み
@@ -149,7 +149,7 @@ async function setupClaudeFolder(workspaceRoot: string): Promise<void> {
         await setupSettingsJson(workspaceRoot);
 
         // 設定を適用
-        const config = vscode.workspace.getConfiguration('fileListExtension');
+        const config = vscode.workspace.getConfiguration('aiCodingSidebar');
         await config.update('defaultRelativePath', '.claude', vscode.ConfigurationTarget.Workspace);
 
         vscode.window.showInformationMessage('.claudeフォルダを作成し、設定を更新しました');
@@ -159,7 +159,7 @@ async function setupClaudeFolder(workspaceRoot: string): Promise<void> {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-    console.log('File List Extension が有効化されました');
+    console.log('AI Coding Sidebar が有効化されました');
 
     // サービスクラスの初期化
     const fileOperationService = new FileOperationService();
@@ -171,9 +171,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     // ステータスバーアイテムを作成
     const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-    statusBarItem.text = "$(gear) File List設定";
-    statusBarItem.tooltip = "File List拡張機能のワークスペース設定";
-    statusBarItem.command = "fileList.setupWorkspace";
+    statusBarItem.text = "$(gear) AI Coding Sidebar設定";
+    statusBarItem.tooltip = "AI Coding Sidebar拡張機能のワークスペース設定";
+    statusBarItem.command = "aiCodingSidebar.setupWorkspace";
     statusBarItem.show();
     context.subscriptions.push(statusBarItem);
 
@@ -184,8 +184,8 @@ export function activate(context: vscode.ExtensionContext) {
         configProvider,
         searchService
     );
-    const fileListProvider = new FileListProvider();
-    const fileDetailsProvider = new FileDetailsProvider(fileListProvider);
+    const aiCodingSidebarProvider = new AiCodingSidebarProvider();
+    const aiCodingSidebarDetailsProvider = new AiCodingSidebarDetailsProvider(aiCodingSidebarProvider);
     const gitChangesProvider = new GitChangesProvider();
 
     // プロジェクトルートを設定
@@ -197,7 +197,7 @@ export function activate(context: vscode.ExtensionContext) {
         const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
 
         // 設定から相対パスを取得
-        const config = vscode.workspace.getConfiguration('fileListExtension');
+        const config = vscode.workspace.getConfiguration('aiCodingSidebar');
         const defaultRelativePath = config.get<string>('defaultRelativePath');
 
         let targetPath: string;
@@ -223,13 +223,13 @@ export function activate(context: vscode.ExtensionContext) {
             targetPath = workspaceRoot;
         }
 
-        fileListProvider.setRootPath(targetPath);
+        aiCodingSidebarProvider.setRootPath(targetPath);
 
         // ファイル一覧ペインにも同じパスを設定（パスが存在する場合のみ）
         try {
             const stat = fs.statSync(targetPath);
             if (stat.isDirectory()) {
-                fileDetailsProvider.setRootPath(targetPath);
+                aiCodingSidebarDetailsProvider.setRootPath(targetPath);
             }
         } catch (error) {
             // パスが存在しない場合はファイル一覧ペインは空のまま
@@ -280,19 +280,19 @@ export function activate(context: vscode.ExtensionContext) {
         }, 500);
     }
 
-    const treeView = vscode.window.createTreeView('fileListExplorer', {
-        treeDataProvider: fileListProvider,
+    const treeView = vscode.window.createTreeView('aiCodingSidebarExplorer', {
+        treeDataProvider: aiCodingSidebarProvider,
         showCollapseAll: true
     });
 
     // TreeViewをProviderに設定
-    fileListProvider.setTreeView(treeView);
+    aiCodingSidebarProvider.setTreeView(treeView);
 
-    const detailsView = vscode.window.createTreeView('fileListDetails', {
-        treeDataProvider: fileDetailsProvider,
+    const detailsView = vscode.window.createTreeView('aiCodingSidebarDetails', {
+        treeDataProvider: aiCodingSidebarDetailsProvider,
         showCollapseAll: true,
         canSelectMany: false,
-        dragAndDropController: fileDetailsProvider
+        dragAndDropController: aiCodingSidebarDetailsProvider
     });
 
     const gitChangesView = vscode.window.createTreeView('gitChanges', {
@@ -300,8 +300,8 @@ export function activate(context: vscode.ExtensionContext) {
         showCollapseAll: false
     });
 
-    // FileDetailsProviderにdetailsViewの参照を渡す
-    fileDetailsProvider.setTreeView(detailsView);
+    // AiCodingSidebarDetailsProviderにdetailsViewの参照を渡す
+    aiCodingSidebarDetailsProvider.setTreeView(detailsView);
 
 
 
@@ -311,11 +311,11 @@ export function activate(context: vscode.ExtensionContext) {
 
     // 初期化後にルートフォルダを選択状態にする
     setTimeout(async () => {
-        const currentRootPath = fileListProvider.getRootPath();
+        const currentRootPath = aiCodingSidebarProvider.getRootPath();
         if (currentRootPath) {
             await selectInitialFolder(treeView, currentRootPath);
             // ファイル一覧ペインにも同じパスを確実に設定
-            fileDetailsProvider.setRootPath(currentRootPath);
+            aiCodingSidebarDetailsProvider.setRootPath(currentRootPath);
         }
     }, 500);
 
@@ -324,7 +324,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (e.selection.length > 0) {
             const selectedItem = e.selection[0];
             if (selectedItem.isDirectory) {
-                fileDetailsProvider.setRootPath(selectedItem.filePath);
+                aiCodingSidebarDetailsProvider.setRootPath(selectedItem.filePath);
             }
         }
     });
@@ -334,18 +334,18 @@ export function activate(context: vscode.ExtensionContext) {
     /*
     detailsView.onDidChangeSelection(async (e) => {
         if (e.selection.length > 0) {
-            fileDetailsProvider.setSelectedItem(e.selection[0]);
+            aiCodingSidebarDetailsProvider.setSelectedItem(e.selection[0]);
         } else {
-            fileDetailsProvider.setSelectedItem(undefined);
+            aiCodingSidebarDetailsProvider.setSelectedItem(undefined);
         }
     });
     */
 
     // ビューを有効化
-    vscode.commands.executeCommand('setContext', 'fileListView:enabled', true);
+    vscode.commands.executeCommand('setContext', 'aiCodingSidebarView:enabled', true);
 
     // フォルダ選択コマンドを登録
-    const selectFolderCommand = vscode.commands.registerCommand('fileList.selectFolder', async () => {
+    const selectFolderCommand = vscode.commands.registerCommand('aiCodingSidebar.selectFolder', async () => {
         const folderUri = await vscode.window.showOpenDialog({
             canSelectFiles: false,
             canSelectFolders: true,
@@ -354,73 +354,73 @@ export function activate(context: vscode.ExtensionContext) {
         });
 
         if (folderUri && folderUri.length > 0) {
-            fileListProvider.setRootPath(folderUri[0].fsPath);
+            aiCodingSidebarProvider.setRootPath(folderUri[0].fsPath);
         }
     });
 
     // 更新コマンドを登録
-    const refreshCommand = vscode.commands.registerCommand('fileList.refresh', () => {
-        fileListProvider.refresh();
+    const refreshCommand = vscode.commands.registerCommand('aiCodingSidebar.refresh', () => {
+        aiCodingSidebarProvider.refresh();
     });
 
     // 下ペイン表示コマンドを登録
-    const showInPanelCommand = vscode.commands.registerCommand('fileList.showInPanel', async (item: FileItem) => {
+    const showInPanelCommand = vscode.commands.registerCommand('aiCodingSidebar.showInPanel', async (item: FileItem) => {
         if (item && item.isDirectory) {
-            fileDetailsProvider.setRootPath(item.filePath);
+            aiCodingSidebarDetailsProvider.setRootPath(item.filePath);
         }
     });
 
     // フォルダを開くコマンドを登録
-    const openFolderCommand = vscode.commands.registerCommand('fileList.openFolder', async (folderPath: string) => {
-        fileDetailsProvider.setRootPath(folderPath);
+    const openFolderCommand = vscode.commands.registerCommand('aiCodingSidebar.openFolder', async (folderPath: string) => {
+        aiCodingSidebarDetailsProvider.setRootPath(folderPath);
     });
 
     // 親フォルダへ移動するコマンドを登録
-    const goToParentCommand = vscode.commands.registerCommand('fileList.goToParent', async () => {
+    const goToParentCommand = vscode.commands.registerCommand('aiCodingSidebar.goToParent', async () => {
         // フォルダツリーviewの親フォルダへ移動
-        const currentPath = fileListProvider.getRootPath();
+        const currentPath = aiCodingSidebarProvider.getRootPath();
         if (currentPath) {
             const parentPath = path.dirname(currentPath);
 
             // プロジェクトルートより上には移動しない
             const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
             if (workspaceRoot && parentPath.startsWith(workspaceRoot) && parentPath !== currentPath) {
-                fileListProvider.setRootPath(parentPath);
+                aiCodingSidebarProvider.setRootPath(parentPath);
                 // ファイル一覧ペインも同期
-                fileDetailsProvider.setRootPath(parentPath);
+                aiCodingSidebarDetailsProvider.setRootPath(parentPath);
             } else {
                 vscode.window.showInformationMessage('これ以上上のフォルダはありません');
             }
         } else {
             // フォルダツリーにパスが設定されていない場合は、ファイル一覧ペインの親フォルダへ移動
-            fileDetailsProvider.goToParentFolder();
+            aiCodingSidebarDetailsProvider.goToParentFolder();
         }
     });
 
     // フォルダ選択リセットコマンドを登録
-    const resetFolderSelectionCommand = vscode.commands.registerCommand('fileList.resetFolderSelection', async () => {
-        const rootPath = fileListProvider.getRootPath();
+    const resetFolderSelectionCommand = vscode.commands.registerCommand('aiCodingSidebar.resetFolderSelection', async () => {
+        const rootPath = aiCodingSidebarProvider.getRootPath();
 
         if (!rootPath) {
             vscode.window.showInformationMessage('フォルダツリーのルートが設定されていません');
             return;
         }
 
-        fileListProvider.resetActiveFolder();
-        fileDetailsProvider.setRootPath(rootPath);
+        aiCodingSidebarProvider.resetActiveFolder();
+        aiCodingSidebarDetailsProvider.setRootPath(rootPath);
 
         vscode.window.showInformationMessage('フォルダ選択をリセットしました');
     });
 
     // 相対パス設定コマンドを登録
-    const setRelativePathCommand = vscode.commands.registerCommand('fileList.setRelativePath', async () => {
+    const setRelativePathCommand = vscode.commands.registerCommand('aiCodingSidebar.setRelativePath', async () => {
         if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
             vscode.window.showErrorMessage('ワークスペースが開かれていません');
             return;
         }
 
         const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
-        const currentPath = fileListProvider.getRootPath() || workspaceRoot;
+        const currentPath = aiCodingSidebarProvider.getRootPath() || workspaceRoot;
 
         // 現在のパスから相対パスを計算
         const currentRelativePath = path.relative(workspaceRoot, currentPath);
@@ -475,11 +475,11 @@ export function activate(context: vscode.ExtensionContext) {
             }
 
             // パスを設定（存在しなくても設定）
-            fileListProvider.setRootPath(targetPath);
+            aiCodingSidebarProvider.setRootPath(targetPath);
 
             // ファイル一覧ペインにも同じパスを設定（存在する場合のみ）
             if (pathExists) {
-                fileDetailsProvider.setRootPath(targetPath);
+                aiCodingSidebarDetailsProvider.setRootPath(targetPath);
             }
 
             // 設定に保存するかユーザーに確認
@@ -491,7 +491,7 @@ export function activate(context: vscode.ExtensionContext) {
             );
 
             if (saveChoice === 'はい') {
-                const config = vscode.workspace.getConfiguration('fileListExtension');
+                const config = vscode.workspace.getConfiguration('aiCodingSidebar');
                 await config.update('defaultRelativePath', relativePathToSave, vscode.ConfigurationTarget.Workspace);
                 vscode.window.showInformationMessage('設定に保存しました');
             }
@@ -506,12 +506,12 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // 設定を開くコマンドを登録
-    const openSettingsCommand = vscode.commands.registerCommand('fileList.openSettings', async () => {
-        await vscode.commands.executeCommand('workbench.action.openSettings', 'fileListExtension');
+    const openSettingsCommand = vscode.commands.registerCommand('aiCodingSidebar.openSettings', async () => {
+        await vscode.commands.executeCommand('workbench.action.openSettings', 'aiCodingSidebar');
     });
 
     // ワークスペース設定コマンドを登録
-    const setupWorkspaceCommand = vscode.commands.registerCommand('fileList.setupWorkspace', async () => {
+    const setupWorkspaceCommand = vscode.commands.registerCommand('aiCodingSidebar.setupWorkspace', async () => {
         if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
             vscode.window.showErrorMessage('ワークスペースが開かれていません');
             return;
@@ -560,31 +560,31 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // 個別の設定コマンドを登録
-    const openUserSettingsCommand = vscode.commands.registerCommand('fileList.openUserSettings', async () => {
+    const openUserSettingsCommand = vscode.commands.registerCommand('aiCodingSidebar.openUserSettings', async () => {
         try {
-            // ユーザ設定を開き、fileListExtensionでフィルタする
+            // ユーザ設定を開き、aiCodingSidebarでフィルタする
             await vscode.commands.executeCommand(
                 'workbench.action.openSettings',
-                'fileListExtension'
+                'aiCodingSidebar'
             );
         } catch (error) {
             vscode.window.showErrorMessage('ユーザ設定を開けませんでした');
         }
     });
 
-    const openWorkspaceSettingsCommand = vscode.commands.registerCommand('fileList.openWorkspaceSettings', async () => {
+    const openWorkspaceSettingsCommand = vscode.commands.registerCommand('aiCodingSidebar.openWorkspaceSettings', async () => {
         try {
-            // ワークスペース設定を開き、fileListExtensionでフィルタする
+            // ワークスペース設定を開き、aiCodingSidebarでフィルタする
             await vscode.commands.executeCommand(
                 'workbench.action.openWorkspaceSettings',
-                'fileListExtension'
+                'aiCodingSidebar'
             );
         } catch (error) {
             vscode.window.showErrorMessage('ワークスペース設定を開けませんでした');
         }
     });
 
-    const setupTemplateCommand = vscode.commands.registerCommand('fileList.setupTemplate', async () => {
+    const setupTemplateCommand = vscode.commands.registerCommand('aiCodingSidebar.setupTemplate', async () => {
         if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
             vscode.window.showErrorMessage('ワークスペースが開かれていません');
             return;
@@ -594,7 +594,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // Gitファイルを開くコマンドを登録
-    const openGitFileCommand = vscode.commands.registerCommand('fileList.openGitFile', async (item: GitFileItem) => {
+    const openGitFileCommand = vscode.commands.registerCommand('aiCodingSidebar.openGitFile', async (item: GitFileItem) => {
         if (item && item.filePath) {
             const document = await vscode.workspace.openTextDocument(item.filePath);
             await vscode.window.showTextDocument(document);
@@ -602,19 +602,19 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // Git差分を表示するコマンドを登録
-    const showGitDiffCommand = vscode.commands.registerCommand('fileList.showGitDiff', async (item: GitFileItem) => {
+    const showGitDiffCommand = vscode.commands.registerCommand('aiCodingSidebar.showGitDiff', async (item: GitFileItem) => {
         if (item && item.filePath) {
             await gitChangesProvider.showDiff(item);
         }
     });
 
     // Git変更を更新するコマンドを登録
-    const refreshGitChangesCommand = vscode.commands.registerCommand('fileList.refreshGitChanges', () => {
+    const refreshGitChangesCommand = vscode.commands.registerCommand('aiCodingSidebar.refreshGitChanges', () => {
         gitChangesProvider.refresh();
     });
 
     // markdownファイルを作成するコマンドを登録
-    const createMarkdownFileCommand = vscode.commands.registerCommand('fileList.createMarkdownFile', async (item?: FileItem) => {
+    const createMarkdownFileCommand = vscode.commands.registerCommand('aiCodingSidebar.createMarkdownFile', async (item?: FileItem) => {
         let targetPath: string;
 
         // 優先順位に従って作成先を決定
@@ -628,7 +628,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
         // 2. ファイル一覧ペインで現在開いているフォルダ（選択状態に関わらず常に使用）
         else {
-            const currentPath = fileDetailsProvider.getCurrentPath();
+            const currentPath = aiCodingSidebarDetailsProvider.getCurrentPath();
             if (!currentPath) {
                 vscode.window.showErrorMessage('ファイル一覧ペインでフォルダが開かれていません');
                 return;
@@ -663,7 +663,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (result.success) {
                 // ビューを更新
-                fileDetailsProvider.refresh();
+                aiCodingSidebarDetailsProvider.refresh();
                 workspaceExplorerProvider.refresh();
 
                 // 作成したファイルを開く
@@ -680,14 +680,14 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // 任意のファイルを作成するコマンドを登録
-    const createFileCommand = vscode.commands.registerCommand('fileList.createFile', async (item?: FileItem) => {
+    const createFileCommand = vscode.commands.registerCommand('aiCodingSidebar.createFile', async (item?: FileItem) => {
         let targetDirectory: string | undefined;
 
         if (item) {
             targetDirectory = item.isDirectory ? item.filePath : path.dirname(item.filePath);
         } else {
-            targetDirectory = fileDetailsProvider.getCurrentPath()
-                || fileListProvider.getRootPath()
+            targetDirectory = aiCodingSidebarDetailsProvider.getCurrentPath()
+                || aiCodingSidebarProvider.getRootPath()
                 || vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
         }
 
@@ -744,8 +744,8 @@ export function activate(context: vscode.ExtensionContext) {
             const result = await fileOperationService.createFile(newFilePath);
 
             if (result.success) {
-                fileDetailsProvider.refresh();
-                fileListProvider.refresh();
+                aiCodingSidebarDetailsProvider.refresh();
+                aiCodingSidebarProvider.refresh();
                 workspaceExplorerProvider.refresh();
 
                 const document = await vscode.workspace.openTextDocument(newFilePath);
@@ -761,7 +761,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // フォルダを作成するコマンドを登録
-    const createFolderCommand = vscode.commands.registerCommand('fileList.createFolder', async (item?: FileItem) => {
+    const createFolderCommand = vscode.commands.registerCommand('aiCodingSidebar.createFolder', async (item?: FileItem) => {
         let targetPath: string;
 
         // 優先順位に従って作成先を決定
@@ -775,7 +775,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
         // 2. ファイル一覧ペインで現在開いているフォルダ（選択状態に関わらず常に使用）
         else {
-            const currentPath = fileDetailsProvider.getCurrentPath();
+            const currentPath = aiCodingSidebarDetailsProvider.getCurrentPath();
             if (!currentPath) {
                 vscode.window.showErrorMessage('ファイル一覧ペインでフォルダが開かれていません');
                 return;
@@ -817,8 +817,8 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (result.success) {
                 // ビューを更新
-                fileDetailsProvider.refresh();
-                fileListProvider.refresh();
+                aiCodingSidebarDetailsProvider.refresh();
+                aiCodingSidebarProvider.refresh();
                 workspaceExplorerProvider.refresh();
 
                 vscode.window.showInformationMessage(`フォルダ "${trimmedFolderName}" を作成しました`);
@@ -831,7 +831,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // リネームコマンドを登録
-    const renameCommand = vscode.commands.registerCommand('fileList.rename', async (item: FileItem) => {
+    const renameCommand = vscode.commands.registerCommand('aiCodingSidebar.rename', async (item: FileItem) => {
         if (!item) {
             vscode.window.showErrorMessage('項目が選択されていません');
             return;
@@ -872,7 +872,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (result.success) {
                 // ビューを更新
-                fileDetailsProvider.refresh();
+                aiCodingSidebarDetailsProvider.refresh();
                 workspaceExplorerProvider.refresh();
 
                 vscode.window.showInformationMessage(`${oldName} を ${newName} に変更しました`);
@@ -885,7 +885,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // 削除コマンドを登録
-    const deleteCommand = vscode.commands.registerCommand('fileList.delete', async (item: FileItem) => {
+    const deleteCommand = vscode.commands.registerCommand('aiCodingSidebar.delete', async (item: FileItem) => {
         if (!item) {
             vscode.window.showErrorMessage('項目が選択されていません');
             return;
@@ -914,33 +914,33 @@ export function activate(context: vscode.ExtensionContext) {
                 let treeUpdated = false;
 
                 if (item.isDirectory) {
-                    const rootPath = fileListProvider.getRootPath();
+                    const rootPath = aiCodingSidebarProvider.getRootPath();
                     if (rootPath) {
                         if (item.filePath === rootPath) {
-                            fileListProvider.resetActiveFolder();
+                            aiCodingSidebarProvider.resetActiveFolder();
                             treeUpdated = true;
                         } else {
                             const parentPath = path.dirname(item.filePath);
                             if (parentPath && parentPath.startsWith(rootPath) && fs.existsSync(parentPath)) {
-                                fileListProvider.setActiveFolder(parentPath, true);
+                                aiCodingSidebarProvider.setActiveFolder(parentPath, true);
                                 treeUpdated = true;
                             } else {
-                                fileListProvider.resetActiveFolder();
+                                aiCodingSidebarProvider.resetActiveFolder();
                                 treeUpdated = true;
                             }
                         }
                     } else {
-                        fileListProvider.resetActiveFolder();
+                        aiCodingSidebarProvider.resetActiveFolder();
                         treeUpdated = true;
                     }
                 }
 
                 if (!treeUpdated) {
-                    fileListProvider.refresh();
+                    aiCodingSidebarProvider.refresh();
                 }
 
                 // ビューを更新
-                fileDetailsProvider.refresh();
+                aiCodingSidebarDetailsProvider.refresh();
                 workspaceExplorerProvider.refresh();
 
                 vscode.window.showInformationMessage(`${itemType} "${itemName}" を削除しました`);
@@ -953,7 +953,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // フォルダを追加コマンドを登録（フォルダツリーview用）
-    const addFolderCommand = vscode.commands.registerCommand('fileList.addFolder', async (item?: FileItem) => {
+    const addFolderCommand = vscode.commands.registerCommand('aiCodingSidebar.addFolder', async (item?: FileItem) => {
         let targetPath: string;
 
         // コンテキストメニューから呼ばれた場合
@@ -965,7 +965,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
         } else {
             // フォルダツリーviewで現在選択されているフォルダまたはルートフォルダを使用
-            const currentPath = fileListProvider.getRootPath();
+            const currentPath = aiCodingSidebarProvider.getRootPath();
             if (!currentPath) {
                 vscode.window.showErrorMessage('フォルダが開かれていません');
                 return;
@@ -1007,25 +1007,25 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showInformationMessage(`フォルダ "${trimmedFolderName}" を作成しました`);
 
             // ビューを更新
-            fileDetailsProvider.refresh();
-            fileListProvider.refresh();
+            aiCodingSidebarDetailsProvider.refresh();
+            aiCodingSidebarProvider.refresh();
         } catch (error) {
             vscode.window.showErrorMessage(`フォルダの作成に失敗しました: ${error}`);
         }
     });
 
     // フォルダ削除コマンドを登録（フォルダツリーview用）
-    const deleteFolderCommand = vscode.commands.registerCommand('fileList.deleteFolder', async (item?: FileItem) => {
+    const deleteFolderCommand = vscode.commands.registerCommand('aiCodingSidebar.deleteFolder', async (item?: FileItem) => {
         if (!item || !item.isDirectory) {
             vscode.window.showErrorMessage('フォルダが選択されていません');
             return;
         }
 
-        await vscode.commands.executeCommand('fileList.delete', item);
+        await vscode.commands.executeCommand('aiCodingSidebar.delete', item);
     });
 
     // 相対パスをコピーコマンドを登録
-    const copyRelativePathCommand = vscode.commands.registerCommand('fileList.copyRelativePath', async (item?: FileItem | vscode.Uri) => {
+    const copyRelativePathCommand = vscode.commands.registerCommand('aiCodingSidebar.copyRelativePath', async (item?: FileItem | vscode.Uri) => {
         if (!item) {
             vscode.window.showErrorMessage('ファイルまたはフォルダが選択されていません');
             return;
@@ -1051,7 +1051,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // コピーコマンドを登録(workspaceExplorer用)
-    const copyCommand = vscode.commands.registerCommand('fileList.copy', async (item?: FileItem, items?: FileItem[]) => {
+    const copyCommand = vscode.commands.registerCommand('aiCodingSidebar.copy', async (item?: FileItem, items?: FileItem[]) => {
         // 複数選択時はitemsを優先、単一選択時はitemを使用
         const selectedItems = items && items.length > 0 ? items : (item ? [item] : []);
 
@@ -1076,7 +1076,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // 切り取りコマンドを登録(workspaceExplorer用)
-    const cutCommand = vscode.commands.registerCommand('fileList.cut', async (item?: FileItem, items?: FileItem[]) => {
+    const cutCommand = vscode.commands.registerCommand('aiCodingSidebar.cut', async (item?: FileItem, items?: FileItem[]) => {
         // 複数選択時はitemsを優先、単一選択時はitemを使用
         const selectedItems = items && items.length > 0 ? items : (item ? [item] : []);
 
@@ -1101,7 +1101,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // 貼り付けコマンドを登録(workspaceExplorer用)
-    const pasteCommand = vscode.commands.registerCommand('fileList.paste', async (item?: FileItem) => {
+    const pasteCommand = vscode.commands.registerCommand('aiCodingSidebar.paste', async (item?: FileItem) => {
         const clipboardManager = explorerManager.getClipboardManager();
 
         if (!clipboardManager.hasData()) {
@@ -1139,7 +1139,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // 検索コマンド
-    const searchInWorkspaceCommand = vscode.commands.registerCommand('fileList.searchInWorkspace', async () => {
+    const searchInWorkspaceCommand = vscode.commands.registerCommand('aiCodingSidebar.searchInWorkspace', async () => {
         if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
             vscode.window.showErrorMessage('ワークスペースが開かれていません');
             return;
@@ -1209,8 +1209,8 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push({
         dispose: () => {
             workspaceExplorerProvider.dispose();
-            fileListProvider.dispose();
-            fileDetailsProvider.dispose();
+            aiCodingSidebarProvider.dispose();
+            aiCodingSidebarDetailsProvider.dispose();
         }
     });
 }
@@ -1315,7 +1315,7 @@ interface FileInfo {
 }
 
 // TreeDataProvider実装（フォルダのみ表示）
-class FileListProvider implements vscode.TreeDataProvider<FileItem> {
+class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
     private _onDidChangeTreeData: vscode.EventEmitter<FileItem | undefined | null | void> = new vscode.EventEmitter<FileItem | undefined | null | void>();
     readonly onDidChangeTreeData: vscode.Event<FileItem | undefined | null | void> = this._onDidChangeTreeData.event;
 
@@ -1558,7 +1558,7 @@ class FileListProvider implements vscode.TreeDataProvider<FileItem> {
 }
 
 // ファイル詳細用TreeDataProvider実装（フォルダツリーと同じ機能）
-class FileDetailsProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDragAndDropController<FileItem> {
+class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDragAndDropController<FileItem> {
     private _onDidChangeTreeData: vscode.EventEmitter<FileItem | undefined | null | void> = new vscode.EventEmitter<FileItem | undefined | null | void>();
     readonly onDidChangeTreeData: vscode.Event<FileItem | undefined | null | void> = this._onDidChangeTreeData.event;
 
@@ -1569,7 +1569,7 @@ class FileDetailsProvider implements vscode.TreeDataProvider<FileItem>, vscode.T
     private selectedItem: FileItem | undefined;
     private itemCache: Map<string, FileItem[]> = new Map();  // パスをキーとしたFileItemのキャッシュ
 
-    constructor(private readonly folderTreeProvider: FileListProvider) {
+    constructor(private readonly folderTreeProvider: AiCodingSidebarProvider) {
         // プロジェクトルートパスを取得
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
             this.projectRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
@@ -1685,15 +1685,15 @@ class FileDetailsProvider implements vscode.TreeDataProvider<FileItem>, vscode.T
     }
 
     // ドラッグ&ドロップのサポート
-    readonly dragMimeTypes = ['application/vnd.code.tree.fileListDetails'];
-    readonly dropMimeTypes = ['application/vnd.code.tree.fileListDetails', 'text/uri-list'];
+    readonly dragMimeTypes = ['application/vnd.code.tree.aiCodingSidebarDetails'];
+    readonly dropMimeTypes = ['application/vnd.code.tree.aiCodingSidebarDetails', 'text/uri-list'];
 
     handleDrag(source: readonly FileItem[], dataTransfer: vscode.DataTransfer, token: vscode.CancellationToken): void | Thenable<void> {
-        dataTransfer.set('application/vnd.code.tree.fileListDetails', new vscode.DataTransferItem(source));
+        dataTransfer.set('application/vnd.code.tree.aiCodingSidebarDetails', new vscode.DataTransferItem(source));
     }
 
     handleDrop(target: FileItem | undefined, dataTransfer: vscode.DataTransfer, token: vscode.CancellationToken): void | Thenable<void> {
-        const transferItem = dataTransfer.get('application/vnd.code.tree.fileListDetails');
+        const transferItem = dataTransfer.get('application/vnd.code.tree.aiCodingSidebarDetails');
         if (!transferItem) {
             return;
         }
@@ -2346,7 +2346,7 @@ class GitFileItem extends vscode.TreeItem {
         // ディレクトリでない場合のみクリックで差分を表示
         if (!isDirectory) {
             this.command = {
-                command: 'fileList.showGitDiff',
+                command: 'aiCodingSidebar.showGitDiff',
                 title: 'Show Git Diff',
                 arguments: [this]
             };
@@ -2433,14 +2433,14 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem>, vs
     private setupConfigurationWatcher(): void {
         this.configurationProvider.onConfigurationChanged((e) => {
             // 表示に影響する設定が変更された場合は更新
-            if (e.affectsConfiguration('fileListExtension.sortBy') ||
-                e.affectsConfiguration('fileListExtension.sortOrder') ||
-                e.affectsConfiguration('fileListExtension.showFileIcons')) {
+            if (e.affectsConfiguration('aiCodingSidebar.sortBy') ||
+                e.affectsConfiguration('aiCodingSidebar.sortOrder') ||
+                e.affectsConfiguration('aiCodingSidebar.showFileIcons')) {
                 this.refresh();
             }
 
             // autoRefresh設定が変更された場合はファイルウォッチャーを再設定
-            if (e.affectsConfiguration('fileListExtension.autoRefresh')) {
+            if (e.affectsConfiguration('aiCodingSidebar.autoRefresh')) {
                 this.setupFileWatcher();
             }
         });
@@ -2822,12 +2822,12 @@ class WorkspaceSettingsProvider implements vscode.TreeDataProvider<WorkspaceSett
                     [
                         new WorkspaceSettingItem(
                             'ユーザ設定を開く',
-                            'File List Extensionのユーザ設定を開く',
+                            'AI Coding Sidebarのユーザ設定を開く',
                             {
-                                command: 'fileList.openUserSettings',
+                                command: 'aiCodingSidebar.openUserSettings',
                                 title: 'ユーザ設定を開く'
                             },
-                            new vscode.ThemeIcon('settings')
+                            new vscode.ThemeIcon('settings-gear')
                         )
                     ],
                     vscode.TreeItemCollapsibleState.Collapsed
@@ -2841,9 +2841,9 @@ class WorkspaceSettingsProvider implements vscode.TreeDataProvider<WorkspaceSett
                     [
                         new WorkspaceSettingItem(
                             'ワークスペース設定を開く',
-                            'File List Extensionのワークスペース設定を開く',
+                            'AI Coding Sidebarのワークスペース設定を開く',
                             {
-                                command: 'fileList.openWorkspaceSettings',
+                                command: 'aiCodingSidebar.openWorkspaceSettings',
                                 title: 'ワークスペース設定を開く'
                             },
                             new vscode.ThemeIcon('settings-gear')
@@ -2852,7 +2852,7 @@ class WorkspaceSettingsProvider implements vscode.TreeDataProvider<WorkspaceSett
                             'テンプレートをカスタマイズ',
                             'ファイル作成時のテンプレートをカスタマイズ',
                             {
-                                command: 'fileList.setupTemplate',
+                                command: 'aiCodingSidebar.setupTemplate',
                                 title: 'テンプレートをカスタマイズ'
                             },
                             new vscode.ThemeIcon('file-text')

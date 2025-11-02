@@ -1,7 +1,7 @@
 # VSCode AI Coding Sidebar
 
 ## プロジェクト概要
-VSCode拡張機能として、ディレクトリ内のファイルを一覧表示し、Git変更ファイルの管理機能を提供します。
+AIコーディングツール（Claude Code、Cursor、GitHub Copilot等）との連携を強化するVSCode拡張機能です。ワークスペース内のファイル・フォルダの効率的な閲覧・管理、Git変更ファイルの追跡など、AIとのコーディング作業を支援する機能を提供します。
 
 ## 技術スタック
 - TypeScript

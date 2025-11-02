@@ -1,7 +1,7 @@
 {
   "name": "ai-coding-sidebar",
   "displayName": "AI Coding Sidebar",
-  "description": "指定したディレクトリ内のファイルを一覧表示するVSCode拡張機能",
+  "description": "AIコーディングツールとの連携を強化するサイドバー拡張機能。ファイルとフォルダを効率的に閲覧・管理し、AIとのコーディング作業をスムーズに。",
   "version": "0.2.0",
   "publisher": "nacn",
   "icon": "images/nacn.png",

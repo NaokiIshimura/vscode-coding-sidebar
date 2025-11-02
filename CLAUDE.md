@@ -1,7 +1,7 @@
-# VSCode File List Extension
+# VSCode AI Coding Sidebar
 
 ## プロジェクト概要
-VSCode拡張機能として、ディレクトリ内のファイルを一覧表示し、Git変更ファイルの管理機能を提供します。
+AIコーディングツール（Claude Code、Cursor、GitHub Copilot等）との連携を強化するVSCode拡張機能です。ワークスペース内のファイル・フォルダの効率的な閲覧・管理、Git変更ファイルの追跡など、AIとのコーディング作業を支援する機能を提供します。
 
 ## 技術スタック
 - TypeScript
@@ -71,7 +71,7 @@ npm run compile
 ### 3. デバッグ時の動作
 - 新しいVSCodeウィンドウ（Extension Development Host）が開く
 - このウィンドウで拡張機能がロードされた状態になる
-- アクティビティバーに「File List」アイコンが表示される
+- アクティビティバーに「AI Coding Sidebar」アイコンが表示される
 
 ### 4. デバッグ機能
 - **ブレークポイント**: `src/extension.ts`にブレークポイントを設定可能

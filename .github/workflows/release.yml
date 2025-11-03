@@ -99,7 +99,12 @@ jobs:
 
       - name: Publish to VSCode Marketplace
         if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+        continue-on-error: true
         run: |
-          vsce publish --pat ${{ secrets.VSCE_PAT }} --packagePath ai-coding-sidebar-${{ env.VERSION }}.vsix
+          if [ -z "$VSCE_PAT" ]; then
+            echo "VSCE_PAT is not set. Skipping VSCode Marketplace publishing."
+            exit 0
+          fi
+          vsce publish --pat $VSCE_PAT ai-coding-sidebar-${{ env.VERSION }}.vsix
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}

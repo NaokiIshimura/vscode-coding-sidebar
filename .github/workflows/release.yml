@@ -96,3 +96,10 @@ jobs:
             詳細な変更内容は [CHANGELOG.md](https://github.com/NaokiIshimura/vscode-panel/blob/${{ env.TAG }}/CHANGELOG.md) をご覧ください。
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to VSCode Marketplace
+        if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+        run: |
+          vsce publish --pat ${{ secrets.VSCE_PAT }} --packagePath ai-coding-sidebar-${{ env.VERSION }}.vsix
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}

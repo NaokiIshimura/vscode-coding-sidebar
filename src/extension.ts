@@ -14,6 +14,20 @@ import { DragDropHandler } from './services/DragDropHandler';
 import { SearchService } from './services/SearchService';
 import { ConfigurationProvider } from './services/ConfigurationProvider';
 
+// デフォルトテンプレート内容
+const DEFAULT_TEMPLATE = `created: {{datetime}}
+
+file: {{filename}}
+
+---
+
+## overview
+
+## tasks
+
+
+`;
+
 // テンプレートを読み込んで変数を置換する関数
 function loadTemplate(context: vscode.ExtensionContext, variables: { [key: string]: string }): string {
     try {
@@ -49,7 +63,12 @@ function loadTemplate(context: vscode.ExtensionContext, variables: { [key: strin
     }
 
     // テンプレートが見つからない場合のデフォルト
-    return `作成日時: ${variables.datetime}\n\n---\n\n\n`;
+    let content = DEFAULT_TEMPLATE;
+    for (const [key, value] of Object.entries(variables)) {
+        const regex = new RegExp(`{{${key}}}`, 'g');
+        content = content.replace(regex, value);
+    }
+    return content;
 }
 
 // settings.jsonを設定するヘルパー関数
@@ -105,25 +124,9 @@ async function setupTemplate(workspaceRoot: string): Promise<void> {
             fs.mkdirSync(templatesDir, { recursive: true });
         }
 
-        // デフォルトテンプレート内容
-        const defaultTemplate = `作成日時: {{datetime}}
-
----
-
-# {{filename}}
-
-## 概要
-
-
-## 詳細
-
-
-## メモ
-`;
-
         // テンプレートファイルが存在しない場合のみ作成
         if (!fs.existsSync(templatePath)) {
-            fs.writeFileSync(templatePath, defaultTemplate, 'utf8');
+            fs.writeFileSync(templatePath, DEFAULT_TEMPLATE, 'utf8');
         }
 
         // ファイルを開く

@@ -5,6 +5,15 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.2.5] - 2025-01-11
+
+### 変更
+- **UIの英語化**: すべてのユーザー向けメッセージを日本語から英語に変更
+  - 情報メッセージ、エラーメッセージ、警告メッセージ
+  - 入力プロンプト、クイックピック、確認ダイアログ
+  - ツールチップ、ステータスバー、設定項目のラベルと説明
+  - ビューのタイトル表示（Directory List, Markdown List, Explorer）
+
 ## [0.1.0] - 2025-01-11
 
 ### 追加
@@ -66,5 +75,6 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.2.5]: https://github.com/NaokiIshimura/vscode-panel/compare/v0.1.0...v0.2.5
 [0.1.0]: https://github.com/NaokiIshimura/vscode-panel/compare/v0.0.1...v0.1.0
 [0.0.1]: https://github.com/NaokiIshimura/vscode-panel/releases/tag/v0.0.1

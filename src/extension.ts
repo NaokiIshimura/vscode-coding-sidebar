@@ -16,12 +16,12 @@ import { ConfigurationProvider } from './services/ConfigurationProvider';
 
 // デフォルトテンプレート内容
 const DEFAULT_TEMPLATE = `created: {{datetime}}
-
 file: {{filename}}
 
 ---
 
 ## overview
+
 
 ## tasks
 

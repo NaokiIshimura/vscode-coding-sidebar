@@ -1,79 +1,79 @@
 # Change Log
 
-このプロジェクトのすべての重要な変更は、このファイルに記録されます。
+All notable changes to this project will be documented in this file.
 
-フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
-このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.2.5] - 2025-01-11
 
-### 変更
-- **UIの英語化**: すべてのユーザー向けメッセージを日本語から英語に変更
-  - 情報メッセージ、エラーメッセージ、警告メッセージ
-  - 入力プロンプト、クイックピック、確認ダイアログ
-  - ツールチップ、ステータスバー、設定項目のラベルと説明
-  - ビューのタイトル表示（Directory List, Markdown List, Explorer）
+### Changed
+- **UI Internationalization**: Converted all user-facing messages from Japanese to English
+  - Information, error, and warning messages
+  - Input prompts, quick picks, and confirmation dialogs
+  - Tooltips, status bar, and settings labels
+  - View titles (Directory List, Markdown List, Explorer)
 
 ## [0.1.0] - 2025-01-11
 
-### 追加
-- **ワークスペースエクスプローラー**: プロジェクト全体をツリー形式で表示する新しいビュー
-- **ファイルアイコン表示**: ファイル種別に応じた50種類以上のアイコンを自動表示
-  - TypeScript、JavaScript、JSON、Markdown、CSS、HTML、画像ファイルなど主要な形式をサポート
-  - `fileListExtension.showFileIcons`設定でアイコンの表示/非表示を切り替え可能
-- **ソート機能**: 名前、種類、サイズ、更新日時でソート可能
-  - `fileListExtension.sortBy`設定でソート基準を選択
-  - `fileListExtension.sortOrder`設定で昇順/降順を選択
-- **隠しファイル表示**: 隠しファイル・フォルダの表示/非表示を切り替え
-  - `fileListExtension.showHidden`設定で制御
-- **自動更新設定**: ファイルシステム変更時の自動更新を有効/無効化
-  - `fileListExtension.autoRefresh`設定で制御
-  - パフォーマンス最適化のため、大規模プロジェクトでは無効化可能
-- **ファイル操作機能**:
-  - ドラッグ&ドロップによるファイル・フォルダの移動
-  - コピー、切り取り、貼り付け機能（Ctrl+C/X/V、Cmd+C/X/Vのキーボードショートカット対応）
-  - 名前の変更（F2キー対応）
-  - 削除機能（Deleteキー対応）
-- **検索機能**: ワークスペース内のファイルを検索
-- **Git変更ファイル**: 変更されたファイルを一覧表示し、差分を確認
-  - ディレクトリ配下のファイルをグループ化して表示
+### Added
+- **Workspace Explorer**: New view displaying the entire project in tree format
+- **File Icon Display**: Automatically displays 50+ icons based on file type
+  - Supports major formats: TypeScript, JavaScript, JSON, Markdown, CSS, HTML, image files, etc.
+  - Toggle icon display with `fileListExtension.showFileIcons` setting
+- **Sort Functionality**: Sort by name, type, size, or modified time
+  - Select sort criteria with `fileListExtension.sortBy` setting
+  - Choose ascending/descending order with `fileListExtension.sortOrder` setting
+- **Hidden Files Display**: Toggle display of hidden files and folders
+  - Controlled by `fileListExtension.showHidden` setting
+- **Auto-refresh Settings**: Enable/disable auto-refresh on file system changes
+  - Controlled by `fileListExtension.autoRefresh` setting
+  - Can be disabled for performance optimization in large projects
+- **File Operations**:
+  - Move files and folders via drag & drop
+  - Copy, cut, paste functionality (keyboard shortcuts: Ctrl+C/X/V, Cmd+C/X/V)
+  - Rename (F2 key support)
+  - Delete (Delete key support)
+- **Search Functionality**: Search files within workspace
+- **Git Changed Files**: List modified files and review diffs
+  - Files grouped by directory
 
-### 改善
-- **パフォーマンス最適化**: キャッシュ機能の実装
-  - FileListProvider、FileDetailsProvider、WorkspaceExplorerProviderにキャッシュを追加
-  - 不要なディレクトリ読み取りを削減
-  - 大規模プロジェクトでのパフォーマンス向上
-- **設定管理**: ConfigurationProviderサービスの実装
-  - すべての設定を一元管理
-  - 設定変更の監視機能
-- **サービス指向アーキテクチャ**:
-  - FileOperationService: ファイル操作を一元管理
-  - SearchService: 検索機能を提供
-  - DragDropHandler: ドラッグ&ドロップ処理を管理
+### Improved
+- **Performance Optimization**: Implemented caching functionality
+  - Added caching to FileListProvider, FileDetailsProvider, and WorkspaceExplorerProvider
+  - Reduced unnecessary directory reads
+  - Improved performance for large projects
+- **Configuration Management**: Implemented ConfigurationProvider service
+  - Centralized management of all settings
+  - Settings change monitoring functionality
+- **Service-Oriented Architecture**:
+  - FileOperationService: Centralized file operations management
+  - SearchService: Provides search functionality
+  - DragDropHandler: Manages drag & drop processing
 
-### 変更
-- **ドキュメント**: README.mdを大幅に更新
-  - 機能をカテゴリ別に整理（表示機能、ファイル操作、カスタマイズ機能）
-  - 詳細な設定セクションを追加
-  - すべての設定項目の説明とデフォルト値を記載
-  - 設定例のJSONコードを追加
+### Changed
+- **Documentation**: Major update to README.md
+  - Organized features by category (display features, file operations, customization features)
+  - Added detailed settings section
+  - Documented all setting items with descriptions and default values
+  - Added JSON code examples for settings
 
-### 修正
-- ファイル名のソート時の`modifiedDate`プロパティの参照エラーを修正（`modified`に統一）
+### Fixed
+- Fixed `modifiedDate` property reference error during file name sorting (unified to `modified`)
 
 ## [0.0.1] - 2024-09-27
 
-### 追加
-- 初回リリース
-- **フォルダツリーペイン**: フォルダのみを表示し、階層構造をナビゲート
-- **ファイル一覧ペイン**: 選択したフォルダ内のファイルとサブフォルダを表示
-- **相対パス設定**: ワークスペースルートからの相対パスでデフォルトフォルダを指定
-- **親フォルダへ移動**: ファイル一覧ペインから上位フォルダへ簡単移動
-- **相対パスコピー**: ファイルを右クリックしてワークスペースからの相対パスをクリップボードにコピー
-- **ファイル・フォルダ作成**: 新しいファイルやフォルダを簡単に作成
-- **テンプレート機能**: `templates/file.md`でファイル作成時の初期内容をカスタマイズ
-- **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
-- **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
+### Added
+- Initial release
+- **Folder Tree Pane**: Display folders only and navigate hierarchical structure
+- **File List Pane**: Display files and subfolders within selected folder
+- **Relative Path Settings**: Specify default folder with relative path from workspace root
+- **Navigate to Parent Folder**: Easily move to upper folder from file list pane
+- **Copy Relative Path**: Right-click file to copy relative path from workspace to clipboard
+- **Create Files and Folders**: Easily create new files and folders
+- **Template Feature**: Customize initial file content with `templates/file.md`
+- **Workspace Settings**: Easily create and edit `.vscode/settings.json`
+- **Automated Build & Release**: Automated build and release via GitHub Actions
 
 [0.2.5]: https://github.com/NaokiIshimura/vscode-panel/compare/v0.1.0...v0.2.5
 [0.1.0]: https://github.com/NaokiIshimura/vscode-panel/compare/v0.0.1...v0.1.0

@@ -1,8 +1,8 @@
 {
   "name": "ai-coding-sidebar",
   "displayName": "AI Coding Sidebar",
-  "description": "AIコーディングツールとの連携を強化するサイドバー拡張機能。ファイルとフォルダを効率的に閲覧・管理し、AIとのコーディング作業をスムーズに。",
-  "version": "0.2.3",
+  "description": "A sidebar extension that strengthens integration with AI coding tools.Browse and manage files and folders efficiently to keep coding with AI smooth.",
+  "version": "0.2.4",
   "publisher": "nacn",
   "icon": "images/icon.png",
   "repository": {

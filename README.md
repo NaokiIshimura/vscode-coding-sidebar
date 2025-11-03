@@ -1,6 +1,7 @@
 # AI Coding Sidebar
 
-AI Coding Sidebar is a VS Code extension that streamlines workflows when you work with AI coding tools such as Claude Code and the Codex CLI.
+A sidebar extension that strengthens integration with AI coding tools.
+Browse and manage files and folders efficiently to keep coding with AI smooth.
 
 ## Features
 

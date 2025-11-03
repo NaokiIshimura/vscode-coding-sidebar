@@ -2,7 +2,7 @@
   "name": "ai-coding-sidebar",
   "displayName": "AI Coding Sidebar",
   "description": "AIコーディングツールとの連携を強化するサイドバー拡張機能。ファイルとフォルダを効率的に閲覧・管理し、AIとのコーディング作業をスムーズに。",
-  "version": "2.0.2",
+  "version": "0.2.3",
   "publisher": "nacn",
   "icon": "images/nacn.png",
   "repository": {
@@ -23,124 +23,124 @@
     "commands": [
       {
         "command": "aiCodingSidebar.refresh",
-        "title": "更新",
+        "title": "Refresh",
         "icon": "$(refresh)"
       },
       {
         "command": "aiCodingSidebar.showInPanel",
-        "title": "ファイル一覧に表示",
+        "title": "Show in File List",
         "icon": "$(list-tree)"
       },
       {
         "command": "aiCodingSidebar.openFolder",
-        "title": "フォルダを開く"
+        "title": "Open Folder"
       },
       {
         "command": "aiCodingSidebar.goToParent",
-        "title": "親フォルダへ移動",
+        "title": "Go to Parent Folder",
         "icon": "$(arrow-up)"
       },
       {
         "command": "aiCodingSidebar.setRelativePath",
-        "title": "相対パスを設定",
+        "title": "Set Relative Path",
         "icon": "$(edit)"
       },
       {
         "command": "aiCodingSidebar.openSettings",
-        "title": "設定を開く",
+        "title": "Open Settings",
         "icon": "$(settings-gear)"
       },
       {
         "command": "aiCodingSidebar.openFolderTreeSettings",
-        "title": "フォルダツリー設定",
+        "title": "Folder Tree Settings",
         "icon": "$(settings-gear)"
       },
       {
         "command": "aiCodingSidebar.openUserSettings",
-        "title": "ユーザ設定を開く",
+        "title": "Open User Settings",
         "icon": "$(settings)"
       },
       {
         "command": "aiCodingSidebar.openWorkspaceSettings",
-        "title": "ワークスペース設定を開く",
+        "title": "Open Workspace Settings",
         "icon": "$(settings-gear)"
       },
       {
         "command": "aiCodingSidebar.setupTemplate",
-        "title": "テンプレートをカスタマイズ",
+        "title": "Customize Template",
         "icon": "$(file-text)"
       },
       {
         "command": "aiCodingSidebar.openGitFile",
-        "title": "Gitファイルを開く"
+        "title": "Open Git File"
       },
       {
         "command": "aiCodingSidebar.showGitDiff",
-        "title": "Git差分を表示"
+        "title": "Show Git Diff"
       },
       {
         "command": "aiCodingSidebar.refreshGitChanges",
-        "title": "Git変更を更新",
+        "title": "Refresh File Changes",
         "icon": "$(refresh)"
       },
       {
         "command": "aiCodingSidebar.createMarkdownFile",
-        "title": "markdownファイルを作成",
+        "title": "Create Markdown File",
         "icon": "$(new-file)"
       },
       {
         "command": "aiCodingSidebar.createFile",
-        "title": "ファイルを作成",
+        "title": "Create File",
         "icon": "$(new-file)"
       },
       {
         "command": "aiCodingSidebar.createFolder",
-        "title": "フォルダを作成",
+        "title": "Create Folder",
         "icon": "$(new-folder)"
       },
       {
         "command": "aiCodingSidebar.rename",
-        "title": "名前の変更...",
+        "title": "Rename...",
         "icon": "$(edit)"
       },
       {
         "command": "aiCodingSidebar.delete",
-        "title": "削除",
+        "title": "Delete",
         "icon": "$(trash)"
       },
       {
         "command": "aiCodingSidebar.addFolder",
-        "title": "フォルダを追加",
+        "title": "Add Folder",
         "icon": "$(new-folder)"
       },
       {
         "command": "aiCodingSidebar.deleteFolder",
-        "title": "フォルダを削除",
+        "title": "Delete Folder",
         "icon": "$(trash)"
       },
       {
         "command": "aiCodingSidebar.copyRelativePath",
-        "title": "相対パスをコピー",
+        "title": "Copy Relative Path",
         "icon": "$(copy)"
       },
       {
         "command": "aiCodingSidebar.copy",
-        "title": "コピー",
+        "title": "Copy",
         "icon": "$(copy)"
       },
       {
         "command": "aiCodingSidebar.cut",
-        "title": "切り取り",
+        "title": "Cut",
         "icon": "$(scissors)"
       },
       {
         "command": "aiCodingSidebar.paste",
-        "title": "貼り付け",
+        "title": "Paste",
         "icon": "$(clippy)"
       },
       {
         "command": "aiCodingSidebar.searchInWorkspace",
-        "title": "ワークスペース内を検索",
+        "title": "Search in Workspace",
         "icon": "$(search)"
       }
     ],
@@ -148,24 +148,24 @@
       "aiCodingSidebarView": [
         {
           "id": "workspaceSettings",
-          "name": "設定",
+          "name": "Settings",
           "visibility": "collapsed"
         },
         {
           "id": "workspaceExplorer",
-          "name": "エクスプローラー"
+          "name": "Explorer"
         },
         {
           "id": "aiCodingSidebarExplorer",
-          "name": "フォルダツリー"
+          "name": "Dir List"
         },
         {
           "id": "aiCodingSidebarDetails",
-          "name": "ファイル一覧"
+          "name": "Markdown List"
         },
         {
           "id": "gitChanges",
-          "name": "Git変更ファイル"
+          "name": "File Changes"
         }
       ]
     },
@@ -204,11 +204,6 @@
           "command": "aiCodingSidebar.refresh",
           "when": "view == aiCodingSidebarDetails",
           "group": "navigation@3"
-        },
-        {
-          "command": "aiCodingSidebar.goToParent",
-          "when": "view == aiCodingSidebarDetails",
-          "group": "navigation@4"
         },
         {
           "command": "aiCodingSidebar.refreshGitChanges",
@@ -350,7 +345,7 @@
         "aiCodingSidebar.defaultRelativePath": {
           "type": "string",
           "default": "",
-          "description": "フォルダツリーのデフォルト相対パス"
+          "description": "Default relative path for the folder tree"
         },
         "aiCodingSidebar.sortBy": {
           "type": "string",
@@ -361,12 +356,12 @@
             "modified"
           ],
           "default": "name",
-          "description": "ファイルのソート基準",
+          "description": "Sort files by",
           "enumDescriptions": [
-            "名前でソート",
-            "種類でソート",
-            "サイズでソート",
-            "更新日時でソート"
+            "Sort by name",
+            "Sort by type",
+            "Sort by size",
+            "Sort by modified date"
           ]
         },
         "aiCodingSidebar.sortOrder": {
@@ -376,16 +371,16 @@
             "descending"
           ],
           "default": "ascending",
-          "description": "ソート順序",
+          "description": "Sort order",
           "enumDescriptions": [
-            "昇順",
-            "降順"
+            "Ascending",
+            "Descending"
           ]
         },
         "aiCodingSidebar.showHidden": {
           "type": "boolean",
           "default": false,
-          "description": "隠しファイル・フォルダを表示する"
+          "description": "Show hidden files and folders"
         },
         "aiCodingSidebar.viewMode": {
           "type": "string",
@@ -394,21 +389,21 @@
             "list"
           ],
           "default": "tree",
-          "description": "表示モード",
+          "description": "View mode",
           "enumDescriptions": [
-            "ツリー表示",
-            "リスト表示"
+            "Tree view",
+            "List view"
           ]
         },
         "aiCodingSidebar.autoRefresh": {
           "type": "boolean",
           "default": true,
-          "description": "ファイルシステム変更時に自動更新する"
+          "description": "Auto refresh on file system changes"
         },
         "aiCodingSidebar.showFileIcons": {
           "type": "boolean",
           "default": true,
-          "description": "ファイルアイコンを表示する"
+          "description": "Show file icons"
         }
       }
     }

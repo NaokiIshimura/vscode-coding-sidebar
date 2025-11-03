@@ -344,20 +344,6 @@ export function activate(context: vscode.ExtensionContext) {
     // ビューを有効化
     vscode.commands.executeCommand('setContext', 'aiCodingSidebarView:enabled', true);
 
-    // フォルダ選択コマンドを登録
-    const selectFolderCommand = vscode.commands.registerCommand('aiCodingSidebar.selectFolder', async () => {
-        const folderUri = await vscode.window.showOpenDialog({
-            canSelectFiles: false,
-            canSelectFolders: true,
-            canSelectMany: false,
-            openLabel: 'フォルダを選択'
-        });
-
-        if (folderUri && folderUri.length > 0) {
-            aiCodingSidebarProvider.setRootPath(folderUri[0].fsPath);
-        }
-    });
-
     // 更新コマンドを登録
     const refreshCommand = vscode.commands.registerCommand('aiCodingSidebar.refresh', () => {
         aiCodingSidebarProvider.refresh();
@@ -395,21 +381,6 @@ export function activate(context: vscode.ExtensionContext) {
             // フォルダツリーにパスが設定されていない場合は、ファイル一覧ペインの親フォルダへ移動
             aiCodingSidebarDetailsProvider.goToParentFolder();
         }
-    });
-
-    // フォルダ選択リセットコマンドを登録
-    const resetFolderSelectionCommand = vscode.commands.registerCommand('aiCodingSidebar.resetFolderSelection', async () => {
-        const rootPath = aiCodingSidebarProvider.getRootPath();
-
-        if (!rootPath) {
-            vscode.window.showInformationMessage('フォルダツリーのルートが設定されていません');
-            return;
-        }
-
-        aiCodingSidebarProvider.resetActiveFolder();
-        aiCodingSidebarDetailsProvider.setRootPath(rootPath);
-
-        vscode.window.showInformationMessage('フォルダ選択をリセットしました');
     });
 
     // 相対パス設定コマンドを登録
@@ -508,6 +479,11 @@ export function activate(context: vscode.ExtensionContext) {
     // 設定を開くコマンドを登録
     const openSettingsCommand = vscode.commands.registerCommand('aiCodingSidebar.openSettings', async () => {
         await vscode.commands.executeCommand('workbench.action.openSettings', 'aiCodingSidebar');
+    });
+
+    // フォルダツリー設定を開くコマンドを登録
+    const openFolderTreeSettingsCommand = vscode.commands.registerCommand('aiCodingSidebar.openFolderTreeSettings', async () => {
+        await vscode.commands.executeCommand('workbench.action.openSettings', 'aiCodingSidebar.defaultRelativePath');
     });
 
     // ワークスペース設定コマンドを登録
@@ -1203,7 +1179,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(selectFolderCommand, refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, resetFolderSelectionCommand, setRelativePathCommand, openSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addFolderCommand, deleteFolderCommand, copyRelativePathCommand, copyCommand, cutCommand, pasteCommand, searchInWorkspaceCommand);
+    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addFolderCommand, deleteFolderCommand, copyRelativePathCommand, copyCommand, cutCommand, pasteCommand, searchInWorkspaceCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({

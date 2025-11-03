@@ -2,7 +2,7 @@
   "name": "ai-coding-sidebar",
   "displayName": "AI Coding Sidebar",
   "description": "AIコーディングツールとの連携を強化するサイドバー拡張機能。ファイルとフォルダを効率的に閲覧・管理し、AIとのコーディング作業をスムーズに。",
-  "version": "0.2.1",
+  "version": "2.0.2",
   "publisher": "nacn",
   "icon": "images/nacn.png",
   "repository": {
@@ -21,11 +21,6 @@
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
-      {
-        "command": "aiCodingSidebar.selectFolder",
-        "title": "フォルダを選択",
-        "icon": "$(folder-opened)"
-      },
       {
         "command": "aiCodingSidebar.refresh",
         "title": "更新",
@@ -46,11 +41,6 @@
         "icon": "$(arrow-up)"
       },
       {
-        "command": "aiCodingSidebar.resetFolderSelection",
-        "title": "フォルダ選択をリセット",
-        "icon": "$(home)"
-      },
-      {
         "command": "aiCodingSidebar.setRelativePath",
         "title": "相対パスを設定",
         "icon": "$(edit)"
@@ -58,6 +48,11 @@
       {
         "command": "aiCodingSidebar.openSettings",
         "title": "設定を開く",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "aiCodingSidebar.openFolderTreeSettings",
+        "title": "フォルダツリー設定",
         "icon": "$(settings-gear)"
       },
       {
@@ -196,19 +191,9 @@
           "group": "navigation@2"
         },
         {
-          "command": "aiCodingSidebar.goToParent",
+          "command": "aiCodingSidebar.openFolderTreeSettings",
           "when": "view == aiCodingSidebarExplorer",
           "group": "navigation@3"
-        },
-        {
-          "command": "aiCodingSidebar.resetFolderSelection",
-          "when": "view == aiCodingSidebarExplorer",
-          "group": "navigation@4"
-        },
-        {
-          "command": "aiCodingSidebar.selectFolder",
-          "when": "view == aiCodingSidebarExplorer",
-          "group": "navigation@5"
         },
         {
           "command": "aiCodingSidebar.createMarkdownFile",

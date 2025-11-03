@@ -77,8 +77,8 @@ export enum SortField {
 }
 
 export enum SortOrder {
-    Ascending = 'asc',
-    Descending = 'desc'
+    Ascending = 'ascending',
+    Descending = 'descending'
 }
 
 export enum ViewMode {

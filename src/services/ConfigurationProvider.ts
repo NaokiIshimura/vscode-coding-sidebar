@@ -5,7 +5,7 @@ import { DisplayOptions, SortField, SortOrder, ViewMode } from '../types';
  * 設定プロバイダー
  */
 export class ConfigurationProvider {
-    private readonly configSection = 'fileListExtension';
+    private readonly configSection = 'aiCodingSidebar';
 
     /**
      * 設定を取得

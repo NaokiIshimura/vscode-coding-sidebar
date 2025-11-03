@@ -59,7 +59,7 @@ function loadTemplate(context: vscode.ExtensionContext, variables: { [key: strin
             return content;
         }
     } catch (error) {
-        console.error(`テンプレートの読み込みに失敗しました: ${error}`);
+        console.error(`Failed to load template: ${error}`);
     }
 
     // テンプレートが見つからない場合のデフォルト
@@ -90,7 +90,7 @@ async function setupSettingsJson(workspaceRoot: string): Promise<void> {
                 const content = fs.readFileSync(settingsPath, 'utf8');
                 settings = JSON.parse(content);
             } catch (error) {
-                console.error('settings.jsonの解析に失敗しました:', error);
+                console.error('Failed to parse settings.json:', error);
             }
         }
 
@@ -107,9 +107,9 @@ async function setupSettingsJson(workspaceRoot: string): Promise<void> {
         const document = await vscode.workspace.openTextDocument(settingsPath);
         await vscode.window.showTextDocument(document);
 
-        vscode.window.showInformationMessage('settings.jsonを作成/更新しました');
+        vscode.window.showInformationMessage('Created/updated settings.json');
     } catch (error) {
-        vscode.window.showErrorMessage(`settings.jsonの作成に失敗しました: ${error}`);
+        vscode.window.showErrorMessage(`Failed to create settings.json: ${error}`);
     }
 }
 
@@ -133,9 +133,9 @@ async function setupTemplate(workspaceRoot: string): Promise<void> {
         const document = await vscode.workspace.openTextDocument(templatePath);
         await vscode.window.showTextDocument(document);
 
-        vscode.window.showInformationMessage('テンプレートファイルを開きました。編集して保存してください。');
+        vscode.window.showInformationMessage('Template file opened. Please edit and save.');
     } catch (error) {
-        vscode.window.showErrorMessage(`テンプレートファイルの作成に失敗しました: ${error}`);
+        vscode.window.showErrorMessage(`Failed to create template file: ${error}`);
     }
 }
 
@@ -155,14 +155,14 @@ async function setupClaudeFolder(workspaceRoot: string): Promise<void> {
         const config = vscode.workspace.getConfiguration('aiCodingSidebar');
         await config.update('defaultRelativePath', '.claude', vscode.ConfigurationTarget.Workspace);
 
-        vscode.window.showInformationMessage('.claudeフォルダを作成し、設定を更新しました');
+        vscode.window.showInformationMessage('Created .claude folder and updated settings');
     } catch (error) {
-        vscode.window.showErrorMessage(`.claudeフォルダの設定に失敗しました: ${error}`);
+        vscode.window.showErrorMessage(`Failed to configure .claude folder: ${error}`);
     }
 }
 
 export function activate(context: vscode.ExtensionContext) {
-    console.log('AI Coding Sidebar が有効化されました');
+    console.log('AI Coding Sidebar activated');
 
     // サービスクラスの初期化
     const fileOperationService = new FileOperationService();
@@ -174,8 +174,8 @@ export function activate(context: vscode.ExtensionContext) {
 
     // ステータスバーアイテムを作成
     const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-    statusBarItem.text = "$(gear) AI Coding Sidebar設定";
-    statusBarItem.tooltip = "AI Coding Sidebar拡張機能のワークスペース設定";
+    statusBarItem.text = "$(gear) AI Coding Sidebar Settings";
+    statusBarItem.tooltip = "AI Coding Sidebar extension workspace settings";
     statusBarItem.command = "aiCodingSidebar.setupWorkspace";
     statusBarItem.show();
     context.subscriptions.push(statusBarItem);
@@ -217,7 +217,7 @@ export function activate(context: vscode.ExtensionContext) {
                     throw new Error('Not a directory');
                 }
             } catch (error) {
-                vscode.window.showWarningMessage(`設定された相対パスが無効です: ${relativePath}`);
+                vscode.window.showWarningMessage(`Configured relative path is invalid: ${relativePath}`);
                 // フォールバックとしてワークスペースルートを使用
                 targetPath = workspaceRoot;
             }
@@ -378,7 +378,7 @@ export function activate(context: vscode.ExtensionContext) {
                 // ファイル一覧ペインも同期
                 aiCodingSidebarDetailsProvider.setRootPath(parentPath);
             } else {
-                vscode.window.showInformationMessage('これ以上上のフォルダはありません');
+                vscode.window.showInformationMessage('No parent folder available');
             }
         } else {
             // フォルダツリーにパスが設定されていない場合は、ファイル一覧ペインの親フォルダへ移動
@@ -389,7 +389,7 @@ export function activate(context: vscode.ExtensionContext) {
     // 相対パス設定コマンドを登録
     const setRelativePathCommand = vscode.commands.registerCommand('aiCodingSidebar.setRelativePath', async () => {
         if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
-            vscode.window.showErrorMessage('ワークスペースが開かれていません');
+            vscode.window.showErrorMessage('No workspace is open');
             return;
         }
 
@@ -401,9 +401,9 @@ export function activate(context: vscode.ExtensionContext) {
         const displayPath = currentRelativePath === '' ? '.' : currentRelativePath;
 
         const inputPath = await vscode.window.showInputBox({
-            prompt: `ワークスペースルート (${path.basename(workspaceRoot)}) からの相対パスを入力してください`,
+            prompt: `Enter relative path from workspace root (${path.basename(workspaceRoot)})`,
             value: displayPath,
-            placeHolder: 'src, docs/api, .claude, . (ルート)'
+            placeHolder: 'src, docs/api, .claude, . (root)'
         });
 
         if (inputPath !== undefined) {
@@ -432,18 +432,18 @@ export function activate(context: vscode.ExtensionContext) {
             }
 
             if (pathExists && !isDirectory) {
-                vscode.window.showErrorMessage(`指定されたパスはディレクトリではありません: ${targetPath}`);
+                vscode.window.showErrorMessage(`Specified path is not a directory: ${targetPath}`);
                 return;
             }
 
             if (!pathExists) {
                 const continueChoice = await vscode.window.showWarningMessage(
-                    `指定されたパスが見つかりません:\n相対パス: ${trimmedPath}\n絶対パス: ${targetPath}\n\n続行しますか？`,
-                    'はい',
-                    'いいえ'
+                    `Specified path not found:\nRelative path: ${trimmedPath}\nAbsolute path: ${targetPath}\n\nContinue anyway?`,
+                    'Yes',
+                    'No'
                 );
 
-                if (continueChoice !== 'はい') {
+                if (continueChoice !== 'Yes') {
                     return;
                 }
             }
@@ -459,15 +459,15 @@ export function activate(context: vscode.ExtensionContext) {
             // 設定に保存するかユーザーに確認
             const relativePathToSave = trimmedPath === '' || trimmedPath === '.' ? '' : trimmedPath;
             const saveChoice = await vscode.window.showInformationMessage(
-                `相対パス "${relativePathToSave || '.'}" を設定に保存しますか？`,
-                'はい',
-                'いいえ'
+                `Save relative path "${relativePathToSave || '.'}" to settings?`,
+                'Yes',
+                'No'
             );
 
-            if (saveChoice === 'はい') {
+            if (saveChoice === 'Yes') {
                 const config = vscode.workspace.getConfiguration('aiCodingSidebar');
                 await config.update('defaultRelativePath', relativePathToSave, vscode.ConfigurationTarget.Workspace);
-                vscode.window.showInformationMessage('設定に保存しました');
+                vscode.window.showInformationMessage('Saved to settings');
             }
 
             // 設定したフォルダを選択状態にする（存在する場合のみ）
@@ -492,7 +492,7 @@ export function activate(context: vscode.ExtensionContext) {
     // ワークスペース設定コマンドを登録
     const setupWorkspaceCommand = vscode.commands.registerCommand('aiCodingSidebar.setupWorkspace', async () => {
         if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
-            vscode.window.showErrorMessage('ワークスペースが開かれていません');
+            vscode.window.showErrorMessage('No workspace is open');
             return;
         }
 
@@ -501,24 +501,24 @@ export function activate(context: vscode.ExtensionContext) {
         // 設定オプションを表示
         const options = [
             {
-                label: '$(gear) settings.jsonを作成/編集',
-                description: 'ワークスペース設定ファイルを作成または編集',
+                label: '$(gear) Create/Edit settings.json',
+                description: 'Create or edit workspace settings file',
                 action: 'settings'
             },
             {
-                label: '$(file-text) テンプレートをカスタマイズ',
-                description: 'ファイル作成時のテンプレートをカスタマイズ',
+                label: '$(file-text) Customize Template',
+                description: 'Customize template for file creation',
                 action: 'template'
             },
             {
-                label: '$(folder) .claudeフォルダを設定',
-                description: 'defaultRelativePathを.claudeに設定',
+                label: '$(folder) Configure .claude Folder',
+                description: 'Set defaultRelativePath to .claude',
                 action: 'claude'
             }
         ];
 
         const selected = await vscode.window.showQuickPick(options, {
-            placeHolder: '設定したい項目を選択してください'
+            placeHolder: 'Select an item to configure'
         });
 
         if (!selected) {
@@ -547,7 +547,7 @@ export function activate(context: vscode.ExtensionContext) {
                 'aiCodingSidebar'
             );
         } catch (error) {
-            vscode.window.showErrorMessage('ユーザ設定を開けませんでした');
+            vscode.window.showErrorMessage('Failed to open user settings');
         }
     });
 
@@ -559,13 +559,13 @@ export function activate(context: vscode.ExtensionContext) {
                 'aiCodingSidebar'
             );
         } catch (error) {
-            vscode.window.showErrorMessage('ワークスペース設定を開けませんでした');
+            vscode.window.showErrorMessage('Failed to open workspace settings');
         }
     });
 
     const setupTemplateCommand = vscode.commands.registerCommand('aiCodingSidebar.setupTemplate', async () => {
         if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
-            vscode.window.showErrorMessage('ワークスペースが開かれていません');
+            vscode.window.showErrorMessage('No workspace is open');
             return;
         }
         const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
@@ -609,7 +609,7 @@ export function activate(context: vscode.ExtensionContext) {
         else {
             const currentPath = aiCodingSidebarDetailsProvider.getCurrentPath();
             if (!currentPath) {
-                vscode.window.showErrorMessage('ファイル一覧ペインでフォルダが開かれていません');
+                vscode.window.showErrorMessage('No folder is open in the file list pane');
                 return;
             }
             targetPath = currentPath;
@@ -649,12 +649,12 @@ export function activate(context: vscode.ExtensionContext) {
                 const document = await vscode.workspace.openTextDocument(filePath);
                 await vscode.window.showTextDocument(document);
 
-                vscode.window.showInformationMessage(`メモファイル ${fileName} を作成しました`);
+                vscode.window.showInformationMessage(`Created markdown file ${fileName}`);
             } else {
-                throw result.error || new Error('ファイルの作成に失敗しました');
+                throw result.error || new Error('Failed to create file');
             }
         } catch (error) {
-            vscode.window.showErrorMessage(`メモファイルの作成に失敗しました: ${error}`);
+            vscode.window.showErrorMessage(`Failed to create markdown file: ${error}`);
         }
     });
 
@@ -671,41 +671,41 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         if (!targetDirectory) {
-            vscode.window.showErrorMessage('ファイルを作成するフォルダを特定できませんでした');
+            vscode.window.showErrorMessage('Failed to identify folder for file creation');
             return;
         }
 
         try {
             if (!fs.existsSync(targetDirectory) || !fs.statSync(targetDirectory).isDirectory()) {
-                vscode.window.showErrorMessage('対象フォルダにアクセスできません');
+                vscode.window.showErrorMessage('Cannot access target folder');
                 return;
             }
         } catch (error) {
-            vscode.window.showErrorMessage(`対象フォルダにアクセスできません: ${error}`);
+            vscode.window.showErrorMessage(`Cannot access target folder: ${error}`);
             return;
         }
 
         const fileName = await vscode.window.showInputBox({
-            prompt: '新しいファイルの名前を入力してください',
+            prompt: 'Enter new file name',
             placeHolder: 'example.txt',
             validateInput: (value: string) => {
                 const trimmed = value.trim();
 
                 if (!trimmed) {
-                    return 'ファイル名を入力してください';
+                    return 'Please enter a file name';
                 }
 
                 if (trimmed.includes('/') || trimmed.includes('\\')) {
-                    return 'フォルダを含むパスは指定できません';
+                    return 'Cannot specify path with folders';
                 }
 
                 if (!fileOperationService.validateFileName(trimmed)) {
-                    return '使用できない文字が含まれています';
+                    return 'Contains invalid characters';
                 }
 
                 const candidatePath = path.join(targetDirectory!, trimmed);
                 if (fs.existsSync(candidatePath)) {
-                    return `ファイル "${trimmed}" は既に存在します`;
+                    return `File "${trimmed}" already exists`;
                 }
 
                 return null;
@@ -730,12 +730,12 @@ export function activate(context: vscode.ExtensionContext) {
                 const document = await vscode.workspace.openTextDocument(newFilePath);
                 await vscode.window.showTextDocument(document);
 
-                vscode.window.showInformationMessage(`ファイル "${trimmedFileName}" を作成しました`);
+                vscode.window.showInformationMessage(`Created file "${trimmedFileName}"`);
             } else {
-                throw result.error || new Error('ファイルの作成に失敗しました');
+                throw result.error || new Error('Failed to create file');
             }
         } catch (error) {
-            vscode.window.showErrorMessage(`ファイルの作成に失敗しました: ${error}`);
+            vscode.window.showErrorMessage(`Failed to create file: ${error}`);
         }
     });
 
@@ -756,7 +756,7 @@ export function activate(context: vscode.ExtensionContext) {
         else {
             const currentPath = aiCodingSidebarDetailsProvider.getCurrentPath();
             if (!currentPath) {
-                vscode.window.showErrorMessage('ファイル一覧ペインでフォルダが開かれていません');
+                vscode.window.showErrorMessage('No folder is open in the file list pane');
                 return;
             }
             targetPath = currentPath;
@@ -764,20 +764,20 @@ export function activate(context: vscode.ExtensionContext) {
 
         // フォルダ名をユーザーに入力してもらう
         const folderName = await vscode.window.showInputBox({
-            prompt: '新しいフォルダの名前を入力してください',
-            placeHolder: 'フォルダ名',
+            prompt: 'Enter new folder name',
+            placeHolder: 'Folder name',
             validateInput: (value) => {
                 if (!value || value.trim() === '') {
-                    return 'フォルダ名を入力してください';
+                    return 'Please enter a folder name';
                 }
                 // 不正な文字をチェック
                 if (value.match(/[<>:"|?*\/\\]/)) {
-                    return '使用できない文字が含まれています: < > : " | ? * / \\';
+                    return 'Contains invalid characters: < > : " | ? * / \\';
                 }
                 // 既存フォルダとの重複チェック
                 const folderPath = path.join(targetPath, value.trim());
                 if (fs.existsSync(folderPath)) {
-                    return `フォルダ "${value.trim()}" は既に存在します`;
+                    return `Folder "${value.trim()}" already exists`;
                 }
                 return null;
             }
@@ -800,19 +800,19 @@ export function activate(context: vscode.ExtensionContext) {
                 aiCodingSidebarProvider.refresh();
                 workspaceExplorerProvider.refresh();
 
-                vscode.window.showInformationMessage(`フォルダ "${trimmedFolderName}" を作成しました`);
+                vscode.window.showInformationMessage(`Created folder "${trimmedFolderName}"`);
             } else {
-                throw result.error || new Error('フォルダの作成に失敗しました');
+                throw result.error || new Error('Failed to create folder');
             }
         } catch (error) {
-            vscode.window.showErrorMessage(`フォルダの作成に失敗しました: ${error}`);
+            vscode.window.showErrorMessage(`Failed to create folder: ${error}`);
         }
     });
 
     // リネームコマンドを登録
     const renameCommand = vscode.commands.registerCommand('aiCodingSidebar.rename', async (item: FileItem) => {
         if (!item) {
-            vscode.window.showErrorMessage('項目が選択されていません');
+            vscode.window.showErrorMessage('No item is selected');
             return;
         }
 
@@ -821,19 +821,19 @@ export function activate(context: vscode.ExtensionContext) {
 
         // 新しい名前の入力を求める
         const newName = await vscode.window.showInputBox({
-            prompt: '新しい名前を入力してください',
+            prompt: 'Enter new name',
             value: oldName,
             validateInput: (value) => {
                 if (!value || value.trim() === '') {
-                    return '名前を入力してください';
+                    return 'Please enter a name';
                 }
                 // 不正な文字をチェック
                 if (value.match(/[<>:"|?*\/\\]/)) {
-                    return '使用できない文字が含まれています: < > : " | ? * / \\';
+                    return 'Contains invalid characters: < > : " | ? * / \\';
                 }
                 // 同じ名前の場合
                 if (value === oldName) {
-                    return '同じ名前です';
+                    return 'Same name';
                 }
                 return null;
             }
@@ -854,33 +854,33 @@ export function activate(context: vscode.ExtensionContext) {
                 aiCodingSidebarDetailsProvider.refresh();
                 workspaceExplorerProvider.refresh();
 
-                vscode.window.showInformationMessage(`${oldName} を ${newName} に変更しました`);
+                vscode.window.showInformationMessage(`Renamed ${oldName} to ${newName}`);
             } else {
-                throw result.error || new Error('名前の変更に失敗しました');
+                throw result.error || new Error('Failed to rename');
             }
         } catch (error) {
-            vscode.window.showErrorMessage(`名前の変更に失敗しました: ${error}`);
+            vscode.window.showErrorMessage(`Failed to rename: ${error}`);
         }
     });
 
     // 削除コマンドを登録
     const deleteCommand = vscode.commands.registerCommand('aiCodingSidebar.delete', async (item: FileItem) => {
         if (!item) {
-            vscode.window.showErrorMessage('項目が選択されていません');
+            vscode.window.showErrorMessage('No item is selected');
             return;
         }
 
         const itemName = path.basename(item.filePath);
-        const itemType = item.isDirectory ? 'フォルダ' : 'ファイル';
+        const itemType = item.isDirectory ? 'folder' : 'file';
 
         // 確認ダイアログを表示
         const answer = await vscode.window.showWarningMessage(
-            `${itemType} "${itemName}" を削除してもよろしいですか？\nこの操作は元に戻せません。`,
-            'はい',
-            'いいえ'
+            `Are you sure you want to delete ${itemType} "${itemName}"?\nThis action cannot be undone.`,
+            'Yes',
+            'No'
         );
 
-        if (answer !== 'はい') {
+        if (answer !== 'Yes') {
             return;
         }
 
@@ -922,12 +922,12 @@ export function activate(context: vscode.ExtensionContext) {
                 aiCodingSidebarDetailsProvider.refresh();
                 workspaceExplorerProvider.refresh();
 
-                vscode.window.showInformationMessage(`${itemType} "${itemName}" を削除しました`);
+                vscode.window.showInformationMessage(`Deleted ${itemType} "${itemName}"`);
             } else {
-                throw result[0].error || new Error('削除に失敗しました');
+                throw result[0].error || new Error('Failed to delete');
             }
         } catch (error) {
-            vscode.window.showErrorMessage(`削除に失敗しました: ${error}`);
+            vscode.window.showErrorMessage(`Failed to delete: ${error}`);
         }
     });
 
@@ -946,7 +946,7 @@ export function activate(context: vscode.ExtensionContext) {
             // フォルダツリーviewで現在選択されているフォルダまたはルートフォルダを使用
             const currentPath = aiCodingSidebarProvider.getRootPath();
             if (!currentPath) {
-                vscode.window.showErrorMessage('フォルダが開かれていません');
+                vscode.window.showErrorMessage('No folder is open');
                 return;
             }
             targetPath = currentPath;
@@ -954,20 +954,20 @@ export function activate(context: vscode.ExtensionContext) {
 
         // フォルダ名をユーザーに入力してもらう
         const folderName = await vscode.window.showInputBox({
-            prompt: '新しいフォルダの名前を入力してください',
-            placeHolder: 'フォルダ名',
+            prompt: 'Enter new folder name',
+            placeHolder: 'Folder name',
             validateInput: (value) => {
                 if (!value || value.trim() === '') {
-                    return 'フォルダ名を入力してください';
+                    return 'Please enter a folder name';
                 }
                 // 不正な文字をチェック
                 if (value.match(/[<>:"|?*\/\\]/)) {
-                    return '使用できない文字が含まれています: < > : " | ? * / \\';
+                    return 'Contains invalid characters: < > : " | ? * / \\';
                 }
                 // 既存フォルダとの重複チェック
                 const folderPath = path.join(targetPath, value.trim());
                 if (fs.existsSync(folderPath)) {
-                    return `フォルダ "${value.trim()}" は既に存在します`;
+                    return `Folder "${value.trim()}" already exists`;
                 }
                 return null;
             }
@@ -983,20 +983,20 @@ export function activate(context: vscode.ExtensionContext) {
         try {
             // フォルダを作成
             fs.mkdirSync(folderPath, { recursive: true });
-            vscode.window.showInformationMessage(`フォルダ "${trimmedFolderName}" を作成しました`);
+            vscode.window.showInformationMessage(`Created folder "${trimmedFolderName}"`);
 
             // ビューを更新
             aiCodingSidebarDetailsProvider.refresh();
             aiCodingSidebarProvider.refresh();
         } catch (error) {
-            vscode.window.showErrorMessage(`フォルダの作成に失敗しました: ${error}`);
+            vscode.window.showErrorMessage(`Failed to create folder: ${error}`);
         }
     });
 
     // フォルダ削除コマンドを登録（フォルダツリーview用）
     const deleteFolderCommand = vscode.commands.registerCommand('aiCodingSidebar.deleteFolder', async (item?: FileItem) => {
         if (!item || !item.isDirectory) {
-            vscode.window.showErrorMessage('フォルダが選択されていません');
+            vscode.window.showErrorMessage('No folder is selected');
             return;
         }
 
@@ -1006,13 +1006,13 @@ export function activate(context: vscode.ExtensionContext) {
     // 相対パスをコピーコマンドを登録
     const copyRelativePathCommand = vscode.commands.registerCommand('aiCodingSidebar.copyRelativePath', async (item?: FileItem | vscode.Uri) => {
         if (!item) {
-            vscode.window.showErrorMessage('ファイルまたはフォルダが選択されていません');
+            vscode.window.showErrorMessage('No file or folder is selected');
             return;
         }
 
         // ワークスペースルートを取得
         if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
-            vscode.window.showErrorMessage('ワークスペースが開かれていません');
+            vscode.window.showErrorMessage('No workspace is open');
             return;
         }
 
@@ -1026,7 +1026,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         // クリップボードにコピー
         await vscode.env.clipboard.writeText(relativePath);
-        vscode.window.showInformationMessage(`相対パスをコピーしました: ${relativePath}`);
+        vscode.window.showInformationMessage(`Copied relative path: ${relativePath}`);
     });
 
     // コピーコマンドを登録(workspaceExplorer用)
@@ -1035,7 +1035,7 @@ export function activate(context: vscode.ExtensionContext) {
         const selectedItems = items && items.length > 0 ? items : (item ? [item] : []);
 
         if (selectedItems.length === 0) {
-            vscode.window.showErrorMessage('ファイルまたはフォルダが選択されていません');
+            vscode.window.showErrorMessage('No file or folder is selected');
             return;
         }
 
@@ -1045,12 +1045,12 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (selectedItems.length === 1) {
                 const itemName = path.basename(selectedItems[0].filePath);
-                vscode.window.showInformationMessage(`"${itemName}" をコピーしました`);
+                vscode.window.showInformationMessage(`Copied "${itemName}"`);
             } else {
-                vscode.window.showInformationMessage(`${selectedItems.length}個のアイテムをコピーしました`);
+                vscode.window.showInformationMessage(`Copied ${selectedItems.length} items`);
             }
         } catch (error) {
-            vscode.window.showErrorMessage(`コピーに失敗しました: ${error}`);
+            vscode.window.showErrorMessage(`Failed to copy: ${error}`);
         }
     });
 
@@ -1060,7 +1060,7 @@ export function activate(context: vscode.ExtensionContext) {
         const selectedItems = items && items.length > 0 ? items : (item ? [item] : []);
 
         if (selectedItems.length === 0) {
-            vscode.window.showErrorMessage('ファイルまたはフォルダが選択されていません');
+            vscode.window.showErrorMessage('No file or folder is selected');
             return;
         }
 
@@ -1070,12 +1070,12 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (selectedItems.length === 1) {
                 const itemName = path.basename(selectedItems[0].filePath);
-                vscode.window.showInformationMessage(`"${itemName}" を切り取りました`);
+                vscode.window.showInformationMessage(`Cut "${itemName}"`);
             } else {
-                vscode.window.showInformationMessage(`${selectedItems.length}個のアイテムを切り取りました`);
+                vscode.window.showInformationMessage(`Cut ${selectedItems.length} items`);
             }
         } catch (error) {
-            vscode.window.showErrorMessage(`切り取りに失敗しました: ${error}`);
+            vscode.window.showErrorMessage(`Failed to cut: ${error}`);
         }
     });
 
@@ -1084,7 +1084,7 @@ export function activate(context: vscode.ExtensionContext) {
         const clipboardManager = explorerManager.getClipboardManager();
 
         if (!clipboardManager.hasData()) {
-            vscode.window.showErrorMessage('クリップボードが空です');
+            vscode.window.showErrorMessage('Clipboard is empty');
             return;
         }
 
@@ -1099,7 +1099,7 @@ export function activate(context: vscode.ExtensionContext) {
         } else {
             // アイテムが指定されていない場合はワークスペースルートを使用
             if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
-                vscode.window.showErrorMessage('ワークスペースが開かれていません');
+                vscode.window.showErrorMessage('No workspace is open');
                 return;
             }
             targetPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
@@ -1111,16 +1111,16 @@ export function activate(context: vscode.ExtensionContext) {
             // ビューを更新
             workspaceExplorerProvider.refresh();
 
-            vscode.window.showInformationMessage('貼り付けが完了しました');
+            vscode.window.showInformationMessage('Paste completed');
         } catch (error) {
-            vscode.window.showErrorMessage(`貼り付けに失敗しました: ${error}`);
+            vscode.window.showErrorMessage(`Failed to paste: ${error}`);
         }
     });
 
     // 検索コマンド
     const searchInWorkspaceCommand = vscode.commands.registerCommand('aiCodingSidebar.searchInWorkspace', async () => {
         if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
-            vscode.window.showErrorMessage('ワークスペースが開かれていません');
+            vscode.window.showErrorMessage('No workspace is open');
             return;
         }
 
@@ -1128,8 +1128,8 @@ export function activate(context: vscode.ExtensionContext) {
 
         // 検索パターンを入力
         const pattern = await vscode.window.showInputBox({
-            prompt: '検索パターンを入力してください',
-            placeHolder: '例: *.ts, test*, README.md',
+            prompt: 'Enter search pattern',
+            placeHolder: 'Example: *.ts, test*, README.md',
             value: ''
         });
 
@@ -1149,7 +1149,7 @@ export function activate(context: vscode.ExtensionContext) {
             const matchedResults = searchService.filterResults(results, true);
 
             if (matchedResults.length === 0) {
-                vscode.window.showInformationMessage(`"${pattern}" に一致するファイルが見つかりませんでした`);
+                vscode.window.showInformationMessage(`No files found matching "${pattern}"`);
                 return;
             }
 
@@ -1157,13 +1157,13 @@ export function activate(context: vscode.ExtensionContext) {
             const items = matchedResults.map(result => ({
                 label: result.name,
                 description: path.relative(workspaceRoot, path.dirname(result.path)),
-                detail: result.isDirectory ? 'フォルダ' : 'ファイル',
+                detail: result.isDirectory ? 'Folder' : 'File',
                 path: result.path,
                 isDirectory: result.isDirectory
             }));
 
             const selected = await vscode.window.showQuickPick(items, {
-                placeHolder: `${matchedResults.length}件の結果`,
+                placeHolder: `${matchedResults.length} results`,
                 matchOnDescription: true,
                 matchOnDetail: true
             });
@@ -1174,11 +1174,11 @@ export function activate(context: vscode.ExtensionContext) {
                     const document = await vscode.workspace.openTextDocument(selected.path);
                     await vscode.window.showTextDocument(document);
                 } else {
-                    vscode.window.showInformationMessage(`フォルダ: ${selected.path}`);
+                    vscode.window.showInformationMessage(`Folder: ${selected.path}`);
                 }
             }
         } catch (error) {
-            vscode.window.showErrorMessage(`検索に失敗しました: ${error}`);
+            vscode.window.showErrorMessage(`Search failed: ${error}`);
         }
     });
 
@@ -1210,7 +1210,7 @@ async function selectInitialFolder(treeView: vscode.TreeView<FileItem>, rootPath
         // ルートフォルダを選択状態にする
         await treeView.reveal(rootItem, { select: true, focus: false, expand: true });
     } catch (error) {
-        console.log('初期フォルダの選択に失敗しました:', error);
+        console.log('Failed to select initial folder:', error);
     }
 }
 
@@ -1242,7 +1242,7 @@ async function getFileList(dirPath: string): Promise<FileInfo[]> {
         });
 
     } catch (error) {
-        throw new Error(`ディレクトリの読み取りに失敗しました: ${error}`);
+        throw new Error(`Failed to read directory: ${error}`);
     }
 
     return files;
@@ -1355,7 +1355,7 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
     private updateTitle(): void {
         if (this.treeView && this.rootPath) {
             const folderName = path.basename(this.rootPath);
-            this.treeView.title = `フォルダツリー - ${folderName}`;
+            this.treeView.title = `Directory List - ${folderName}`;
         }
     }
 
@@ -1401,8 +1401,8 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
                 );
 
                 if (isDirectory && this.activeFolderPath === file.path) {
-                    item.description = '選択中';
-                    item.tooltip = `${item.tooltip}\n現在のフォルダです`;
+                    item.description = 'Selected';
+                    item.tooltip = `${item.tooltip}\nCurrent folder`;
                 }
 
                 return item;
@@ -1412,7 +1412,7 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
             this.itemCache.set(targetPath, items);
             return Promise.resolve(items);
         } catch (error) {
-            vscode.window.showErrorMessage(`ディレクトリの読み取りに失敗しました: ${error}`);
+            vscode.window.showErrorMessage(`Failed to read directory: ${error}`);
             return Promise.resolve([]);
         }
     }
@@ -1457,7 +1457,7 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
                 stat.mtime
             );
         } catch (error) {
-            console.error('親フォルダの取得に失敗しました:', error);
+            console.error('Failed to get parent folder:', error);
             return undefined;
         }
     }
@@ -1482,7 +1482,7 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
 
             await this.treeView.reveal(item, { select: true, focus: false, expand: true });
         } catch (error) {
-            console.error('フォルダ選択の表示に失敗しました:', error);
+            console.error('Failed to show folder selection:', error);
         }
     }
 
@@ -1527,7 +1527,7 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
             }
 
             const message = err && err.message ? err.message : String(error);
-            throw new Error(`ディレクトリの読み取りに失敗しました: ${message}`);
+            throw new Error(`Failed to read directory: ${message}`);
         }
 
         return files;
@@ -1577,7 +1577,7 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
     private updateTitle(): void {
         if (this.treeView && this.rootPath) {
             const folderName = path.basename(this.rootPath);
-            this.treeView.title = `markdown一覧 - ${folderName}`;
+            this.treeView.title = `Markdown List - ${folderName}`;
         }
     }
 
@@ -1588,7 +1588,7 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
 
         // 現在のパスがルートディレクトリかどうかをチェック
         if (path.dirname(this.rootPath) === this.rootPath) {
-            vscode.window.showInformationMessage('これ以上上のフォルダはありません');
+            vscode.window.showInformationMessage('No parent folder available');
             return;
         }
 
@@ -1596,7 +1596,7 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
 
         // プロジェクトルートより上には移動しない
         if (this.projectRootPath && !parentPath.startsWith(this.projectRootPath)) {
-            vscode.window.showInformationMessage('プロジェクトルートより上には移動できません');
+            vscode.window.showInformationMessage('Cannot move above project root');
             return;
         }
 
@@ -1714,11 +1714,11 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
                 // ファイルが既に存在するかチェック
                 if (fs.existsSync(targetPath)) {
                     const answer = await vscode.window.showWarningMessage(
-                        `${fileName} は既に存在します。上書きしますか？`,
-                        '上書き',
-                        'スキップ'
+                        `${fileName} already exists. Overwrite?`,
+                        'Overwrite',
+                        'Skip'
                     );
-                    if (answer !== '上書き') {
+                    if (answer !== 'Overwrite') {
                         continue;
                     }
                 }
@@ -1726,7 +1726,7 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
                 // ファイル/フォルダを移動
                 fs.renameSync(sourcePath, targetPath);
             } catch (error) {
-                vscode.window.showErrorMessage(`${fileName} の移動に失敗しました: ${error}`);
+                vscode.window.showErrorMessage(`Failed to move ${fileName}: ${error}`);
             }
         }
 
@@ -1766,7 +1766,7 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
             this.itemCache.set(targetPath, fileItems);
             return Promise.resolve(fileItems);
         } catch (error) {
-            vscode.window.showErrorMessage(`ディレクトリの読み取りに失敗しました: ${error}`);
+            vscode.window.showErrorMessage(`Failed to read directory: ${error}`);
             return Promise.resolve([]);
         }
     }
@@ -1815,7 +1815,7 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
             }
 
             const message = err && err.message ? err.message : String(error);
-            throw new Error(`ディレクトリの読み取りに失敗しました: ${message}`);
+            throw new Error(`Failed to read directory: ${message}`);
         }
 
         return files;
@@ -1852,8 +1852,8 @@ class FileItem extends vscode.TreeItem {
         }
 
         // ツールチップを設定
-        const sizeText = isDirectory ? 'ディレクトリ' : formatFileSize(size);
-        this.tooltip = `${label}\n種類: ${sizeText}\n更新日時: ${modified.toLocaleString('ja-JP')}`;
+        const sizeText = isDirectory ? 'Directory' : formatFileSize(size);
+        this.tooltip = `${label}\nType: ${sizeText}\nLast modified: ${modified.toLocaleString('en-US')}`;
 
         // ファイルの場合はクリックで開く
         if (!isDirectory) {
@@ -2002,7 +2002,7 @@ class GitChangesProvider implements vscode.TreeDataProvider<GitFileItem> {
             await this.showFileDiff(workspaceRoot, item.relativePath, item.filePath);
 
         } catch (error) {
-            vscode.window.showErrorMessage(`差分の表示に失敗しました: ${error}`);
+            vscode.window.showErrorMessage(`Failed to show diff: ${error}`);
         }
     }
 
@@ -2141,7 +2141,7 @@ class GitChangesProvider implements vscode.TreeDataProvider<GitFileItem> {
                     file.isDirectory
                 ));
             } catch (error) {
-                console.log('ディレクトリ内ファイルの取得に失敗しました:', error);
+                console.log('Failed to get files in directory:', error);
                 return [];
             }
         }
@@ -2158,7 +2158,7 @@ class GitChangesProvider implements vscode.TreeDataProvider<GitFileItem> {
                 change.isDirectory
             ));
         } catch (error) {
-            console.log('Git変更の取得に失敗しました:', error);
+            console.log('Failed to get Git changes:', error);
             return [];
         }
     }
@@ -2292,7 +2292,7 @@ class GitChangesProvider implements vscode.TreeDataProvider<GitFileItem> {
             });
 
         } catch (error) {
-            console.log('ディレクトリの読み取りに失敗しました:', error);
+            console.log('Failed to read directory:', error);
         }
 
         return files;
@@ -2465,11 +2465,12 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem>, vs
 
     updateTitle(editor: vscode.TextEditor | undefined): void {
         if (this.treeView) {
-            if (editor) {
-                const fileName = path.basename(editor.document.fileName);
-                this.treeView.title = `エクスプローラー - ${fileName}`;
+            if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+                const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
+                const rootName = path.basename(workspaceRoot);
+                this.treeView.title = `Explorer - ${rootName}`;
             } else {
-                this.treeView.title = `エクスプローラー`;
+                this.treeView.title = `Explorer`;
             }
         }
     }
@@ -2512,7 +2513,7 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem>, vs
                 }
             }
         } catch (error) {
-            console.log('ファイルの選択に失敗しました:', error);
+            console.log('Failed to select file:', error);
         }
     }
 
@@ -2636,23 +2637,10 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem>, vs
             return Promise.resolve([]);
         }
 
-        // ルート要素の場合、ワークスペースフォルダのルートを返す
+        // ルート要素の場合、ワークスペースルートの中身を直接返す（ルートディレクトリは非表示）
         if (!element) {
             const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
-            const rootName = path.basename(workspaceRoot);
-            const showFileIcons = this.configurationProvider.getShowFileIcons();
-            const rootItem = new FileItem(
-                rootName,
-                vscode.TreeItemCollapsibleState.Expanded,
-                workspaceRoot,
-                true,
-                0,
-                new Date(),
-                showFileIcons
-            );
-            // ルートアイテムをキャッシュに保存
-            this.itemCache.set(workspaceRoot, rootItem);
-            return Promise.resolve([rootItem]);
+            return this.getFileItems(workspaceRoot);
         }
 
         // 選択された要素のサブアイテムを返す
@@ -2692,14 +2680,14 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem>, vs
                     this.itemCache.set(filePath, item);
                     items.push(item);
                 } catch (error) {
-                    console.error(`ファイル情報の取得に失敗: ${filePath}`, error);
+                    console.error(`Failed to get file info: ${filePath}`, error);
                 }
             }
 
             // 設定に基づいてソート
             return this.sortItems(items, sortBy, sortOrder);
         } catch (error) {
-            console.error(`ディレクトリ読み取りエラー: ${dirPath}`, error);
+            console.error(`Directory read error: ${dirPath}`, error);
             return [];
         }
     }
@@ -2794,17 +2782,17 @@ class WorkspaceSettingsProvider implements vscode.TreeDataProvider<WorkspaceSett
             return Promise.resolve([
                 // グローバル（親項目）
                 new WorkspaceSettingItem(
-                    'グローバル',
-                    'ユーザレベルの設定',
+                    'Global',
+                    'User-level settings',
                     undefined,
                     new vscode.ThemeIcon('account'),
                     [
                         new WorkspaceSettingItem(
-                            'ユーザ設定を開く',
-                            'AI Coding Sidebarのユーザ設定を開く',
+                            'Open User Settings',
+                            'Open AI Coding Sidebar user settings',
                             {
                                 command: 'aiCodingSidebar.openUserSettings',
-                                title: 'ユーザ設定を開く'
+                                title: 'Open User Settings'
                             },
                             new vscode.ThemeIcon('settings-gear')
                         )
@@ -2813,26 +2801,26 @@ class WorkspaceSettingsProvider implements vscode.TreeDataProvider<WorkspaceSett
                 ),
                 // ワークスペース（親項目）
                 new WorkspaceSettingItem(
-                    'ワークスペース',
-                    'ワークスペースレベルの設定',
+                    'Workspace',
+                    'Workspace-level settings',
                     undefined,
                     new vscode.ThemeIcon('folder-opened'),
                     [
                         new WorkspaceSettingItem(
-                            'ワークスペース設定を開く',
-                            'AI Coding Sidebarのワークスペース設定を開く',
+                            'Open Workspace Settings',
+                            'Open AI Coding Sidebar workspace settings',
                             {
                                 command: 'aiCodingSidebar.openWorkspaceSettings',
-                                title: 'ワークスペース設定を開く'
+                                title: 'Open Workspace Settings'
                             },
                             new vscode.ThemeIcon('settings-gear')
                         ),
                         new WorkspaceSettingItem(
-                            'テンプレートをカスタマイズ',
-                            'ファイル作成時のテンプレートをカスタマイズ',
+                            'Customize Template',
+                            'Customize template for file creation',
                             {
                                 command: 'aiCodingSidebar.setupTemplate',
-                                title: 'テンプレートをカスタマイズ'
+                                title: 'Customize Template'
                             },
                             new vscode.ThemeIcon('file-text')
                         )

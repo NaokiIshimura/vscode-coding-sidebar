@@ -2465,9 +2465,10 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem>, vs
 
     updateTitle(editor: vscode.TextEditor | undefined): void {
         if (this.treeView) {
-            if (editor) {
-                const fileName = path.basename(editor.document.fileName);
-                this.treeView.title = `Explorer - ${fileName}`;
+            if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+                const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
+                const rootName = path.basename(workspaceRoot);
+                this.treeView.title = `Explorer - ${rootName}`;
             } else {
                 this.treeView.title = `Explorer`;
             }
@@ -2636,23 +2637,10 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem>, vs
             return Promise.resolve([]);
         }
 
-        // ルート要素の場合、ワークスペースフォルダのルートを返す
+        // ルート要素の場合、ワークスペースルートの中身を直接返す（ルートディレクトリは非表示）
         if (!element) {
             const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
-            const rootName = path.basename(workspaceRoot);
-            const showFileIcons = this.configurationProvider.getShowFileIcons();
-            const rootItem = new FileItem(
-                rootName,
-                vscode.TreeItemCollapsibleState.Expanded,
-                workspaceRoot,
-                true,
-                0,
-                new Date(),
-                showFileIcons
-            );
-            // ルートアイテムをキャッシュに保存
-            this.itemCache.set(workspaceRoot, rootItem);
-            return Promise.resolve([rootItem]);
+            return this.getFileItems(workspaceRoot);
         }
 
         // 選択された要素のサブアイテムを返す

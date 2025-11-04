@@ -105,6 +105,6 @@ jobs:
             echo "VSCE_PAT is not set. Skipping VSCode Marketplace publishing."
             exit 0
           fi
-          vsce publish --pat $VSCE_PAT ai-coding-sidebar-${{ env.VERSION }}.vsix
+          vsce publish --pat $VSCE_PAT --packagePath ai-coding-sidebar-${{ env.VERSION }}.vsix
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}

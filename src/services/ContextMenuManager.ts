@@ -234,7 +234,7 @@ export class ContextMenuManager {
             try {
                 await item.handler();
             } catch (error) {
-                vscode.window.showErrorMessage(`操作に失敗しました: ${error}`);
+                vscode.window.showErrorMessage(`Operation failed: ${error}`);
             }
         }
     }

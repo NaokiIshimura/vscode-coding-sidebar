@@ -119,7 +119,7 @@ export class DragDropHandler<T extends vscode.TreeItem> {
                     await this.fileOperationService.moveFile(sourcePath, targetPath);
                 }
             } catch (error) {
-                vscode.window.showErrorMessage(`${fileName} の操作に失敗しました: ${error}`);
+                vscode.window.showErrorMessage(`Failed to operate ${fileName}: ${error}`);
             }
         }
     }

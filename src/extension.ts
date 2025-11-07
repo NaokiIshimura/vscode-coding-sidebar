@@ -1303,6 +1303,7 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
     private fileWatcher: vscode.FileSystemWatcher | undefined;
     private itemCache: Map<string, FileItem[]> = new Map();  // パスをキーとしたFileItemのキャッシュ
     private activeFolderPath: string | undefined;
+    private refreshDebounceTimer: NodeJS.Timeout | undefined;
 
     constructor() { }
 
@@ -1332,15 +1333,15 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
 
             // ファイル・フォルダの変更を監視して自動更新
             this.fileWatcher.onDidChange(() => {
-                this.refresh();
+                this.debouncedRefresh();
             });
 
             this.fileWatcher.onDidCreate(() => {
-                this.refresh();
+                this.debouncedRefresh();
             });
 
             this.fileWatcher.onDidDelete(() => {
-                this.refresh();
+                this.debouncedRefresh();
             });
         }
     }
@@ -1349,6 +1350,10 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
         if (this.fileWatcher) {
             this.fileWatcher.dispose();
             this.fileWatcher = undefined;
+        }
+        if (this.refreshDebounceTimer) {
+            clearTimeout(this.refreshDebounceTimer);
+            this.refreshDebounceTimer = undefined;
         }
     }
 
@@ -1366,6 +1371,15 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
     refresh(): void {
         this.itemCache.clear();  // キャッシュをクリア
         this._onDidChangeTreeData.fire();
+    }
+
+    private debouncedRefresh(): void {
+        if (this.refreshDebounceTimer) {
+            clearTimeout(this.refreshDebounceTimer);
+        }
+        this.refreshDebounceTimer = setTimeout(() => {
+            this.refresh();
+        }, 500);
     }
 
     getTreeItem(element: FileItem): vscode.TreeItem {
@@ -1547,6 +1561,7 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
     private fileWatcher: vscode.FileSystemWatcher | undefined;
     private selectedItem: FileItem | undefined;
     private itemCache: Map<string, FileItem[]> = new Map();  // パスをキーとしたFileItemのキャッシュ
+    private refreshDebounceTimer: NodeJS.Timeout | undefined;
 
     constructor(private readonly folderTreeProvider: AiCodingSidebarProvider) {
         // プロジェクトルートパスを取得
@@ -1629,15 +1644,15 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
 
             // ファイル・フォルダの変更を監視して自動更新
             this.fileWatcher.onDidChange(() => {
-                this.refresh();
+                this.debouncedRefresh();
             });
 
             this.fileWatcher.onDidCreate(() => {
-                this.refresh();
+                this.debouncedRefresh();
             });
 
             this.fileWatcher.onDidDelete(() => {
-                this.refresh();
+                this.debouncedRefresh();
             });
         }
     }
@@ -1647,11 +1662,24 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
             this.fileWatcher.dispose();
             this.fileWatcher = undefined;
         }
+        if (this.refreshDebounceTimer) {
+            clearTimeout(this.refreshDebounceTimer);
+            this.refreshDebounceTimer = undefined;
+        }
     }
 
     refresh(): void {
         this.itemCache.clear();  // キャッシュをクリア
         this._onDidChangeTreeData.fire();
+    }
+
+    private debouncedRefresh(): void {
+        if (this.refreshDebounceTimer) {
+            clearTimeout(this.refreshDebounceTimer);
+        }
+        this.refreshDebounceTimer = setTimeout(() => {
+            this.refresh();
+        }, 500);
     }
 
     private getRelativePath(fullPath: string): string {
@@ -2382,6 +2410,7 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem>, vs
     private treeView: vscode.TreeView<FileItem> | undefined;
     private itemCache: Map<string, FileItem> = new Map();  // パスをキーとしたFileItemのキャッシュ
     private fileWatcher: vscode.FileSystemWatcher | undefined;
+    private refreshDebounceTimer: NodeJS.Timeout | undefined;
 
     // サービスクラス
     private dragDropHandler: DragDropHandler<FileItem>;
@@ -2567,6 +2596,15 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem>, vs
         this._onDidChangeTreeData.fire();
     }
 
+    private debouncedRefresh(): void {
+        if (this.refreshDebounceTimer) {
+            clearTimeout(this.refreshDebounceTimer);
+        }
+        this.refreshDebounceTimer = setTimeout(() => {
+            this.refresh();
+        }, 500);
+    }
+
     private setupFileWatcher(): void {
         // 既存のウォッチャーを破棄
         if (this.fileWatcher) {
@@ -2586,15 +2624,15 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem>, vs
 
             // ファイル・フォルダの変更を監視して自動更新
             this.fileWatcher.onDidChange(() => {
-                this.refresh();
+                this.debouncedRefresh();
             });
 
             this.fileWatcher.onDidCreate(() => {
-                this.refresh();
+                this.debouncedRefresh();
             });
 
             this.fileWatcher.onDidDelete(() => {
-                this.refresh();
+                this.debouncedRefresh();
             });
         }
     }
@@ -2603,6 +2641,10 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem>, vs
         if (this.fileWatcher) {
             this.fileWatcher.dispose();
             this.fileWatcher = undefined;
+        }
+        if (this.refreshDebounceTimer) {
+            clearTimeout(this.refreshDebounceTimer);
+            this.refreshDebounceTimer = undefined;
         }
     }
 

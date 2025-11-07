@@ -1219,8 +1219,15 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
 
     private updateTitle(): void {
         if (this.treeView && this.rootPath) {
-            const folderName = path.basename(this.rootPath);
-            this.treeView.title = `Directory List - ${folderName}`;
+            const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+            if (workspaceRoot) {
+                const relativePath = path.relative(workspaceRoot, this.rootPath);
+                const displayPath = relativePath === '' ? '.' : relativePath;
+                this.treeView.title = `Directory List - ${displayPath}`;
+            } else {
+                const folderName = path.basename(this.rootPath);
+                this.treeView.title = `Directory List - ${folderName}`;
+            }
         }
     }
 
@@ -1487,8 +1494,14 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
 
     private updateTitle(): void {
         if (this.treeView && this.rootPath) {
-            const folderName = path.basename(this.rootPath);
-            this.treeView.title = `Markdown List - ${folderName}`;
+            if (this.projectRootPath) {
+                const relativePath = path.relative(this.projectRootPath, this.rootPath);
+                const displayPath = relativePath === '' ? '.' : relativePath;
+                this.treeView.title = `Markdown List - ${displayPath}`;
+            } else {
+                const folderName = path.basename(this.rootPath);
+                this.treeView.title = `Markdown List - ${folderName}`;
+            }
         }
     }
 

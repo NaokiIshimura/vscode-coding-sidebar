@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2025-01-13
+
+### Added
+- **Keyboard Shortcut**: Added `Cmd+Shift+A` (macOS) / `Ctrl+Shift+A` (Windows/Linux) to quickly focus the AI Coding Sidebar
+- **Settings View Enhancement**: Added "Note" section in Settings view displaying keyboard shortcuts
+- **Directory Creation Helper**: When the configured default relative path does not exist, a "Create directory" button is now displayed in Directory List
+  - Click the button to create the directory automatically
+  - The directory is created recursively if parent directories don't exist
+  - After creation, the directory contents are displayed immediately
+
+### Changed
+- **Directory List Behavior**: Instead of falling back to workspace root when the default path doesn't exist, the extension now prompts users to create the missing directory
+
 ## [0.3.0] - 2025-01-12
 
 ### Removed

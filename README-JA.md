@@ -14,8 +14,14 @@ AIコーディングツールとの連携を強化するサイドバー拡張機
 
 ## 使用方法
 
+### キーボードショートカット
+
+| ショートカット | 動作 |
+| --- | --- |
+| `Cmd+Shift+A` (macOS)<br>`Ctrl+Shift+A` (Windows/Linux) | AI Coding Sidebarにフォーカス |
+
 ### 基本操作
-1. アクティビティバーの「AI Coding Sidebar」アイコンをクリック
+1. アクティビティバーの「AI Coding Sidebar」アイコンをクリック（または`Cmd+Shift+A` / `Ctrl+Shift+A`を押す）
 2. Directory ListでAIコーディング用のディレクトリを作成
 3. Markdown Listでmarkdownファイルを作成
 4. markdownファイルにAIへの指示を記述
@@ -100,6 +106,9 @@ file: {{filename}}
 - `docs/api` → プロジェクト/docs/api
 - `.claude` → プロジェクト/.claude
 - 空文字 → プロジェクトルート
+
+#### 設定したパスが存在しない場合
+デフォルトの相対パスが存在しない場合、Directory Listに「ディレクトリを作成」ボタンが表示されます。ボタンをクリックすると、自動的にディレクトリが作成され、その内容が表示されます。
 
 ### その他
 

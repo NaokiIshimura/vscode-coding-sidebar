@@ -5,6 +5,17 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.3.0] - 2025-01-12
+
+### 削除
+- **ワークスペースエクスプローラービュー**: 冗長なワークスペースエクスプローラービューを削除し、拡張機能をシンプル化
+  - `workspaceExplorer`ビュー定義を削除
+  - このビューでのみ使用されていたcopy/cut/paste/searchInWorkspaceコマンドを削除
+  - ワークスペースエクスプローラーに関連するすべてのメニュー項目とキーバインディングを削除
+  - WorkspaceExplorerProviderクラスを削除（374行）
+  - **コード削減**: 687行を削除
+  - コア機能（Directory List、Markdown List、File Changes）は変更なし
+
 ## [0.2.6] - 2025-01-11
 
 ### 変更
@@ -83,7 +94,8 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
-[0.2.6]: https://github.com/NaokiIshimura/vscode-panel/compare/v0.2.5...v0.2.6
-[0.2.5]: https://github.com/NaokiIshimura/vscode-panel/compare/v0.1.0...v0.2.5
-[0.1.0]: https://github.com/NaokiIshimura/vscode-panel/compare/v0.0.1...v0.1.0
-[0.0.1]: https://github.com/NaokiIshimura/vscode-panel/releases/tag/v0.0.1
+[0.3.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.2.6...v0.3.0
+[0.2.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.2.5...v0.2.6
+[0.2.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.1.0...v0.2.5
+[0.1.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.0.1...v0.1.0
+[0.0.1]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/releases/tag/v0.0.1

@@ -7,7 +7,6 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 
 | Feature | Description |
 | --- | --- |
-| **Explorer** | Display the entire project as a tree view. |
 | **Directory List** | Display directories under a specified path.<br>Configure a default path in settings.<br>Create new directories. |
 | **Markdown List** | Display Markdown files and create new ones. |
 | **File Changes** | List modified files and review diffs. |
@@ -80,7 +79,7 @@ Use the following variables inside a template:
 
 | Item | Steps |
 | --- | --- |
-| Create a folder | Click the folder icon in Directory List or Explorer.<br>Enter a folder name to create it. |
+| Create a folder | Click the folder icon in Directory List.<br>Enter a folder name to create it. |
 | Create a file | Click the "+" icon in Markdown List.<br>A timestamped Markdown file is created (for example, `2025_1103_1227.md`). |
 
 ### Configure the Default Relative Path

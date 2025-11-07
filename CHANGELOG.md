@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-01-12
+
+### Removed
+- **Workspace Explorer View**: Removed the redundant workspace explorer view to simplify the extension
+  - Removed `workspaceExplorer` view definition
+  - Removed copy/cut/paste/searchInWorkspace commands that were only used by this view
+  - Removed all menu items and keybindings associated with the workspace explorer
+  - Removed WorkspaceExplorerProvider class (374 lines)
+  - **Code reduction**: 687 lines removed
+  - Core features (Directory List, Markdown List, File Changes) remain unchanged
+
 ## [0.2.6] - 2025-01-11
 
 ### Changed
@@ -83,7 +94,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
-[0.2.6]: https://github.com/NaokiIshimura/vscode-panel/compare/v0.2.5...v0.2.6
-[0.2.5]: https://github.com/NaokiIshimura/vscode-panel/compare/v0.1.0...v0.2.5
-[0.1.0]: https://github.com/NaokiIshimura/vscode-panel/compare/v0.0.1...v0.1.0
-[0.0.1]: https://github.com/NaokiIshimura/vscode-panel/releases/tag/v0.0.1
+[0.3.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.2.6...v0.3.0
+[0.2.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.2.5...v0.2.6
+[0.2.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.1.0...v0.2.5
+[0.1.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.0.1...v0.1.0
+[0.0.1]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/releases/tag/v0.0.1

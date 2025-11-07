@@ -204,29 +204,19 @@ export function activate(context: vscode.ExtensionContext) {
         const defaultRelativePath = config.get<string>('defaultRelativePath');
 
         let targetPath: string;
+        let relativePath: string | undefined;
 
         if (defaultRelativePath && defaultRelativePath.trim()) {
             // 相対パスを絶対パスに変換
-            const relativePath = defaultRelativePath.trim();
+            relativePath = defaultRelativePath.trim();
             targetPath = path.resolve(workspaceRoot, relativePath);
-
-            // パスの存在確認
-            try {
-                const stat = fs.statSync(targetPath);
-                if (!stat.isDirectory()) {
-                    throw new Error('Not a directory');
-                }
-            } catch (error) {
-                vscode.window.showWarningMessage(`Configured relative path is invalid: ${relativePath}`);
-                // フォールバックとしてワークスペースルートを使用
-                targetPath = workspaceRoot;
-            }
         } else {
             // ワークスペースルートを使用
             targetPath = workspaceRoot;
+            relativePath = undefined;
         }
 
-        aiCodingSidebarProvider.setRootPath(targetPath);
+        aiCodingSidebarProvider.setRootPath(targetPath, relativePath);
 
         // ファイル一覧ペインにも同じパスを設定（パスが存在する場合のみ）
         try {
@@ -1001,7 +991,38 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage(`Copied relative path: ${relativePath}`);
     });
 
-    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addFolderCommand, deleteFolderCommand, copyRelativePathCommand);
+    // デフォルトパスを作成するコマンドを登録
+    const createDefaultPathCommand = vscode.commands.registerCommand('aiCodingSidebar.createDefaultPath', async (targetPath: string, relativePath?: string) => {
+        if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
+            vscode.window.showErrorMessage('No workspace is open');
+            return;
+        }
+
+        const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
+
+        try {
+            // ディレクトリを作成
+            fs.mkdirSync(targetPath, { recursive: true });
+
+            // 作成成功メッセージ
+            const displayPath = relativePath || path.relative(workspaceRoot, targetPath);
+            vscode.window.showInformationMessage(`Created directory: ${displayPath}`);
+
+            // ビューを更新
+            aiCodingSidebarProvider.setRootPath(targetPath, relativePath);
+            aiCodingSidebarDetailsProvider.setRootPath(targetPath);
+
+            // フォルダを選択状態にする
+            setTimeout(async () => {
+                await selectInitialFolder(treeView, targetPath);
+            }, 300);
+
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to create directory: ${error}`);
+        }
+    });
+
+    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addFolderCommand, deleteFolderCommand, copyRelativePathCommand, createDefaultPathCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({
@@ -1123,6 +1144,8 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
     private refreshDebounceTimer: NodeJS.Timeout | undefined;
     private readonly listenerId = 'ai-coding-sidebar';
     private fileWatcherService: FileWatcherService | undefined;
+    private pathNotFound: boolean = false;
+    private configuredRelativePath: string | undefined;
 
     constructor(fileWatcherService?: FileWatcherService) {
         this.fileWatcherService = fileWatcherService;
@@ -1132,12 +1155,30 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
         this.treeView = treeView;
     }
 
-    setRootPath(path: string): void {
+    setRootPath(path: string, relativePath?: string): void {
         this.rootPath = path;
         this.activeFolderPath = path;
+        this.configuredRelativePath = relativePath;
+
+        // パスの存在確認
+        try {
+            const stat = fs.statSync(path);
+            if (!stat.isDirectory()) {
+                this.pathNotFound = true;
+            } else {
+                this.pathNotFound = false;
+            }
+        } catch (error) {
+            this.pathNotFound = true;
+        }
+
         this.updateTitle();
         this.setupFileWatcher();
         this.refresh();
+    }
+
+    getConfiguredRelativePath(): string | undefined {
+        return this.configuredRelativePath;
     }
 
     private setupFileWatcher(): void {
@@ -1218,6 +1259,27 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
     getChildren(element?: FileItem): Thenable<FileItem[]> {
         if (!this.rootPath) {
             return Promise.resolve([]);
+        }
+
+        // ルートレベルでパスが存在しない場合は、作成ボタンを表示
+        if (!element && this.pathNotFound) {
+            const createButton = new FileItem(
+                `Create directory: ${this.configuredRelativePath || this.rootPath}`,
+                vscode.TreeItemCollapsibleState.None,
+                this.rootPath,
+                false,
+                0,
+                new Date()
+            );
+            createButton.contextValue = 'createDirectoryButton';
+            createButton.iconPath = new vscode.ThemeIcon('new-folder');
+            createButton.command = {
+                command: 'aiCodingSidebar.createDefaultPath',
+                title: 'Create Directory',
+                arguments: [this.rootPath, this.configuredRelativePath]
+            };
+            createButton.tooltip = `Click to create directory: ${this.configuredRelativePath || this.rootPath}`;
+            return Promise.resolve([createButton]);
         }
 
         const targetPath = element ? element.resourceUri!.fsPath : this.rootPath;
@@ -2335,6 +2397,22 @@ class WorkspaceSettingsProvider implements vscode.TreeDataProvider<WorkspaceSett
                                 title: 'Customize Template'
                             },
                             new vscode.ThemeIcon('file-text')
+                        )
+                    ],
+                    vscode.TreeItemCollapsibleState.Collapsed
+                ),
+                // Note（親項目）
+                new WorkspaceSettingItem(
+                    'Note',
+                    'Keyboard shortcuts and tips',
+                    undefined,
+                    new vscode.ThemeIcon('info'),
+                    [
+                        new WorkspaceSettingItem(
+                            'Focus Sidebar',
+                            'Cmd+Shift+A (macOS) / Ctrl+Shift+A (Windows/Linux)',
+                            undefined,
+                            new vscode.ThemeIcon('keyboard')
                         )
                     ],
                     vscode.TreeItemCollapsibleState.Collapsed

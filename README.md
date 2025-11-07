@@ -14,8 +14,14 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 
 ## Usage
 
+### Keyboard Shortcuts
+
+| Shortcut | Action |
+| --- | --- |
+| `Cmd+Shift+A` (macOS)<br>`Ctrl+Shift+A` (Windows/Linux) | Focus AI Coding Sidebar |
+
 ### Basic actions
-1. Click the "AI Coding Sidebar" icon in the activity bar.
+1. Click the "AI Coding Sidebar" icon in the activity bar (or press `Cmd+Shift+A` / `Ctrl+Shift+A`).
 2. Use Directory List to create the folder you use for AI coding.
 3. Create Markdown files from Markdown List.
 4. Write instructions for the AI in the Markdown file.
@@ -95,6 +101,9 @@ Use the following variables inside a template:
 - `docs/api` → `<project>/docs/api`
 - `.claude` → `<project>/.claude`
 - empty string → workspace root
+
+#### When the configured path doesn't exist
+If the default relative path doesn't exist, Directory List displays a "Create directory" button. Click it to automatically create the directory and display its contents.
 
 ### Other
 

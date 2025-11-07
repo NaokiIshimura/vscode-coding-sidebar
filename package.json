@@ -2,7 +2,7 @@
   "name": "ai-coding-sidebar",
   "displayName": "AI Coding Sidebar",
   "description": "A sidebar extension that strengthens integration with AI coding tools.Browse and manage files and folders efficiently to keep coding with AI smooth.",
-  "version": "0.2.9",
+  "version": "0.3.0",
   "publisher": "nacn",
   "icon": "images/icon.png",
   "repository": {
@@ -122,26 +122,6 @@
         "command": "aiCodingSidebar.copyRelativePath",
         "title": "Copy Relative Path",
         "icon": "$(copy)"
-      },
-      {
-        "command": "aiCodingSidebar.copy",
-        "title": "Copy",
-        "icon": "$(copy)"
-      },
-      {
-        "command": "aiCodingSidebar.cut",
-        "title": "Cut",
-        "icon": "$(scissors)"
-      },
-      {
-        "command": "aiCodingSidebar.paste",
-        "title": "Paste",
-        "icon": "$(clippy)"
-      },
-      {
-        "command": "aiCodingSidebar.searchInWorkspace",
-        "title": "Search in Workspace",
-        "icon": "$(search)"
       }
     ],
     "views": {
@@ -150,10 +130,6 @@
           "id": "workspaceSettings",
           "name": "Settings",
           "visibility": "collapsed"
-        },
-        {
-          "id": "workspaceExplorer",
-          "name": "Explorer"
         },
         {
           "id": "aiCodingSidebarExplorer",
@@ -209,11 +185,6 @@
           "command": "aiCodingSidebar.refreshGitChanges",
           "when": "view == gitChanges",
           "group": "navigation"
-        },
-        {
-          "command": "aiCodingSidebar.searchInWorkspace",
-          "when": "view == workspaceExplorer",
-          "group": "navigation@1"
         }
       ],
       "view/item/context": [
@@ -261,84 +232,10 @@
           "command": "aiCodingSidebar.copyRelativePath",
           "when": "view == aiCodingSidebarDetails",
           "group": "1_copy"
-        },
-        {
-          "command": "aiCodingSidebar.copy",
-          "when": "view == workspaceExplorer",
-          "group": "1_clipboard@1"
-        },
-        {
-          "command": "aiCodingSidebar.cut",
-          "when": "view == workspaceExplorer",
-          "group": "1_clipboard@2"
-        },
-        {
-          "command": "aiCodingSidebar.paste",
-          "when": "view == workspaceExplorer && viewItem == directory",
-          "group": "1_clipboard@3"
-        },
-        {
-          "command": "aiCodingSidebar.copyRelativePath",
-          "when": "view == workspaceExplorer",
-          "group": "1_copy"
-        },
-        {
-          "command": "aiCodingSidebar.rename",
-          "when": "view == workspaceExplorer",
-          "group": "2_edit@1"
-        },
-        {
-          "command": "aiCodingSidebar.delete",
-          "when": "view == workspaceExplorer",
-          "group": "2_edit@2"
-        },
-        {
-          "command": "aiCodingSidebar.createMarkdownFile",
-          "when": "view == workspaceExplorer && viewItem == directory",
-          "group": "3_new@1"
-        },
-        {
-          "command": "aiCodingSidebar.createFile",
-          "when": "view == workspaceExplorer && viewItem == directory",
-          "group": "3_new@2"
-        },
-        {
-          "command": "aiCodingSidebar.createFolder",
-          "when": "view == workspaceExplorer && viewItem == directory",
-          "group": "3_new@3"
         }
       ]
     },
-    "keybindings": [
-      {
-        "command": "aiCodingSidebar.copy",
-        "key": "ctrl+c",
-        "mac": "cmd+c",
-        "when": "focusedView == workspaceExplorer"
-      },
-      {
-        "command": "aiCodingSidebar.cut",
-        "key": "ctrl+x",
-        "mac": "cmd+x",
-        "when": "focusedView == workspaceExplorer"
-      },
-      {
-        "command": "aiCodingSidebar.paste",
-        "key": "ctrl+v",
-        "mac": "cmd+v",
-        "when": "focusedView == workspaceExplorer"
-      },
-      {
-        "command": "aiCodingSidebar.delete",
-        "key": "delete",
-        "when": "focusedView == workspaceExplorer"
-      },
-      {
-        "command": "aiCodingSidebar.rename",
-        "key": "f2",
-        "when": "focusedView == workspaceExplorer"
-      }
-    ],
+    "keybindings": [],
     "configuration": {
       "title": "AI Coding Sidebar",
       "properties": {

@@ -13,6 +13,7 @@ import { ContextMenuManager } from './services/ContextMenuManager';
 import { DragDropHandler } from './services/DragDropHandler';
 import { SearchService } from './services/SearchService';
 import { ConfigurationProvider } from './services/ConfigurationProvider';
+import { FileWatcherService } from './services/FileWatcherService';
 
 // デフォルトテンプレート内容
 const DEFAULT_TEMPLATE = `created: {{datetime}}
@@ -172,6 +173,10 @@ export function activate(context: vscode.ExtensionContext) {
     const keyboardHandler = new KeyboardShortcutHandler(explorerManager, context);
     const contextMenuManager = new ContextMenuManager(explorerManager);
 
+    // 共通のファイルウォッチャーサービスを作成
+    const fileWatcherService = new FileWatcherService();
+    context.subscriptions.push(fileWatcherService);
+
     // ステータスバーアイテムを作成
     const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     statusBarItem.text = "$(gear) AI Coding Sidebar Settings";
@@ -185,11 +190,12 @@ export function activate(context: vscode.ExtensionContext) {
     const workspaceExplorerProvider = new WorkspaceExplorerProvider(
         fileOperationService,
         configProvider,
-        searchService
+        searchService,
+        fileWatcherService
     );
-    const aiCodingSidebarProvider = new AiCodingSidebarProvider();
-    const aiCodingSidebarDetailsProvider = new AiCodingSidebarDetailsProvider(aiCodingSidebarProvider);
-    const gitChangesProvider = new GitChangesProvider();
+    const aiCodingSidebarProvider = new AiCodingSidebarProvider(fileWatcherService);
+    const aiCodingSidebarDetailsProvider = new AiCodingSidebarDetailsProvider(aiCodingSidebarProvider, fileWatcherService);
+    const gitChangesProvider = new GitChangesProvider(fileWatcherService);
 
     // プロジェクトルートを設定
     const initializeWithWorkspaceRoot = async () => {
@@ -268,6 +274,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     // ビューが表示されたときに現在のファイルを選択
     workspaceView.onDidChangeVisibility(async () => {
+        // ビューの可視性に応じてファイルウォッチャーを制御
+        workspaceExplorerProvider.handleVisibilityChange(workspaceView.visible);
+
         if (workspaceView.visible && vscode.window.activeTextEditor) {
             await workspaceExplorerProvider.revealActiveFile(vscode.window.activeTextEditor);
         }
@@ -291,6 +300,11 @@ export function activate(context: vscode.ExtensionContext) {
     // TreeViewをProviderに設定
     aiCodingSidebarProvider.setTreeView(treeView);
 
+    // ビューの可視性変更を監視
+    treeView.onDidChangeVisibility(() => {
+        aiCodingSidebarProvider.handleVisibilityChange(treeView.visible);
+    });
+
     const detailsView = vscode.window.createTreeView('aiCodingSidebarDetails', {
         treeDataProvider: aiCodingSidebarDetailsProvider,
         showCollapseAll: true,
@@ -298,13 +312,23 @@ export function activate(context: vscode.ExtensionContext) {
         dragAndDropController: aiCodingSidebarDetailsProvider
     });
 
+    // AiCodingSidebarDetailsProviderにdetailsViewの参照を渡す
+    aiCodingSidebarDetailsProvider.setTreeView(detailsView);
+
+    // ビューの可視性変更を監視
+    detailsView.onDidChangeVisibility(() => {
+        aiCodingSidebarDetailsProvider.handleVisibilityChange(detailsView.visible);
+    });
+
     const gitChangesView = vscode.window.createTreeView('gitChanges', {
         treeDataProvider: gitChangesProvider,
         showCollapseAll: false
     });
 
-    // AiCodingSidebarDetailsProviderにdetailsViewの参照を渡す
-    aiCodingSidebarDetailsProvider.setTreeView(detailsView);
+    // ビューの可視性変更を監視
+    gitChangesView.onDidChangeVisibility(() => {
+        gitChangesProvider.handleVisibilityChange(gitChangesView.visible);
+    });
 
 
 
@@ -1300,12 +1324,15 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
 
     private rootPath: string | undefined;
     private treeView: vscode.TreeView<FileItem> | undefined;
-    private fileWatcher: vscode.FileSystemWatcher | undefined;
     private itemCache: Map<string, FileItem[]> = new Map();  // パスをキーとしたFileItemのキャッシュ
     private activeFolderPath: string | undefined;
     private refreshDebounceTimer: NodeJS.Timeout | undefined;
+    private readonly listenerId = 'ai-coding-sidebar';
+    private fileWatcherService: FileWatcherService | undefined;
 
-    constructor() { }
+    constructor(fileWatcherService?: FileWatcherService) {
+        this.fileWatcherService = fileWatcherService;
+    }
 
     setTreeView(treeView: vscode.TreeView<FileItem>): void {
         this.treeView = treeView;
@@ -1320,36 +1347,34 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
     }
 
     private setupFileWatcher(): void {
-        // 既存のウォッチャーを破棄
-        if (this.fileWatcher) {
-            this.fileWatcher.dispose();
-            this.fileWatcher = undefined;
+        if (!this.fileWatcherService || !this.rootPath) {
+            return;
         }
 
-        // 新しいウォッチャーを設定（現在のパス配下を監視）
-        if (this.rootPath) {
-            const watchPattern = new vscode.RelativePattern(this.rootPath, '**/*');
-            this.fileWatcher = vscode.workspace.createFileSystemWatcher(watchPattern);
+        // 共通のファイルウォッチャーサービスにリスナーを登録
+        this.fileWatcherService.registerListener(this.listenerId, (uri) => {
+            this.debouncedRefresh(uri.fsPath);
+        });
+    }
 
-            // ファイル・フォルダの変更を監視して自動更新
-            this.fileWatcher.onDidChange((uri) => {
-                this.debouncedRefresh(uri.fsPath);
-            });
+    /**
+     * ビューの可視性に応じてファイルウォッチャーを制御
+     */
+    handleVisibilityChange(visible: boolean): void {
+        if (!this.fileWatcherService) {
+            return;
+        }
 
-            this.fileWatcher.onDidCreate((uri) => {
-                this.debouncedRefresh(uri.fsPath);
-            });
-
-            this.fileWatcher.onDidDelete((uri) => {
-                this.debouncedRefresh(uri.fsPath);
-            });
+        if (visible) {
+            this.fileWatcherService.enableListener(this.listenerId);
+        } else {
+            this.fileWatcherService.disableListener(this.listenerId);
         }
     }
 
     dispose(): void {
-        if (this.fileWatcher) {
-            this.fileWatcher.dispose();
-            this.fileWatcher = undefined;
+        if (this.fileWatcherService) {
+            this.fileWatcherService.unregisterListener(this.listenerId);
         }
         if (this.refreshDebounceTimer) {
             clearTimeout(this.refreshDebounceTimer);
@@ -1568,12 +1593,17 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
     private rootPath: string | undefined;
     private projectRootPath: string | undefined;
     private treeView: vscode.TreeView<FileItem> | undefined;
-    private fileWatcher: vscode.FileSystemWatcher | undefined;
     private selectedItem: FileItem | undefined;
     private itemCache: Map<string, FileItem[]> = new Map();  // パスをキーとしたFileItemのキャッシュ
     private refreshDebounceTimer: NodeJS.Timeout | undefined;
+    private readonly listenerId = 'ai-coding-sidebar-details';
+    private fileWatcherService: FileWatcherService | undefined;
 
-    constructor(private readonly folderTreeProvider: AiCodingSidebarProvider) {
+    constructor(
+        private readonly folderTreeProvider: AiCodingSidebarProvider,
+        fileWatcherService?: FileWatcherService
+    ) {
+        this.fileWatcherService = fileWatcherService;
         // プロジェクトルートパスを取得
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
             this.projectRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
@@ -1641,36 +1671,34 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
     }
 
     private setupFileWatcher(): void {
-        // 既存のウォッチャーを破棄
-        if (this.fileWatcher) {
-            this.fileWatcher.dispose();
-            this.fileWatcher = undefined;
+        if (!this.fileWatcherService || !this.rootPath) {
+            return;
         }
 
-        // 新しいウォッチャーを設定（現在のパス配下を監視）
-        if (this.rootPath) {
-            const watchPattern = new vscode.RelativePattern(this.rootPath, '**/*');
-            this.fileWatcher = vscode.workspace.createFileSystemWatcher(watchPattern);
+        // 共通のファイルウォッチャーサービスにリスナーを登録
+        this.fileWatcherService.registerListener(this.listenerId, (uri) => {
+            this.debouncedRefresh(uri.fsPath);
+        });
+    }
 
-            // ファイル・フォルダの変更を監視して自動更新
-            this.fileWatcher.onDidChange((uri) => {
-                this.debouncedRefresh(uri.fsPath);
-            });
+    /**
+     * ビューの可視性に応じてファイルウォッチャーを制御
+     */
+    handleVisibilityChange(visible: boolean): void {
+        if (!this.fileWatcherService) {
+            return;
+        }
 
-            this.fileWatcher.onDidCreate((uri) => {
-                this.debouncedRefresh(uri.fsPath);
-            });
-
-            this.fileWatcher.onDidDelete((uri) => {
-                this.debouncedRefresh(uri.fsPath);
-            });
+        if (visible) {
+            this.fileWatcherService.enableListener(this.listenerId);
+        } else {
+            this.fileWatcherService.disableListener(this.listenerId);
         }
     }
 
     dispose(): void {
-        if (this.fileWatcher) {
-            this.fileWatcher.dispose();
-            this.fileWatcher = undefined;
+        if (this.fileWatcherService) {
+            this.fileWatcherService.unregisterListener(this.listenerId);
         }
         if (this.refreshDebounceTimer) {
             clearTimeout(this.refreshDebounceTimer);
@@ -1962,38 +1990,20 @@ class GitChangesProvider implements vscode.TreeDataProvider<GitFileItem> {
     readonly onDidChangeTreeData: vscode.Event<GitFileItem | undefined | null | void> = this._onDidChangeTreeData.event;
     private refreshDebounceTimer: NodeJS.Timeout | undefined;
     private isGitOperationInProgress: boolean = false;
-    private fileWatcher: vscode.FileSystemWatcher | undefined;
+    private readonly listenerId = 'git-changes';
+    private fileWatcherService: FileWatcherService | undefined;
 
-    constructor() {
-        // ファイルシステムの変更を監視（.gitディレクトリとnode_modulesは除外）
-        // globパターンで除外設定を明示的に指定
-        this.fileWatcher = vscode.workspace.createFileSystemWatcher(
-            new vscode.RelativePattern(
-                vscode.workspace.workspaceFolders?.[0] || '',
-                '**/{[!.],.[!g],.[g][!i],.[gi][!t]}*'  // .gitで始まるものを除外
-            ),
-            false,  // create
-            false,  // change
-            false   // delete
-        );
+    constructor(fileWatcherService?: FileWatcherService) {
+        this.fileWatcherService = fileWatcherService;
 
-        // デバウンス処理付きでrefreshを呼び出す
-        this.fileWatcher.onDidChange((uri) => {
-            // .gitディレクトリ内のファイルは無視
-            if (!uri.fsPath.includes('.git')) {
+        if (this.fileWatcherService) {
+            // 共通のファイルウォッチャーサービスにリスナーを登録
+            this.fileWatcherService.registerListener(this.listenerId, (uri) => {
                 this.debouncedRefresh();
-            }
-        });
-        this.fileWatcher.onDidCreate((uri) => {
-            if (!uri.fsPath.includes('.git')) {
-                this.debouncedRefresh();
-            }
-        });
-        this.fileWatcher.onDidDelete((uri) => {
-            if (!uri.fsPath.includes('.git')) {
-                this.debouncedRefresh();
-            }
-        });
+            });
+            // デフォルトで有効化
+            this.fileWatcherService.enableListener(this.listenerId);
+        }
     }
 
     private debouncedRefresh(): void {
@@ -2017,12 +2027,27 @@ class GitChangesProvider implements vscode.TreeDataProvider<GitFileItem> {
         this._onDidChangeTreeData.fire();
     }
 
+    /**
+     * ビューの可視性に応じてファイルウォッチャーを制御
+     */
+    handleVisibilityChange(visible: boolean): void {
+        if (!this.fileWatcherService) {
+            return;
+        }
+
+        if (visible) {
+            this.fileWatcherService.enableListener(this.listenerId);
+        } else {
+            this.fileWatcherService.disableListener(this.listenerId);
+        }
+    }
+
     dispose(): void {
         if (this.refreshDebounceTimer) {
             clearTimeout(this.refreshDebounceTimer);
         }
-        if (this.fileWatcher) {
-            this.fileWatcher.dispose();
+        if (this.fileWatcherService) {
+            this.fileWatcherService.unregisterListener(this.listenerId);
         }
     }
 
@@ -2429,14 +2454,15 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem>, vs
     readonly onDidChangeTreeData: vscode.Event<FileItem | undefined | null | void> = this._onDidChangeTreeData.event;
     private treeView: vscode.TreeView<FileItem> | undefined;
     private itemCache: Map<string, FileItem> = new Map();  // パスをキーとしたFileItemのキャッシュ
-    private fileWatcher: vscode.FileSystemWatcher | undefined;
     private refreshDebounceTimer: NodeJS.Timeout | undefined;
+    private readonly listenerId = 'workspace-explorer';
 
     // サービスクラス
     private dragDropHandler: DragDropHandler<FileItem>;
     private multiSelectionManager: MultiSelectionManager;
     private configurationProvider: ConfigurationProvider;
     private searchService: SearchService;
+    private fileWatcherService: FileWatcherService;
 
     // ドラッグ&ドロップのMIMEタイプ
     readonly dropMimeTypes = ['application/vnd.code.tree.fileItem', 'text/uri-list'];
@@ -2445,10 +2471,12 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem>, vs
     constructor(
         private fileOperationService: FileOperationService,
         configurationProvider: ConfigurationProvider,
-        searchService: SearchService
+        searchService: SearchService,
+        fileWatcherService: FileWatcherService
     ) {
         this.configurationProvider = configurationProvider;
         this.searchService = searchService;
+        this.fileWatcherService = fileWatcherService;
         this.dragDropHandler = new DragDropHandler(fileOperationService);
         this.multiSelectionManager = new MultiSelectionManager();
         this.setupFileWatcher();
@@ -2636,42 +2664,34 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem>, vs
     }
 
     private setupFileWatcher(): void {
-        // 既存のウォッチャーを破棄
-        if (this.fileWatcher) {
-            this.fileWatcher.dispose();
-            this.fileWatcher = undefined;
+        // 共通のファイルウォッチャーサービスにリスナーを登録
+        this.fileWatcherService.registerListener(this.listenerId, (uri) => {
+            this.debouncedRefresh(uri.fsPath);
+        });
+
+        // autoRefresh設定に応じてリスナーを有効/無効化
+        if (this.configurationProvider.getAutoRefresh()) {
+            this.fileWatcherService.enableListener(this.listenerId);
+        } else {
+            this.fileWatcherService.disableListener(this.listenerId);
         }
+    }
 
-        // autoRefresh設定が無効の場合は監視しない
-        if (!this.configurationProvider.getAutoRefresh()) {
-            return;
-        }
-
-        // ワークスペースフォルダがある場合のみ監視
-        if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
-            const watchPattern = new vscode.RelativePattern(vscode.workspace.workspaceFolders[0], '**/*');
-            this.fileWatcher = vscode.workspace.createFileSystemWatcher(watchPattern);
-
-            // ファイル・フォルダの変更を監視して自動更新
-            this.fileWatcher.onDidChange((uri) => {
-                this.debouncedRefresh(uri.fsPath);
-            });
-
-            this.fileWatcher.onDidCreate((uri) => {
-                this.debouncedRefresh(uri.fsPath);
-            });
-
-            this.fileWatcher.onDidDelete((uri) => {
-                this.debouncedRefresh(uri.fsPath);
-            });
+    /**
+     * ビューの可視性に応じてファイルウォッチャーを制御
+     */
+    handleVisibilityChange(visible: boolean): void {
+        if (visible && this.configurationProvider.getAutoRefresh()) {
+            this.fileWatcherService.enableListener(this.listenerId);
+        } else {
+            this.fileWatcherService.disableListener(this.listenerId);
         }
     }
 
     dispose(): void {
-        if (this.fileWatcher) {
-            this.fileWatcher.dispose();
-            this.fileWatcher = undefined;
-        }
+        // 共通のファイルウォッチャーサービスからリスナーを登録解除
+        this.fileWatcherService.unregisterListener(this.listenerId);
+
         if (this.refreshDebounceTimer) {
             clearTimeout(this.refreshDebounceTimer);
             this.refreshDebounceTimer = undefined;

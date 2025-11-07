@@ -1289,7 +1289,32 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
             return Promise.resolve([createButton]);
         }
 
-        const targetPath = element ? element.resourceUri!.fsPath : this.rootPath;
+        // ルートレベル（element が undefined）の場合、rootPath 自体をノードとして返す
+        if (!element) {
+            const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+            let displayName: string;
+
+            if (workspaceRoot) {
+                const relativePath = path.relative(workspaceRoot, this.rootPath);
+                displayName = relativePath === '' ? path.basename(this.rootPath) : relativePath;
+            } else {
+                displayName = path.basename(this.rootPath);
+            }
+
+            const rootItem = new FileItem(
+                displayName,
+                vscode.TreeItemCollapsibleState.Expanded,
+                this.rootPath,
+                true,
+                0,
+                new Date()
+            );
+            rootItem.contextValue = 'directory';
+
+            return Promise.resolve([rootItem]);
+        }
+
+        const targetPath = element.resourceUri!.fsPath;
 
         // キャッシュに存在する場合は返す
         if (this.itemCache.has(targetPath)) {
@@ -1348,10 +1373,37 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
             return undefined;
         }
 
+        // rootItem自体の親はundefined
+        if (element.filePath === this.rootPath) {
+            return undefined;
+        }
+
         const parentPath = path.dirname(element.filePath);
 
-        if (!parentPath || parentPath === element.filePath || parentPath === this.rootPath) {
+        if (!parentPath || parentPath === element.filePath) {
             return undefined;
+        }
+
+        // 親がrootPathの場合、rootPath自体を表すFileItemを返す
+        if (parentPath === this.rootPath) {
+            const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+            let displayName: string;
+
+            if (workspaceRoot) {
+                const relativePath = path.relative(workspaceRoot, this.rootPath);
+                displayName = relativePath === '' ? path.basename(this.rootPath) : relativePath;
+            } else {
+                displayName = path.basename(this.rootPath);
+            }
+
+            return new FileItem(
+                displayName,
+                vscode.TreeItemCollapsibleState.Expanded,
+                this.rootPath,
+                true,
+                0,
+                new Date()
+            );
         }
 
         if (!parentPath.startsWith(this.rootPath)) {

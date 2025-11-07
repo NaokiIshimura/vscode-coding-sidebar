@@ -1332,16 +1332,16 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
             this.fileWatcher = vscode.workspace.createFileSystemWatcher(watchPattern);
 
             // ファイル・フォルダの変更を監視して自動更新
-            this.fileWatcher.onDidChange(() => {
-                this.debouncedRefresh();
+            this.fileWatcher.onDidChange((uri) => {
+                this.debouncedRefresh(uri.fsPath);
             });
 
-            this.fileWatcher.onDidCreate(() => {
-                this.debouncedRefresh();
+            this.fileWatcher.onDidCreate((uri) => {
+                this.debouncedRefresh(uri.fsPath);
             });
 
-            this.fileWatcher.onDidDelete(() => {
-                this.debouncedRefresh();
+            this.fileWatcher.onDidDelete((uri) => {
+                this.debouncedRefresh(uri.fsPath);
             });
         }
     }
@@ -1368,18 +1368,28 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
         return this.rootPath;
     }
 
-    refresh(): void {
-        this.itemCache.clear();  // キャッシュをクリア
+    refresh(targetPath?: string): void {
+        if (targetPath) {
+            // 特定のパスとその親ディレクトリのキャッシュのみクリア
+            this.itemCache.delete(targetPath);
+            const parentPath = path.dirname(targetPath);
+            if (parentPath && parentPath !== targetPath) {
+                this.itemCache.delete(parentPath);
+            }
+        } else {
+            // 全体更新の場合のみ全キャッシュをクリア
+            this.itemCache.clear();
+        }
         this._onDidChangeTreeData.fire();
     }
 
-    private debouncedRefresh(): void {
+    private debouncedRefresh(targetPath?: string): void {
         if (this.refreshDebounceTimer) {
             clearTimeout(this.refreshDebounceTimer);
         }
         this.refreshDebounceTimer = setTimeout(() => {
-            this.refresh();
-        }, 500);
+            this.refresh(targetPath);
+        }, 1500);  // 500ms → 1500msに延長
     }
 
     getTreeItem(element: FileItem): vscode.TreeItem {
@@ -1643,16 +1653,16 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
             this.fileWatcher = vscode.workspace.createFileSystemWatcher(watchPattern);
 
             // ファイル・フォルダの変更を監視して自動更新
-            this.fileWatcher.onDidChange(() => {
-                this.debouncedRefresh();
+            this.fileWatcher.onDidChange((uri) => {
+                this.debouncedRefresh(uri.fsPath);
             });
 
-            this.fileWatcher.onDidCreate(() => {
-                this.debouncedRefresh();
+            this.fileWatcher.onDidCreate((uri) => {
+                this.debouncedRefresh(uri.fsPath);
             });
 
-            this.fileWatcher.onDidDelete(() => {
-                this.debouncedRefresh();
+            this.fileWatcher.onDidDelete((uri) => {
+                this.debouncedRefresh(uri.fsPath);
             });
         }
     }
@@ -1668,18 +1678,28 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
         }
     }
 
-    refresh(): void {
-        this.itemCache.clear();  // キャッシュをクリア
+    refresh(targetPath?: string): void {
+        if (targetPath) {
+            // 特定のパスとその親ディレクトリのキャッシュのみクリア
+            this.itemCache.delete(targetPath);
+            const parentPath = path.dirname(targetPath);
+            if (parentPath && parentPath !== targetPath) {
+                this.itemCache.delete(parentPath);
+            }
+        } else {
+            // 全体更新の場合のみ全キャッシュをクリア
+            this.itemCache.clear();
+        }
         this._onDidChangeTreeData.fire();
     }
 
-    private debouncedRefresh(): void {
+    private debouncedRefresh(targetPath?: string): void {
         if (this.refreshDebounceTimer) {
             clearTimeout(this.refreshDebounceTimer);
         }
         this.refreshDebounceTimer = setTimeout(() => {
-            this.refresh();
-        }, 500);
+            this.refresh(targetPath);
+        }, 1500);  // 500ms → 1500msに延長
     }
 
     private getRelativePath(fullPath: string): string {
@@ -1982,10 +2002,10 @@ class GitChangesProvider implements vscode.TreeDataProvider<GitFileItem> {
             clearTimeout(this.refreshDebounceTimer);
         }
 
-        // 1000ms後に実行（連続した変更をまとめ、git操作との競合を回避）
+        // 1500ms後に実行（連続した変更をまとめ、git操作との競合を回避）
         this.refreshDebounceTimer = setTimeout(() => {
             this.refresh();
-        }, 1000);
+        }, 1500);  // 1000ms → 1500msに延長
     }
 
     refresh(): void {
@@ -2591,18 +2611,28 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem>, vs
         return this.itemCache.get(filePath);
     }
 
-    refresh(): void {
-        this.itemCache.clear();  // キャッシュをクリア
+    refresh(targetPath?: string): void {
+        if (targetPath) {
+            // 特定のパスとその親ディレクトリのキャッシュのみクリア
+            this.itemCache.delete(targetPath);
+            const parentPath = path.dirname(targetPath);
+            if (parentPath && parentPath !== targetPath) {
+                this.itemCache.delete(parentPath);
+            }
+        } else {
+            // 全体更新の場合のみ全キャッシュをクリア
+            this.itemCache.clear();
+        }
         this._onDidChangeTreeData.fire();
     }
 
-    private debouncedRefresh(): void {
+    private debouncedRefresh(targetPath?: string): void {
         if (this.refreshDebounceTimer) {
             clearTimeout(this.refreshDebounceTimer);
         }
         this.refreshDebounceTimer = setTimeout(() => {
-            this.refresh();
-        }, 500);
+            this.refresh(targetPath);
+        }, 1500);  // 500ms → 1500msに延長
     }
 
     private setupFileWatcher(): void {
@@ -2623,16 +2653,16 @@ class WorkspaceExplorerProvider implements vscode.TreeDataProvider<FileItem>, vs
             this.fileWatcher = vscode.workspace.createFileSystemWatcher(watchPattern);
 
             // ファイル・フォルダの変更を監視して自動更新
-            this.fileWatcher.onDidChange(() => {
-                this.debouncedRefresh();
+            this.fileWatcher.onDidChange((uri) => {
+                this.debouncedRefresh(uri.fsPath);
             });
 
-            this.fileWatcher.onDidCreate(() => {
-                this.debouncedRefresh();
+            this.fileWatcher.onDidCreate((uri) => {
+                this.debouncedRefresh(uri.fsPath);
             });
 
-            this.fileWatcher.onDidDelete(() => {
-                this.debouncedRefresh();
+            this.fileWatcher.onDidDelete((uri) => {
+                this.debouncedRefresh(uri.fsPath);
             });
         }
     }

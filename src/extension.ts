@@ -641,7 +641,7 @@ export function activate(context: vscode.ExtensionContext) {
                 aiCodingSidebarProvider.refresh();
 
                 // 作成したファイルをMarkdown Editor Viewで開く
-                await vscode.commands.executeCommand('markdown.showPreview', vscode.Uri.file(filePath));
+                await markdownEditorProvider.showFile(filePath);
 
                 vscode.window.showInformationMessage(`Created markdown file ${fileName}`);
             } else {

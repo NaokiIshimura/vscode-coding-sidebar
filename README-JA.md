@@ -9,7 +9,7 @@ AIコーディングツールとの連携を強化するサイドバー拡張機
 | --- | --- |
 | **Directory List** | 指定したディレクトリ配下を表示できる<br>settingsでデフォルトのパスを設定できる<br>ディレクトリを作成できる |
 | **Markdown List** | マークダウンリストを表示<br>マークダウンファイルを作成できる |
-| **Markdown Editor** | サイドバー内でMarkdownファイルを直接編集可能<br>Markdownファイルを選択すると自動的に表示<br>`Cmd+S` / `Ctrl+S`で保存<br>VSCodeエディタでファイルがアクティブになると自動的に読み取り専用モードに切り替わる |
+| **Markdown Editor** | サイドバー内でMarkdownファイルを直接編集可能<br>タイムスタンプ形式のMarkdownファイル（形式: `YYYY_MMDD_HHMM.md`）を選択すると自動的に表示<br>その他のMarkdownファイルは通常のエディタで開く<br>`Cmd+S` / `Ctrl+S`で保存<br>VSCodeエディタでファイルがアクティブになると自動的に読み取り専用モードに切り替わる |
 | **File Changes** | 変更されたファイルを一覧表示し、差分を確認できる |
 | **Settings** | ユーザ設定を開く<br>グローバル設定を開く<br>テンプレートをカスタマイズ<br>ショートカット機能: ターミナルを開く、デフォルトブランチへ切り替え、Git pull |
 
@@ -25,7 +25,7 @@ AIコーディングツールとの連携を強化するサイドバー拡張機
 1. アクティビティバーの「AI Coding Sidebar」アイコンをクリック（または`Cmd+Shift+A` / `Ctrl+Shift+A`を押す）
 2. Directory ListでAIコーディング用のディレクトリを作成
 3. Markdown Listでmarkdownファイルを作成
-4. Markdown ListでMarkdownファイルをクリックして、下部のMarkdown Editorビューで編集
+4. Markdown Listでタイムスタンプ形式のMarkdownファイル（例: `2025_1103_1227.md`）をクリックして、下部のMarkdown Editorビューで編集。その他のMarkdownファイルは通常のエディタで開く
 5. Markdown EditorでAIへの指示を記述し、`Cmd+S` / `Ctrl+S`で保存
 6. Markdown Listでファイルを右クリック → 相対パスをコピー
 7. AIへ相対パスをペースト

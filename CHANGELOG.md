@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-11-08
+
+### Added
+- **Rename Directory**: Added "Rename Directory" context menu item to Directory List view
+  - Right-click on any directory in Directory List to rename it
+  - Validates directory names and prevents invalid characters
+  - Updates both Directory List and Markdown List views after renaming
+
+### Changed
+- **Terminology Update**: Updated all "Folder" references to "Directory" for consistency
+  - Command names: `addFolder` → `addDirectory`, `deleteFolder` → `deleteDirectory`
+  - Menu labels: "Add Folder" → "Add Directory", "Delete Folder" → "Delete Directory"
+  - Function names and internal references updated throughout the codebase
+
 ## [0.3.7] - 2025-11-08
 
 ### Added
@@ -15,6 +29,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Shows the file path in the header for context
   - Positioned below Markdown List for easy access
   - Provides a seamless workflow for editing AI coding instructions without leaving the sidebar
+  - **Read-only Mode**: Automatically switches to read-only mode when the file is active in VSCode editor
+    - Prevents conflicts between simultaneous edits in editor and sidebar
+    - Displays "Read-only" indicator when the file is active in VSCode editor
+    - Dynamically toggles between editable and read-only based on active editor state
+    - Shows unsaved changes indicator (●) when content is modified
+    - Displays relative path from project root for context
+  - **Context Menu Integration**: Added context menu items for enhanced workflow
+    - "Open in Editor" menu item in Markdown List view to open files in VSCode editor
+    - "Copy Relative Path" menu item in both Markdown List and Markdown Editor views
 
 ## [0.3.6] - 2025-11-08
 
@@ -187,6 +210,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.4.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.7...v0.4.0
 [0.3.7]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.6...v0.3.7
 [0.3.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.5...v0.3.6
 [0.3.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.4...v0.3.5

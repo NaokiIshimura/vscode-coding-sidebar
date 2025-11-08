@@ -1098,6 +1098,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
+
     // 相対パスをコピーコマンドを登録
     const copyRelativePathCommand = vscode.commands.registerCommand('aiCodingSidebar.copyRelativePath', async (item?: FileItem | vscode.Uri) => {
         if (!item) {

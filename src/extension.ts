@@ -1016,6 +1016,13 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    // ターミナルを開くコマンドを登録
+    const openTerminalCommand = vscode.commands.registerCommand('aiCodingSidebar.openTerminal', async () => {
+        // VSCode内のターミナルを開く
+        await vscode.commands.executeCommand('workbench.action.terminal.toggleTerminal');
+        vscode.window.showInformationMessage('Terminal opened');
+    });
+
     // 相対パスをコピーコマンドを登録
     const copyRelativePathCommand = vscode.commands.registerCommand('aiCodingSidebar.copyRelativePath', async (item?: FileItem | vscode.Uri) => {
         if (!item) {
@@ -1073,7 +1080,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addFolderCommand, deleteFolderCommand, checkoutBranchCommand, copyRelativePathCommand, createDefaultPathCommand);
+    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addFolderCommand, deleteFolderCommand, checkoutBranchCommand, openTerminalCommand, copyRelativePathCommand, createDefaultPathCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({
@@ -2513,6 +2520,25 @@ class WorkspaceSettingsProvider implements vscode.TreeDataProvider<WorkspaceSett
                                 title: 'Customize Template'
                             },
                             new vscode.ThemeIcon('file-text')
+                        )
+                    ],
+                    vscode.TreeItemCollapsibleState.Collapsed
+                ),
+                // Shortcut（親項目）
+                new WorkspaceSettingItem(
+                    'Shortcut',
+                    'Quick actions and shortcuts',
+                    undefined,
+                    new vscode.ThemeIcon('zap'),
+                    [
+                        new WorkspaceSettingItem(
+                            'Open Terminal',
+                            'Open integrated terminal in VSCode',
+                            {
+                                command: 'aiCodingSidebar.openTerminal',
+                                title: 'Open Terminal'
+                            },
+                            new vscode.ThemeIcon('terminal')
                         )
                     ],
                     vscode.TreeItemCollapsibleState.Collapsed

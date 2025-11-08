@@ -10,7 +10,7 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 | **Directory List** | Display directories under a specified path.<br>Configure a default path in settings.<br>Create new directories. |
 | **Markdown List** | Display Markdown files and create new ones. |
 | **File Changes** | List modified files and review diffs. |
-| **Settings** | Open user or global settings.<br>Customize templates. |
+| **Settings** | Open user or global settings.<br>Customize templates.<br>Quick shortcuts for common actions. |
 
 ## Usage
 

@@ -1207,6 +1207,31 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    // Markdown Editorから相対パスをコピーするコマンドを登録
+    const copyRelativePathFromEditorCommand = vscode.commands.registerCommand('aiCodingSidebar.copyRelativePathFromEditor', async () => {
+        const currentFilePath = markdownEditorProvider.getCurrentFilePath();
+
+        if (!currentFilePath) {
+            vscode.window.showErrorMessage('No file is currently open in Markdown Editor');
+            return;
+        }
+
+        // ワークスペースルートを取得
+        if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
+            vscode.window.showErrorMessage('No workspace is open');
+            return;
+        }
+
+        const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
+
+        // 相対パスを計算
+        const relativePath = path.relative(workspaceRoot, currentFilePath);
+
+        // クリップボードにコピー
+        await vscode.env.clipboard.writeText(relativePath);
+        vscode.window.showInformationMessage(`Copied relative path: ${relativePath}`);
+    });
+
     // デフォルトパスを作成するコマンドを登録
     const createDefaultPathCommand = vscode.commands.registerCommand('aiCodingSidebar.createDefaultPath', async (targetPath: string, relativePath?: string) => {
         if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
@@ -1238,7 +1263,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addFolderCommand, deleteFolderCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, createDefaultPathCommand);
+    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addFolderCommand, deleteFolderCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({
@@ -2826,6 +2851,10 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to read file: ${error}`);
         }
+    }
+
+    public getCurrentFilePath(): string | undefined {
+        return this._currentFilePath;
     }
 
     private _getHtmlForWebview(webview: vscode.Webview) {

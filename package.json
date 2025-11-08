@@ -129,6 +129,11 @@
         "icon": "$(go-to-file)"
       },
       {
+        "command": "aiCodingSidebar.copyRelativePathFromEditor",
+        "title": "Copy Relative Path",
+        "icon": "$(copy)"
+      },
+      {
         "command": "aiCodingSidebar.checkoutBranch",
         "title": "Checkout Branch",
         "icon": "$(git-branch)"
@@ -273,6 +278,13 @@
           "command": "aiCodingSidebar.openInEditor",
           "when": "view == aiCodingSidebarDetails && viewItem == file",
           "group": "1_copy@2"
+        }
+      ],
+      "webview/context": [
+        {
+          "command": "aiCodingSidebar.copyRelativePathFromEditor",
+          "when": "webviewId == 'markdownEditor'",
+          "group": "1_copy@1"
         }
       ]
     },

@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Pre-fills branch name with the directory name for quick creation
   - Validates branch name and creates the branch using VS Code's Git extension
   - Automatically switches to the newly created branch
+  - If the branch already exists, it will switch to that branch instead of creating a duplicate
+  - Displays appropriate messages for both creation and switching scenarios
 
 ## [0.3.3] - 2025-01-13
 

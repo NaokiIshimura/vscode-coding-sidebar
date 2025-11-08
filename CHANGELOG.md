@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Markdown File Creation**: Created Markdown files now open in Markdown Editor View instead of text editor
+  - Applies to both "Create Markdown File" command and "Add Directory" command
   - Provides a more integrated experience when creating files from Markdown List
+  - When creating a new directory, the auto-created markdown file also opens in Markdown Editor View
   - Automatically displays the file content in the sidebar's Markdown Editor View
 
 ## [0.4.0] - 2025-11-08

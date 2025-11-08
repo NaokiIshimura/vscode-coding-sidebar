@@ -270,13 +270,13 @@
           "group": "3_edit@2"
         },
         {
-          "command": "aiCodingSidebar.copyRelativePath",
-          "when": "view == aiCodingSidebarDetails",
+          "command": "aiCodingSidebar.openInEditor",
+          "when": "view == aiCodingSidebarDetails && viewItem == file",
           "group": "1_copy@1"
         },
         {
-          "command": "aiCodingSidebar.openInEditor",
-          "when": "view == aiCodingSidebarDetails && viewItem == file",
+          "command": "aiCodingSidebar.copyRelativePath",
+          "when": "view == aiCodingSidebarDetails",
           "group": "1_copy@2"
         }
       ],

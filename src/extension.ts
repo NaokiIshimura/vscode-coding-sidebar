@@ -2828,6 +2828,16 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
 
     public async showFile(filePath: string) {
         this._currentFilePath = filePath;
+
+        // ファイルが既にエディタで開いているかチェック
+        const isOpenInEditor = vscode.window.visibleTextEditors.some(editor => {
+            return editor.document.uri.fsPath === filePath;
+        });
+
+        if (isOpenInEditor) {
+            vscode.window.showWarningMessage('This file is already open in the editor');
+        }
+
         try {
             const content = await fs.promises.readFile(filePath, 'utf8');
             this._currentContent = content;

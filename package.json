@@ -210,14 +210,14 @@
           "group": "2_workspace@3"
         },
         {
-          "command": "aiCodingSidebar.createBranch",
-          "when": "view == aiCodingSidebarExplorer && viewItem == directory",
-          "group": "2_workspace@4"
-        },
-        {
           "command": "aiCodingSidebar.copyRelativePath",
           "when": "view == aiCodingSidebarExplorer",
-          "group": "1_copy"
+          "group": "1_copy@1"
+        },
+        {
+          "command": "aiCodingSidebar.createBranch",
+          "when": "view == aiCodingSidebarExplorer && viewItem == directory",
+          "group": "1_copy@2"
         },
         {
           "command": "aiCodingSidebar.showInPanel",

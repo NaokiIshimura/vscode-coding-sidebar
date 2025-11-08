@@ -9,7 +9,7 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 | --- | --- |
 | **Directory List** | Display directories under a specified path.<br>Configure a default path in settings.<br>Create new directories. |
 | **Markdown List** | Display Markdown files and create new ones. |
-| **Markdown Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a Markdown file.<br>Save with `Cmd+S` / `Ctrl+S`.<br>Automatically switches to read-only mode when the file is active in VSCode editor. |
+| **Markdown Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a timestamp-named Markdown file (format: `YYYY_MMDD_HHMM.md`).<br>Other Markdown files open in the standard editor.<br>Save with `Cmd+S` / `Ctrl+S`.<br>Automatically switches to read-only mode when the file is active in VSCode editor. |
 | **File Changes** | List modified files and review diffs. |
 | **Settings** | Open user or global settings.<br>Customize templates.<br>Quick shortcuts: Open terminal, Checkout default branch, Git pull. |
 
@@ -25,7 +25,7 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 1. Click the "AI Coding Sidebar" icon in the activity bar (or press `Cmd+Shift+A` / `Ctrl+Shift+A`).
 2. Use Directory List to create the folder you use for AI coding.
 3. Create Markdown files from Markdown List.
-4. Click a Markdown file in Markdown List to edit it in the Markdown Editor view below.
+4. Click a timestamp-named Markdown file (e.g., `2025_1103_1227.md`) in Markdown List to edit it in the Markdown Editor view below. Other Markdown files open in the standard editor.
 5. Write instructions for the AI in the Markdown Editor and save with `Cmd+S` / `Ctrl+S`.
 6. Right-click the Markdown file in Markdown List and choose "Copy Relative Path," then share it with your AI tool.
 

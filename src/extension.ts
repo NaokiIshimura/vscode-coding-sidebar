@@ -319,9 +319,20 @@ export function activate(context: vscode.ExtensionContext) {
     detailsView.onDidChangeSelection(async (e) => {
         if (e.selection.length > 0) {
             const selectedItem = e.selection[0];
-            // Markdownファイルの場合はMarkdown Editorに表示
+            // Markdownファイルの場合
             if (!selectedItem.isDirectory && selectedItem.filePath.endsWith('.md')) {
-                await markdownEditorProvider.showFile(selectedItem.filePath);
+                // ファイル名がYYYY_MMDD_HHMM.md形式の場合はMarkdown Editorで開く
+                const fileName = path.basename(selectedItem.filePath);
+                const timestampPattern = /^\d{4}_\d{4}_\d{4}\.md$/;
+
+                if (timestampPattern.test(fileName)) {
+                    // YYYY_MMDD_HHMM.md形式の場合はMarkdown Editorで開く
+                    await markdownEditorProvider.showFile(selectedItem.filePath);
+                } else {
+                    // それ以外は通常のエディタで開く
+                    const fileUri = vscode.Uri.file(selectedItem.filePath);
+                    await vscode.commands.executeCommand('vscode.open', fileUri);
+                }
             }
         }
     });

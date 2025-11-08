@@ -132,6 +132,16 @@
         "command": "aiCodingSidebar.openTerminal",
         "title": "Open Terminal",
         "icon": "$(terminal)"
+      },
+      {
+        "command": "aiCodingSidebar.checkoutDefaultBranch",
+        "title": "Checkout Default Branch",
+        "icon": "$(git-branch)"
+      },
+      {
+        "command": "aiCodingSidebar.gitPull",
+        "title": "Git Pull",
+        "icon": "$(arrow-down)"
       }
     ],
     "views": {

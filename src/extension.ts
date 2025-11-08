@@ -1023,6 +1023,81 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage('Terminal opened');
     });
 
+    // デフォルトブランチにチェックアウトするコマンドを登録
+    const checkoutDefaultBranchCommand = vscode.commands.registerCommand('aiCodingSidebar.checkoutDefaultBranch', async () => {
+        try {
+            // Git リポジトリのルートディレクトリを取得
+            const gitExtension = vscode.extensions.getExtension('vscode.git')?.exports;
+            const git = gitExtension?.getAPI(1);
+
+            if (!git) {
+                vscode.window.showErrorMessage('Git extension is not available');
+                return;
+            }
+
+            if (git.repositories.length === 0) {
+                vscode.window.showErrorMessage('No git repository found');
+                return;
+            }
+
+            const repository = git.repositories[0];
+
+            // ローカルブランチの一覧を取得
+            const branches = await repository.getBranches({ remote: false });
+
+            // デフォルトブランチ候補（優先順位順）
+            const defaultBranchCandidates = ['main', 'master', 'develop'];
+
+            // 存在するブランチを探す
+            let defaultBranch: string | undefined;
+            for (const candidate of defaultBranchCandidates) {
+                if (branches.find((branch: any) => branch.name === candidate)) {
+                    defaultBranch = candidate;
+                    break;
+                }
+            }
+
+            if (!defaultBranch) {
+                vscode.window.showErrorMessage('Default branch (main/master/develop) not found');
+                return;
+            }
+
+            // デフォルトブランチにチェックアウト
+            await repository.checkout(defaultBranch);
+            vscode.window.showInformationMessage(`Checked out to default branch "${defaultBranch}"`);
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to checkout default branch: ${error}`);
+        }
+    });
+
+    // Git pullコマンドを登録
+    const gitPullCommand = vscode.commands.registerCommand('aiCodingSidebar.gitPull', async () => {
+        try {
+            // Git リポジトリのルートディレクトリを取得
+            const gitExtension = vscode.extensions.getExtension('vscode.git')?.exports;
+            const git = gitExtension?.getAPI(1);
+
+            if (!git) {
+                vscode.window.showErrorMessage('Git extension is not available');
+                return;
+            }
+
+            if (git.repositories.length === 0) {
+                vscode.window.showErrorMessage('No git repository found');
+                return;
+            }
+
+            const repository = git.repositories[0];
+
+            // Git pull実行
+            vscode.window.showInformationMessage('Pulling from remote...');
+            await repository.pull();
+            vscode.window.showInformationMessage('Successfully pulled from remote');
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to pull: ${error}`);
+        }
+    });
+
     // 相対パスをコピーコマンドを登録
     const copyRelativePathCommand = vscode.commands.registerCommand('aiCodingSidebar.copyRelativePath', async (item?: FileItem | vscode.Uri) => {
         if (!item) {
@@ -1080,7 +1155,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addFolderCommand, deleteFolderCommand, checkoutBranchCommand, openTerminalCommand, copyRelativePathCommand, createDefaultPathCommand);
+    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addFolderCommand, deleteFolderCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, createDefaultPathCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({
@@ -2539,6 +2614,24 @@ class WorkspaceSettingsProvider implements vscode.TreeDataProvider<WorkspaceSett
                                 title: 'Open Terminal'
                             },
                             new vscode.ThemeIcon('terminal')
+                        ),
+                        new WorkspaceSettingItem(
+                            'Checkout Default Branch',
+                            'Switch to the default branch (main/master)',
+                            {
+                                command: 'aiCodingSidebar.checkoutDefaultBranch',
+                                title: 'Checkout Default Branch'
+                            },
+                            new vscode.ThemeIcon('git-branch')
+                        ),
+                        new WorkspaceSettingItem(
+                            'Git Pull',
+                            'Pull the latest changes from remote',
+                            {
+                                command: 'aiCodingSidebar.gitPull',
+                                title: 'Git Pull'
+                            },
+                            new vscode.ThemeIcon('arrow-down')
                         )
                     ],
                     vscode.TreeItemCollapsibleState.Collapsed

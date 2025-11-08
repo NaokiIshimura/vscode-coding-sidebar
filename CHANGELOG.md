@@ -9,8 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Shortcut Menu in Settings View**: Added a new "Shortcut" section in the Settings view for quick access to common actions
-  - New "Open Terminal" shortcut to quickly toggle the integrated terminal in VS Code
-  - The Shortcut menu provides a centralized location for frequently used actions
+  - **Open Terminal**: Quickly toggle the integrated terminal in VS Code with a status message
+  - **Checkout Default Branch**: Automatically switch to the default branch (main/master/develop) with intelligent detection
+  - **Git Pull**: Pull the latest changes from the remote repository with progress feedback
+  - The Shortcut menu provides a centralized location for frequently used Git and workspace actions
   - Positioned between Workspace and Note sections in the Settings view
 
 ## [0.3.4] - 2025-01-08

@@ -190,6 +190,7 @@ export function activate(context: vscode.ExtensionContext) {
     const aiCodingSidebarProvider = new AiCodingSidebarProvider(fileWatcherService);
     const aiCodingSidebarDetailsProvider = new AiCodingSidebarDetailsProvider(aiCodingSidebarProvider, fileWatcherService);
     const gitChangesProvider = new GitChangesProvider(fileWatcherService);
+    const markdownEditorProvider = new MarkdownEditorProvider(context.extensionUri);
 
     // プロジェクトルートを設定
     const initializeWithWorkspaceRoot = async () => {
@@ -282,7 +283,13 @@ export function activate(context: vscode.ExtensionContext) {
         gitChangesProvider.handleVisibilityChange(gitChangesView.visible);
     });
 
-
+    // Markdown Editor Viewを登録
+    context.subscriptions.push(
+        vscode.window.registerWebviewViewProvider(
+            MarkdownEditorProvider.viewType,
+            markdownEditorProvider
+        )
+    );
 
     // 初期化を実行
     initializeWithWorkspaceRoot();
@@ -304,6 +311,17 @@ export function activate(context: vscode.ExtensionContext) {
             const selectedItem = e.selection[0];
             if (selectedItem.isDirectory) {
                 aiCodingSidebarDetailsProvider.setRootPath(selectedItem.filePath);
+            }
+        }
+    });
+
+    // ファイル一覧ビューの選択イベント - Markdown Editorに表示
+    detailsView.onDidChangeSelection(async (e) => {
+        if (e.selection.length > 0) {
+            const selectedItem = e.selection[0];
+            // Markdownファイルの場合はMarkdown Editorに表示
+            if (!selectedItem.isDirectory && selectedItem.filePath.endsWith('.md')) {
+                await markdownEditorProvider.showFile(selectedItem.filePath);
             }
         }
     });
@@ -906,7 +924,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // フォルダを追加コマンドを登録（フォルダツリーview用）
-    const addFolderCommand = vscode.commands.registerCommand('aiCodingSidebar.addFolder', async (item?: FileItem) => {
+    const addDirectoryCommand = vscode.commands.registerCommand('aiCodingSidebar.addDirectory', async (item?: FileItem) => {
         let targetPath: string;
 
         // コンテキストメニューから呼ばれた場合
@@ -1005,10 +1023,20 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    // フォルダ削除コマンドを登録（フォルダツリーview用）
-    const deleteFolderCommand = vscode.commands.registerCommand('aiCodingSidebar.deleteFolder', async (item?: FileItem) => {
+    // ディレクトリ名変更コマンドを登録
+    const renameDirectoryCommand = vscode.commands.registerCommand('aiCodingSidebar.renameDirectory', async (item?: FileItem) => {
         if (!item || !item.isDirectory) {
-            vscode.window.showErrorMessage('No folder is selected');
+            vscode.window.showErrorMessage('No directory is selected');
+            return;
+        }
+
+        await vscode.commands.executeCommand('aiCodingSidebar.rename', item);
+    });
+
+    // ディレクトリ削除コマンドを登録
+    const deleteDirectoryCommand = vscode.commands.registerCommand('aiCodingSidebar.deleteDirectory', async (item?: FileItem) => {
+        if (!item || !item.isDirectory) {
+            vscode.window.showErrorMessage('No directory is selected');
             return;
         }
 
@@ -1175,6 +1203,45 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage(`Copied relative path: ${relativePath}`);
     });
 
+    // エディタで開くコマンドを登録
+    const openInEditorCommand = vscode.commands.registerCommand('aiCodingSidebar.openInEditor', async (item?: FileItem) => {
+        if (!item) {
+            vscode.window.showErrorMessage('No file is selected');
+            return;
+        }
+
+        // ファイルの場合のみ開く
+        if (!item.isDirectory) {
+            const fileUri = vscode.Uri.file(item.filePath);
+            await vscode.commands.executeCommand('vscode.open', fileUri);
+        }
+    });
+
+    // Markdown Editorから相対パスをコピーするコマンドを登録
+    const copyRelativePathFromEditorCommand = vscode.commands.registerCommand('aiCodingSidebar.copyRelativePathFromEditor', async () => {
+        const currentFilePath = markdownEditorProvider.getCurrentFilePath();
+
+        if (!currentFilePath) {
+            vscode.window.showErrorMessage('No file is currently open in Markdown Editor');
+            return;
+        }
+
+        // ワークスペースルートを取得
+        if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
+            vscode.window.showErrorMessage('No workspace is open');
+            return;
+        }
+
+        const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
+
+        // 相対パスを計算
+        const relativePath = path.relative(workspaceRoot, currentFilePath);
+
+        // クリップボードにコピー
+        await vscode.env.clipboard.writeText(relativePath);
+        vscode.window.showInformationMessage(`Copied relative path: ${relativePath}`);
+    });
+
     // デフォルトパスを作成するコマンドを登録
     const createDefaultPathCommand = vscode.commands.registerCommand('aiCodingSidebar.createDefaultPath', async (targetPath: string, relativePath?: string) => {
         if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
@@ -1206,7 +1273,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addFolderCommand, deleteFolderCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, createDefaultPathCommand);
+    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, renameDirectoryCommand, deleteDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({
@@ -2036,8 +2103,9 @@ class FileItem extends vscode.TreeItem {
         const sizeText = isDirectory ? 'Directory' : formatFileSize(size);
         this.tooltip = `${label}\nType: ${sizeText}\nLast modified: ${modified.toLocaleString('en-US')}`;
 
-        // ファイルの場合はクリックで開く
-        if (!isDirectory) {
+        // ファイルの場合はクリックで開く（Markdownファイル以外）
+        // Markdownファイルは Markdown Editor で開くため、vscode.open コマンドを設定しない
+        if (!isDirectory && !label.endsWith('.md')) {
             this.command = {
                 command: 'vscode.open',
                 title: 'Open File',
@@ -2708,6 +2776,328 @@ class WorkspaceSettingsProvider implements vscode.TreeDataProvider<WorkspaceSett
             // 子レベル: 親項目の子要素を返す
             return Promise.resolve(element.children || []);
         }
+    }
+}
+
+// Markdown Editor Provider
+class MarkdownEditorProvider implements vscode.WebviewViewProvider {
+    public static readonly viewType = 'markdownEditor';
+    private _view?: vscode.WebviewView;
+    private _currentFilePath?: string;
+    private _currentContent?: string;
+    private _isDirty: boolean = false;
+
+    constructor(
+        private readonly _extensionUri: vscode.Uri,
+    ) {
+        // アクティブエディタの変更を監視
+        vscode.window.onDidChangeActiveTextEditor(editor => {
+            this._checkAndUpdateReadOnlyState(editor);
+        });
+    }
+
+    private _checkAndUpdateReadOnlyState(editor: vscode.TextEditor | undefined) {
+        if (!this._view || !this._currentFilePath) {
+            return;
+        }
+
+        // アクティブなエディタがMarkdown Editorで開いているファイルと同じかチェック
+        const isActiveInEditor = editor && editor.document.uri.fsPath === this._currentFilePath;
+
+        // webviewに読み取り専用状態を更新
+        this._view.webview.postMessage({
+            type: 'setReadOnlyState',
+            isReadOnly: !!isActiveInEditor
+        });
+    }
+
+    public resolveWebviewView(
+        webviewView: vscode.WebviewView,
+        context: vscode.WebviewViewResolveContext,
+        _token: vscode.CancellationToken,
+    ) {
+        this._view = webviewView;
+
+        webviewView.webview.options = {
+            enableScripts: true,
+            localResourceRoots: [this._extensionUri]
+        };
+
+        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+
+        // Webviewからのメッセージを受信
+        webviewView.webview.onDidReceiveMessage(async (data) => {
+            switch (data.type) {
+                case 'save':
+                    if (this._currentFilePath) {
+                        try {
+                            await fs.promises.writeFile(this._currentFilePath, data.content, 'utf8');
+                            vscode.window.showInformationMessage('File saved successfully');
+                            this._currentContent = data.content;
+                            this._isDirty = false;
+                            // 保存後に未保存状態をクリア
+                            this._view?.webview.postMessage({
+                                type: 'updateDirtyState',
+                                isDirty: false
+                            });
+                        } catch (error) {
+                            vscode.window.showErrorMessage(`Failed to save file: ${error}`);
+                        }
+                    }
+                    break;
+                case 'contentChanged':
+                    // エディタの内容が変更された
+                    const isDirty = data.content !== this._currentContent;
+                    if (this._isDirty !== isDirty) {
+                        this._isDirty = isDirty;
+                    }
+                    break;
+            }
+        });
+    }
+
+    public async showFile(filePath: string) {
+        this._currentFilePath = filePath;
+
+        // アクティブなエディタがこのファイルかチェック
+        const isActiveInEditor = vscode.window.activeTextEditor?.document.uri.fsPath === filePath;
+
+        if (isActiveInEditor) {
+            vscode.window.showWarningMessage('This file is active in the editor. Markdown Editor will be read-only.');
+        }
+
+        try {
+            const content = await fs.promises.readFile(filePath, 'utf8');
+            this._currentContent = content;
+            this._isDirty = false;
+
+            // プロジェクトルートからの相対パスを計算
+            let displayPath = filePath;
+            const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+            if (workspaceRoot) {
+                displayPath = path.relative(workspaceRoot, filePath);
+            }
+
+            if (this._view) {
+                this._view.webview.postMessage({
+                    type: 'showContent',
+                    filePath: displayPath,
+                    content: content,
+                    isReadOnly: isActiveInEditor
+                });
+                this._view.show?.(true);
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to read file: ${error}`);
+        }
+    }
+
+    public getCurrentFilePath(): string | undefined {
+        return this._currentFilePath;
+    }
+
+    private _getHtmlForWebview(webview: vscode.Webview) {
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Editor</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #header {
+            padding: 8px;
+            background-color: var(--vscode-editor-background);
+            border-bottom: 1px solid var(--vscode-panel-border);
+            font-size: 12px;
+            color: var(--vscode-foreground);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .file-info {
+            display: flex;
+            align-items: center;
+        }
+        .dirty-indicator {
+            margin-left: 4px;
+            color: var(--vscode-gitDecoration-modifiedResourceForeground);
+            display: none;
+        }
+        .dirty-indicator.show {
+            display: inline;
+        }
+        .save-hint {
+            font-size: 11px;
+            color: var(--vscode-descriptionForeground);
+            display: none;
+        }
+        .save-hint.show {
+            display: inline;
+        }
+        .readonly-indicator {
+            font-size: 11px;
+            color: var(--vscode-editorWarning-foreground);
+            display: none;
+        }
+        .readonly-indicator.show {
+            display: inline;
+        }
+        #editor-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        #editor {
+            flex: 1;
+            width: 100%;
+            border: none;
+            background-color: var(--vscode-editor-background);
+            color: var(--vscode-editor-foreground);
+            font-family: var(--vscode-editor-font-family);
+            font-size: var(--vscode-editor-font-size);
+            resize: none;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        #editor:focus {
+            outline: none;
+        }
+        #editor[readonly] {
+            background-color: var(--vscode-input-background);
+            opacity: 0.8;
+            cursor: not-allowed;
+        }
+        .empty-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--vscode-descriptionForeground);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <div class="file-info">
+            <span id="file-path"></span>
+            <span class="dirty-indicator" id="dirty-indicator">●</span>
+        </div>
+        <span class="save-hint" id="save-hint">Cmd+S / Ctrl+S to save</span>
+        <span class="readonly-indicator" id="readonly-indicator">Read-only</span>
+    </div>
+    <div id="editor-container">
+        <textarea id="editor" placeholder="Select a markdown file to edit..."></textarea>
+    </div>
+    <script>
+        const vscode = acquireVsCodeApi();
+        const editor = document.getElementById('editor');
+        const filePathElement = document.getElementById('file-path');
+        const dirtyIndicator = document.getElementById('dirty-indicator');
+        const saveHint = document.getElementById('save-hint');
+        const readonlyIndicator = document.getElementById('readonly-indicator');
+        let originalContent = '';
+        let currentFilePath = '';
+        let isReadOnly = false;
+
+        // メッセージを受信
+        window.addEventListener('message', event => {
+            const message = event.data;
+            switch (message.type) {
+                case 'showContent':
+                    editor.value = message.content;
+                    originalContent = message.content;
+                    currentFilePath = message.filePath;
+                    filePathElement.textContent = message.filePath;
+                    dirtyIndicator.classList.remove('show');
+                    saveHint.classList.remove('show');
+
+                    // Handle read-only mode
+                    isReadOnly = message.isReadOnly || false;
+                    if (isReadOnly) {
+                        editor.setAttribute('readonly', 'readonly');
+                        readonlyIndicator.classList.add('show');
+                        saveHint.classList.remove('show');
+                    } else {
+                        editor.removeAttribute('readonly');
+                        readonlyIndicator.classList.remove('show');
+                    }
+                    break;
+                case 'updateDirtyState':
+                    if (message.isDirty) {
+                        dirtyIndicator.classList.add('show');
+                        if (!isReadOnly) {
+                            saveHint.classList.add('show');
+                        }
+                    } else {
+                        dirtyIndicator.classList.remove('show');
+                        saveHint.classList.remove('show');
+                        originalContent = editor.value;
+                    }
+                    break;
+                case 'setReadOnlyState':
+                    isReadOnly = message.isReadOnly || false;
+                    if (isReadOnly) {
+                        editor.setAttribute('readonly', 'readonly');
+                        readonlyIndicator.classList.add('show');
+                        saveHint.classList.remove('show');
+                        dirtyIndicator.classList.remove('show');
+                    } else {
+                        editor.removeAttribute('readonly');
+                        readonlyIndicator.classList.remove('show');
+                        // Check if content is dirty when switching back to editable
+                        const isDirty = editor.value !== originalContent;
+                        if (isDirty) {
+                            dirtyIndicator.classList.add('show');
+                            saveHint.classList.add('show');
+                        }
+                    }
+                    break;
+            }
+        });
+
+        // エディタの内容変更を検知
+        editor.addEventListener('input', () => {
+            if (isReadOnly) {
+                return;
+            }
+            const isDirty = editor.value !== originalContent;
+            if (isDirty) {
+                dirtyIndicator.classList.add('show');
+                saveHint.classList.add('show');
+            } else {
+                dirtyIndicator.classList.remove('show');
+                saveHint.classList.remove('show');
+            }
+            vscode.postMessage({
+                type: 'contentChanged',
+                content: editor.value
+            });
+        });
+
+        // Cmd+S / Ctrl+Sで保存
+        editor.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+                e.preventDefault();
+                if (isReadOnly) {
+                    return;
+                }
+                vscode.postMessage({
+                    type: 'save',
+                    content: editor.value
+                });
+            }
+        });
+    </script>
+</body>
+</html>`;
     }
 }
 

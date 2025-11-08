@@ -2,7 +2,7 @@
   "name": "ai-coding-sidebar",
   "displayName": "AI Coding Sidebar",
   "description": "A sidebar extension that strengthens integration with AI coding tools.Browse and manage files and folders efficiently to keep coding with AI smooth.",
-  "version": "0.3.6",
+  "version": "0.4.0",
   "publisher": "nacn",
   "icon": "images/icon.png",
   "repository": {
@@ -109,17 +109,32 @@
         "icon": "$(trash)"
       },
       {
-        "command": "aiCodingSidebar.addFolder",
+        "command": "aiCodingSidebar.addDirectory",
         "title": "Add Directory",
         "icon": "$(new-folder)"
       },
       {
-        "command": "aiCodingSidebar.deleteFolder",
-        "title": "Delete Folder",
+        "command": "aiCodingSidebar.renameDirectory",
+        "title": "Rename Directory",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "aiCodingSidebar.deleteDirectory",
+        "title": "Delete Directory",
         "icon": "$(trash)"
       },
       {
         "command": "aiCodingSidebar.copyRelativePath",
+        "title": "Copy Relative Path",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "aiCodingSidebar.openInEditor",
+        "title": "Open in Editor",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "aiCodingSidebar.copyRelativePathFromEditor",
         "title": "Copy Relative Path",
         "icon": "$(copy)"
       },
@@ -160,6 +175,11 @@
           "name": "Markdown List"
         },
         {
+          "id": "markdownEditor",
+          "name": "Markdown Editor",
+          "type": "webview"
+        },
+        {
           "id": "gitChanges",
           "name": "File Changes",
           "visibility": "collapsed"
@@ -178,7 +198,7 @@
     "menus": {
       "view/title": [
         {
-          "command": "aiCodingSidebar.addFolder",
+          "command": "aiCodingSidebar.addDirectory",
           "when": "view == aiCodingSidebarExplorer",
           "group": "navigation@1"
         },
@@ -215,14 +235,19 @@
           "group": "inline"
         },
         {
-          "command": "aiCodingSidebar.addFolder",
+          "command": "aiCodingSidebar.addDirectory",
           "when": "view == aiCodingSidebarExplorer && viewItem == directory",
           "group": "2_workspace@2"
         },
         {
-          "command": "aiCodingSidebar.deleteFolder",
+          "command": "aiCodingSidebar.renameDirectory",
           "when": "view == aiCodingSidebarExplorer && viewItem == directory",
           "group": "2_workspace@3"
+        },
+        {
+          "command": "aiCodingSidebar.deleteDirectory",
+          "when": "view == aiCodingSidebarExplorer && viewItem == directory",
+          "group": "2_workspace@4"
         },
         {
           "command": "aiCodingSidebar.copyRelativePath",
@@ -255,9 +280,21 @@
           "group": "3_edit@2"
         },
         {
+          "command": "aiCodingSidebar.openInEditor",
+          "when": "view == aiCodingSidebarDetails && viewItem == file",
+          "group": "1_copy@1"
+        },
+        {
           "command": "aiCodingSidebar.copyRelativePath",
           "when": "view == aiCodingSidebarDetails",
-          "group": "1_copy"
+          "group": "1_copy@2"
+        }
+      ],
+      "webview/context": [
+        {
+          "command": "aiCodingSidebar.copyRelativePathFromEditor",
+          "when": "webviewId == 'markdownEditor'",
+          "group": "1_copy@1"
         }
       ]
     },

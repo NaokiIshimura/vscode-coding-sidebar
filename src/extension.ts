@@ -972,30 +972,14 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
 
-        // ディレクトリ名を取得
-        const directoryName = path.basename(item.filePath);
+        // ディレクトリ名をブランチ名として使用
+        const branchName = path.basename(item.filePath);
 
-        // ブランチ名の確認ダイアログを表示
-        const branchName = await vscode.window.showInputBox({
-            prompt: 'Enter branch name to checkout',
-            value: directoryName,
-            validateInput: (value) => {
-                if (!value || value.trim() === '') {
-                    return 'Please enter a branch name';
-                }
-                // Git ブランチ名として不正な文字をチェック
-                if (value.match(/[\s~^:?*\[\\]/)) {
-                    return 'Contains invalid characters for git branch name';
-                }
-                return null;
-            }
-        });
-
-        if (!branchName || branchName.trim() === '') {
+        // Git ブランチ名として不正な文字をチェック
+        if (branchName.match(/[\s~^:?*\[\\]/)) {
+            vscode.window.showErrorMessage(`Directory name "${branchName}" contains invalid characters for git branch name`);
             return;
         }
-
-        const trimmedBranchName = branchName.trim();
 
         try {
             // Git リポジトリのルートディレクトリを取得
@@ -1016,16 +1000,16 @@ export function activate(context: vscode.ExtensionContext) {
 
             // 既存のブランチを確認
             const branches = await repository.getBranches({ remote: false });
-            const existingBranch = branches.find((branch: any) => branch.name === trimmedBranchName);
+            const existingBranch = branches.find((branch: any) => branch.name === branchName);
 
             if (existingBranch) {
                 // 既存のブランチにチェックアウト
-                await repository.checkout(trimmedBranchName);
-                vscode.window.showInformationMessage(`Checked out branch "${trimmedBranchName}"`);
+                await repository.checkout(branchName);
+                vscode.window.showInformationMessage(`Checked out branch "${branchName}"`);
             } else {
                 // 新しいブランチを作成してチェックアウト
-                await repository.createBranch(trimmedBranchName, true);
-                vscode.window.showInformationMessage(`Created and checked out branch "${trimmedBranchName}"`);
+                await repository.createBranch(branchName, true);
+                vscode.window.showInformationMessage(`Created and checked out branch "${branchName}"`);
             }
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to checkout branch: ${error}`);

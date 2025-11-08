@@ -8,10 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.4] - 2025-01-08
 
 ### Added
-- **Checkout Branch from Directory**: Added context menu item to checkout git branches from directory names
+- **Checkout Branch from Directory**: Added context menu item to checkout git branches using directory names
   - Right-click any directory in Directory List to access "Checkout Branch" menu
-  - Pre-fills branch name with the directory name for quick checkout
-  - Validates branch name and creates the branch using VS Code's Git extension if it doesn't exist
+  - Automatically uses the directory name as the branch name
+  - Validates the directory name for git branch compatibility
+  - Creates the branch using VS Code's Git extension if it doesn't exist
   - Switches to the branch if it already exists
   - Displays appropriate messages for both creation and switching scenarios
 

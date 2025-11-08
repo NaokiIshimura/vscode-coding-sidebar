@@ -124,6 +124,11 @@
         "icon": "$(copy)"
       },
       {
+        "command": "aiCodingSidebar.openInEditor",
+        "title": "Open in Editor",
+        "icon": "$(go-to-file)"
+      },
+      {
         "command": "aiCodingSidebar.checkoutBranch",
         "title": "Checkout Branch",
         "icon": "$(git-branch)"
@@ -262,7 +267,12 @@
         {
           "command": "aiCodingSidebar.copyRelativePath",
           "when": "view == aiCodingSidebarDetails",
-          "group": "1_copy"
+          "group": "1_copy@1"
+        },
+        {
+          "command": "aiCodingSidebar.openInEditor",
+          "when": "view == aiCodingSidebarDetails && viewItem == file",
+          "group": "1_copy@2"
         }
       ]
     },

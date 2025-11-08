@@ -607,7 +607,7 @@ export function activate(context: vscode.ExtensionContext) {
         try {
             // テンプレートを使用してファイル内容を生成
             const variables = {
-                datetime: now.toLocaleString('ja-JP'),
+                datetime: now.toLocaleString(),
                 filename: fileName,
                 timestamp: timestamp
             };
@@ -962,6 +962,44 @@ export function activate(context: vscode.ExtensionContext) {
             // ビューを更新
             aiCodingSidebarDetailsProvider.refresh();
             aiCodingSidebarProvider.refresh();
+
+            // 作成したディレクトリ内にMarkdownファイルを作成
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hour = String(now.getHours()).padStart(2, '0');
+            const minute = String(now.getMinutes()).padStart(2, '0');
+
+            const timestamp = `${year}_${month}${day}_${hour}${minute}`;
+            const fileName = `${timestamp}.md`;
+            const filePath = path.join(folderPath, fileName);
+
+            // テンプレートを使用してファイル内容を生成
+            const variables = {
+                datetime: now.toLocaleString(),
+                filename: fileName,
+                timestamp: timestamp
+            };
+
+            const content = loadTemplate(context, variables);
+
+            // FileOperationServiceを使用してファイル作成
+            const result = await fileOperationService.createFile(filePath, content);
+
+            if (result.success) {
+                // ビューを更新
+                aiCodingSidebarDetailsProvider.refresh();
+                aiCodingSidebarProvider.refresh();
+
+                // 作成したファイルを開く
+                const document = await vscode.workspace.openTextDocument(filePath);
+                await vscode.window.showTextDocument(document);
+
+                vscode.window.showInformationMessage(`Created markdown file ${fileName} in "${trimmedFolderName}"`);
+            } else {
+                vscode.window.showWarningMessage(`Folder created but failed to create markdown file: ${result.error}`);
+            }
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to create folder: ${error}`);
         }

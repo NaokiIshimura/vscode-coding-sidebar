@@ -110,7 +110,7 @@
       },
       {
         "command": "aiCodingSidebar.addFolder",
-        "title": "Add Folder",
+        "title": "Add Directory",
         "icon": "$(new-folder)"
       },
       {

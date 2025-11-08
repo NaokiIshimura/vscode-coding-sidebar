@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.6] - 2025-11-08
+
+### Fixed
+- **Markdown List Refresh**: Fixed refresh button not updating file list in Markdown List view
+  - The refresh command now properly refreshes both Directory List and Markdown List views
+  - Resolved issue where clicking the refresh button in Markdown List view had no effect
+- **Auto-Refresh on File System Changes**: Fixed file system watcher not activating on initial load
+  - File watcher listeners are now registered in provider constructors instead of during setup
+  - Views now automatically reflect external file/directory additions and deletions (via Explorer, terminal, etc.)
+  - Both Directory List and Markdown List views update automatically when files are changed outside the extension
+- **View Updates After Extension Commands**: Improved view refresh behavior after file operations
+  - Create Markdown File command now refreshes both Directory List and Markdown List views
+  - Rename command now refreshes both views to reflect directory structure changes
+
+### Changed
+- **Default Relative Path**: Changed default value from empty string to ".ai/tasks"
+  - New installations will automatically open the ".ai/tasks" directory by default
+  - Provides better out-of-box experience for AI coding workflows
+
 ## [0.3.5] - 2025-11-08
 
 ### Added

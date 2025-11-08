@@ -243,6 +243,9 @@ export function activate(context: vscode.ExtensionContext) {
     // TreeViewをProviderに設定
     aiCodingSidebarProvider.setTreeView(treeView);
 
+    // 初期状態でリスナーを有効化
+    aiCodingSidebarProvider.handleVisibilityChange(treeView.visible);
+
     // ビューの可視性変更を監視
     treeView.onDidChangeVisibility(() => {
         aiCodingSidebarProvider.handleVisibilityChange(treeView.visible);
@@ -258,6 +261,9 @@ export function activate(context: vscode.ExtensionContext) {
     // AiCodingSidebarDetailsProviderにdetailsViewの参照を渡す
     aiCodingSidebarDetailsProvider.setTreeView(detailsView);
 
+    // 初期状態でリスナーを有効化
+    aiCodingSidebarDetailsProvider.handleVisibilityChange(detailsView.visible);
+
     // ビューの可視性変更を監視
     detailsView.onDidChangeVisibility(() => {
         aiCodingSidebarDetailsProvider.handleVisibilityChange(detailsView.visible);
@@ -267,6 +273,9 @@ export function activate(context: vscode.ExtensionContext) {
         treeDataProvider: gitChangesProvider,
         showCollapseAll: false
     });
+
+    // 初期状態でリスナーを有効化
+    gitChangesProvider.handleVisibilityChange(gitChangesView.visible);
 
     // ビューの可視性変更を監視
     gitChangesView.onDidChangeVisibility(() => {
@@ -611,6 +620,7 @@ export function activate(context: vscode.ExtensionContext) {
             if (result.success) {
                 // ビューを更新
                 aiCodingSidebarDetailsProvider.refresh();
+                aiCodingSidebarProvider.refresh();
 
                 // 作成したファイルを開く
                 const document = await vscode.workspace.openTextDocument(filePath);
@@ -817,6 +827,7 @@ export function activate(context: vscode.ExtensionContext) {
             if (result.success) {
                 // ビューを更新
                 aiCodingSidebarDetailsProvider.refresh();
+                aiCodingSidebarProvider.refresh();
 
                 vscode.window.showInformationMessage(`Renamed ${oldName} to ${newName}`);
             } else {
@@ -1284,6 +1295,12 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
 
     constructor(fileWatcherService?: FileWatcherService) {
         this.fileWatcherService = fileWatcherService;
+        // リスナーを事前に登録
+        if (this.fileWatcherService) {
+            this.fileWatcherService.registerListener(this.listenerId, (uri) => {
+                this.debouncedRefresh(uri.fsPath);
+            });
+        }
     }
 
     setTreeView(treeView: vscode.TreeView<FileItem>): void {
@@ -1317,14 +1334,8 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
     }
 
     private setupFileWatcher(): void {
-        if (!this.fileWatcherService || !this.rootPath) {
-            return;
-        }
-
-        // 共通のファイルウォッチャーサービスにリスナーを登録
-        this.fileWatcherService.registerListener(this.listenerId, (uri) => {
-            this.debouncedRefresh(uri.fsPath);
-        });
+        // リスナーはコンストラクタで登録済み
+        // この関数は互換性のために残す
     }
 
     /**
@@ -1658,6 +1669,12 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
             this.projectRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
         }
+        // リスナーを事前に登録
+        if (this.fileWatcherService) {
+            this.fileWatcherService.registerListener(this.listenerId, (uri) => {
+                this.debouncedRefresh(uri.fsPath);
+            });
+        }
     }
 
     setTreeView(treeView: vscode.TreeView<FileItem>): void {
@@ -1727,14 +1744,8 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
     }
 
     private setupFileWatcher(): void {
-        if (!this.fileWatcherService || !this.rootPath) {
-            return;
-        }
-
-        // 共通のファイルウォッチャーサービスにリスナーを登録
-        this.fileWatcherService.registerListener(this.listenerId, (uri) => {
-            this.debouncedRefresh(uri.fsPath);
-        });
+        // リスナーはコンストラクタで登録済み
+        // この関数は互換性のために残す
     }
 
     /**

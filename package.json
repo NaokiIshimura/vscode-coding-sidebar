@@ -124,7 +124,7 @@
         "icon": "$(copy)"
       },
       {
-        "command": "aiCodingSidebar.createBranch",
+        "command": "aiCodingSidebar.checkoutBranch",
         "title": "Checkout Branch",
         "icon": "$(git-branch)"
       }
@@ -215,7 +215,7 @@
           "group": "1_copy@1"
         },
         {
-          "command": "aiCodingSidebar.createBranch",
+          "command": "aiCodingSidebar.checkoutBranch",
           "when": "view == aiCodingSidebarExplorer && viewItem == directory",
           "group": "1_copy@2"
         },

@@ -19,10 +19,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Create Markdown File command now refreshes both Directory List and Markdown List views
   - Rename command now refreshes both views to reflect directory structure changes
 
+### Added
+- **Auto-Create Markdown File in New Directory**: Add Directory command now automatically creates a timestamped markdown file
+  - After creating a new directory, a markdown file is automatically created inside it
+  - The file is automatically opened in the editor for immediate use
+  - Provides a seamless workflow for organizing AI coding tasks
+
 ### Changed
 - **Default Relative Path**: Changed default value from empty string to ".ai/tasks"
   - New installations will automatically open the ".ai/tasks" directory by default
   - Provides better out-of-box experience for AI coding workflows
+- **Command Name Update**: Renamed "Add Folder" to "Add Directory" for consistency
+- **Timestamp Locale**: Changed timestamp format to use system locale instead of hard-coded Japanese format
+  - Markdown file creation now uses `toLocaleString()` to respect user's system locale settings
+  - Improves internationalization support
 
 ## [0.3.5] - 2025-11-08
 
@@ -166,10 +176,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
-<<<<<<< HEAD
+[0.3.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.5...v0.3.6
 [0.3.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.4...v0.3.5
-=======
->>>>>>> origin/main
 [0.3.4]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.1...v0.3.2

@@ -19,10 +19,20 @@
   - Markdownファイル作成コマンドで、Directory ListとMarkdown Listの両方のビューを更新するように変更
   - 名前変更コマンドで、ディレクトリ構造の変更を反映するために両方のビューを更新するように変更
 
+### 追加
+- **新規ディレクトリでのMarkdownファイル自動作成**: Add Directoryコマンドでタイムスタンプ付きMarkdownファイルを自動作成
+  - 新しいディレクトリを作成すると、その中に自動的にMarkdownファイルが作成されます
+  - ファイルは自動的にエディタで開かれ、すぐに使用できます
+  - AIコーディングタスクの整理をシームレスに行えるワークフローを提供
+
 ### 変更
 - **デフォルト相対パス**: デフォルト値を空文字列から".ai/tasks"に変更
   - 新規インストール時に自動的に".ai/tasks"ディレクトリが開かれるようになりました
   - AIコーディングワークフローに適した初期設定を提供
+- **コマンド名の更新**: 一貫性のため"Add Folder"を"Add Directory"に変更
+- **タイムスタンプのロケール**: タイムスタンプ形式を日本語固定からシステムロケール使用に変更
+  - Markdownファイル作成時に`toLocaleString()`を使用し、ユーザーのシステムロケール設定を尊重
+  - 国際化対応を改善
 
 ## [0.3.0] - 2025-01-12
 
@@ -113,6 +123,12 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.3.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.5...v0.3.6
+[0.3.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.4...v0.3.5
+[0.3.4]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.3...v0.3.4
+[0.3.3]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.2...v0.3.3
+[0.3.2]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.1...v0.3.2
+[0.3.1]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.2.6...v0.3.0
 [0.2.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.1.0...v0.2.5

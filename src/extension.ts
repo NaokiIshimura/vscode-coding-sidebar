@@ -640,9 +640,8 @@ export function activate(context: vscode.ExtensionContext) {
                 aiCodingSidebarDetailsProvider.refresh();
                 aiCodingSidebarProvider.refresh();
 
-                // 作成したファイルを開く
-                const document = await vscode.workspace.openTextDocument(filePath);
-                await vscode.window.showTextDocument(document);
+                // 作成したファイルをMarkdown Editor Viewで開く
+                await vscode.commands.executeCommand('markdown.showPreview', vscode.Uri.file(filePath));
 
                 vscode.window.showInformationMessage(`Created markdown file ${fileName}`);
             } else {

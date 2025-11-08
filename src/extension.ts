@@ -2054,8 +2054,9 @@ class FileItem extends vscode.TreeItem {
         const sizeText = isDirectory ? 'Directory' : formatFileSize(size);
         this.tooltip = `${label}\nType: ${sizeText}\nLast modified: ${modified.toLocaleString('en-US')}`;
 
-        // ファイルの場合はクリックで開く
-        if (!isDirectory) {
+        // ファイルの場合はクリックで開く（Markdownファイル以外）
+        // Markdownファイルは Markdown Editor で開くため、vscode.open コマンドを設定しない
+        if (!isDirectory && !label.endsWith('.md')) {
             this.command = {
                 command: 'vscode.open',
                 title: 'Open File',
@@ -2735,6 +2736,7 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
     private _view?: vscode.WebviewView;
     private _currentFilePath?: string;
     private _currentContent?: string;
+    private _isDirty: boolean = false;
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
@@ -2763,9 +2765,22 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
                             await fs.promises.writeFile(this._currentFilePath, data.content, 'utf8');
                             vscode.window.showInformationMessage('File saved successfully');
                             this._currentContent = data.content;
+                            this._isDirty = false;
+                            // 保存後に未保存状態をクリア
+                            this._view?.webview.postMessage({
+                                type: 'updateDirtyState',
+                                isDirty: false
+                            });
                         } catch (error) {
                             vscode.window.showErrorMessage(`Failed to save file: ${error}`);
                         }
+                    }
+                    break;
+                case 'contentChanged':
+                    // エディタの内容が変更された
+                    const isDirty = data.content !== this._currentContent;
+                    if (this._isDirty !== isDirty) {
+                        this._isDirty = isDirty;
                     }
                     break;
             }
@@ -2777,11 +2792,19 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
         try {
             const content = await fs.promises.readFile(filePath, 'utf8');
             this._currentContent = content;
+            this._isDirty = false;
+
+            // プロジェクトルートからの相対パスを計算
+            let displayPath = filePath;
+            const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+            if (workspaceRoot) {
+                displayPath = path.relative(workspaceRoot, filePath);
+            }
 
             if (this._view) {
                 this._view.webview.postMessage({
                     type: 'showContent',
-                    filePath: filePath,
+                    filePath: displayPath,
                     content: content
                 });
                 this._view.show?.(true);
@@ -2812,6 +2835,16 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
             border-bottom: 1px solid var(--vscode-panel-border);
             font-size: 12px;
             color: var(--vscode-foreground);
+            display: flex;
+            align-items: center;
+        }
+        .dirty-indicator {
+            margin-left: 4px;
+            color: var(--vscode-gitDecoration-modifiedResourceForeground);
+            display: none;
+        }
+        .dirty-indicator.show {
+            display: inline;
         }
         #editor-container {
             flex: 1;
@@ -2844,14 +2877,20 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
     </style>
 </head>
 <body>
-    <div id="header"></div>
+    <div id="header">
+        <span id="file-path"></span>
+        <span class="dirty-indicator" id="dirty-indicator">●</span>
+    </div>
     <div id="editor-container">
         <textarea id="editor" placeholder="Select a markdown file to edit..."></textarea>
     </div>
     <script>
         const vscode = acquireVsCodeApi();
         const editor = document.getElementById('editor');
-        const header = document.getElementById('header');
+        const filePathElement = document.getElementById('file-path');
+        const dirtyIndicator = document.getElementById('dirty-indicator');
+        let originalContent = '';
+        let currentFilePath = '';
 
         // メッセージを受信
         window.addEventListener('message', event => {
@@ -2859,9 +2898,34 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
             switch (message.type) {
                 case 'showContent':
                     editor.value = message.content;
-                    header.textContent = message.filePath;
+                    originalContent = message.content;
+                    currentFilePath = message.filePath;
+                    filePathElement.textContent = message.filePath;
+                    dirtyIndicator.classList.remove('show');
+                    break;
+                case 'updateDirtyState':
+                    if (message.isDirty) {
+                        dirtyIndicator.classList.add('show');
+                    } else {
+                        dirtyIndicator.classList.remove('show');
+                        originalContent = editor.value;
+                    }
                     break;
             }
+        });
+
+        // エディタの内容変更を検知
+        editor.addEventListener('input', () => {
+            const isDirty = editor.value !== originalContent;
+            if (isDirty) {
+                dirtyIndicator.classList.add('show');
+            } else {
+                dirtyIndicator.classList.remove('show');
+            }
+            vscode.postMessage({
+                type: 'contentChanged',
+                content: editor.value
+            });
         });
 
         // Cmd+S / Ctrl+Sで保存

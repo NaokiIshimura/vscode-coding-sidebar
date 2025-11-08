@@ -2837,6 +2837,11 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
             color: var(--vscode-foreground);
             display: flex;
             align-items: center;
+            justify-content: space-between;
+        }
+        .file-info {
+            display: flex;
+            align-items: center;
         }
         .dirty-indicator {
             margin-left: 4px;
@@ -2844,6 +2849,14 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
             display: none;
         }
         .dirty-indicator.show {
+            display: inline;
+        }
+        .save-hint {
+            font-size: 11px;
+            color: var(--vscode-descriptionForeground);
+            display: none;
+        }
+        .save-hint.show {
             display: inline;
         }
         #editor-container {
@@ -2878,8 +2891,11 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
 </head>
 <body>
     <div id="header">
-        <span id="file-path"></span>
-        <span class="dirty-indicator" id="dirty-indicator">●</span>
+        <div class="file-info">
+            <span id="file-path"></span>
+            <span class="dirty-indicator" id="dirty-indicator">●</span>
+        </div>
+        <span class="save-hint" id="save-hint">Cmd+S / Ctrl+S to save</span>
     </div>
     <div id="editor-container">
         <textarea id="editor" placeholder="Select a markdown file to edit..."></textarea>
@@ -2889,6 +2905,7 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
         const editor = document.getElementById('editor');
         const filePathElement = document.getElementById('file-path');
         const dirtyIndicator = document.getElementById('dirty-indicator');
+        const saveHint = document.getElementById('save-hint');
         let originalContent = '';
         let currentFilePath = '';
 
@@ -2902,12 +2919,15 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
                     currentFilePath = message.filePath;
                     filePathElement.textContent = message.filePath;
                     dirtyIndicator.classList.remove('show');
+                    saveHint.classList.remove('show');
                     break;
                 case 'updateDirtyState':
                     if (message.isDirty) {
                         dirtyIndicator.classList.add('show');
+                        saveHint.classList.add('show');
                     } else {
                         dirtyIndicator.classList.remove('show');
+                        saveHint.classList.remove('show');
                         originalContent = editor.value;
                     }
                     break;
@@ -2919,8 +2939,10 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
             const isDirty = editor.value !== originalContent;
             if (isDirty) {
                 dirtyIndicator.classList.add('show');
+                saveHint.classList.add('show');
             } else {
                 dirtyIndicator.classList.remove('show');
+                saveHint.classList.remove('show');
             }
             vscode.postMessage({
                 type: 'contentChanged',

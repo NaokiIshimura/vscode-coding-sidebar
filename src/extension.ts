@@ -190,6 +190,7 @@ export function activate(context: vscode.ExtensionContext) {
     const aiCodingSidebarProvider = new AiCodingSidebarProvider(fileWatcherService);
     const aiCodingSidebarDetailsProvider = new AiCodingSidebarDetailsProvider(aiCodingSidebarProvider, fileWatcherService);
     const gitChangesProvider = new GitChangesProvider(fileWatcherService);
+    const markdownEditorProvider = new MarkdownEditorProvider(context.extensionUri);
 
     // プロジェクトルートを設定
     const initializeWithWorkspaceRoot = async () => {
@@ -282,7 +283,13 @@ export function activate(context: vscode.ExtensionContext) {
         gitChangesProvider.handleVisibilityChange(gitChangesView.visible);
     });
 
-
+    // Markdown Editor Viewを登録
+    context.subscriptions.push(
+        vscode.window.registerWebviewViewProvider(
+            MarkdownEditorProvider.viewType,
+            markdownEditorProvider
+        )
+    );
 
     // 初期化を実行
     initializeWithWorkspaceRoot();
@@ -304,6 +311,17 @@ export function activate(context: vscode.ExtensionContext) {
             const selectedItem = e.selection[0];
             if (selectedItem.isDirectory) {
                 aiCodingSidebarDetailsProvider.setRootPath(selectedItem.filePath);
+            }
+        }
+    });
+
+    // ファイル一覧ビューの選択イベント - Markdown Editorに表示
+    detailsView.onDidChangeSelection(async (e) => {
+        if (e.selection.length > 0) {
+            const selectedItem = e.selection[0];
+            // Markdownファイルの場合はMarkdown Editorに表示
+            if (!selectedItem.isDirectory && selectedItem.filePath.endsWith('.md')) {
+                await markdownEditorProvider.showFile(selectedItem.filePath);
             }
         }
     });
@@ -2708,6 +2726,157 @@ class WorkspaceSettingsProvider implements vscode.TreeDataProvider<WorkspaceSett
             // 子レベル: 親項目の子要素を返す
             return Promise.resolve(element.children || []);
         }
+    }
+}
+
+// Markdown Editor Provider
+class MarkdownEditorProvider implements vscode.WebviewViewProvider {
+    public static readonly viewType = 'markdownEditor';
+    private _view?: vscode.WebviewView;
+    private _currentFilePath?: string;
+    private _currentContent?: string;
+
+    constructor(
+        private readonly _extensionUri: vscode.Uri,
+    ) { }
+
+    public resolveWebviewView(
+        webviewView: vscode.WebviewView,
+        context: vscode.WebviewViewResolveContext,
+        _token: vscode.CancellationToken,
+    ) {
+        this._view = webviewView;
+
+        webviewView.webview.options = {
+            enableScripts: true,
+            localResourceRoots: [this._extensionUri]
+        };
+
+        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+
+        // Webviewからのメッセージを受信
+        webviewView.webview.onDidReceiveMessage(async (data) => {
+            switch (data.type) {
+                case 'save':
+                    if (this._currentFilePath) {
+                        try {
+                            await fs.promises.writeFile(this._currentFilePath, data.content, 'utf8');
+                            vscode.window.showInformationMessage('File saved successfully');
+                            this._currentContent = data.content;
+                        } catch (error) {
+                            vscode.window.showErrorMessage(`Failed to save file: ${error}`);
+                        }
+                    }
+                    break;
+            }
+        });
+    }
+
+    public async showFile(filePath: string) {
+        this._currentFilePath = filePath;
+        try {
+            const content = await fs.promises.readFile(filePath, 'utf8');
+            this._currentContent = content;
+
+            if (this._view) {
+                this._view.webview.postMessage({
+                    type: 'showContent',
+                    filePath: filePath,
+                    content: content
+                });
+                this._view.show?.(true);
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to read file: ${error}`);
+        }
+    }
+
+    private _getHtmlForWebview(webview: vscode.Webview) {
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Editor</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #header {
+            padding: 8px;
+            background-color: var(--vscode-editor-background);
+            border-bottom: 1px solid var(--vscode-panel-border);
+            font-size: 12px;
+            color: var(--vscode-foreground);
+        }
+        #editor-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        #editor {
+            flex: 1;
+            width: 100%;
+            border: none;
+            background-color: var(--vscode-editor-background);
+            color: var(--vscode-editor-foreground);
+            font-family: var(--vscode-editor-font-family);
+            font-size: var(--vscode-editor-font-size);
+            resize: none;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        #editor:focus {
+            outline: none;
+        }
+        .empty-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--vscode-descriptionForeground);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="header"></div>
+    <div id="editor-container">
+        <textarea id="editor" placeholder="Select a markdown file to edit..."></textarea>
+    </div>
+    <script>
+        const vscode = acquireVsCodeApi();
+        const editor = document.getElementById('editor');
+        const header = document.getElementById('header');
+
+        // メッセージを受信
+        window.addEventListener('message', event => {
+            const message = event.data;
+            switch (message.type) {
+                case 'showContent':
+                    editor.value = message.content;
+                    header.textContent = message.filePath;
+                    break;
+            }
+        });
+
+        // Cmd+S / Ctrl+Sで保存
+        editor.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+                e.preventDefault();
+                vscode.postMessage({
+                    type: 'save',
+                    content: editor.value
+                });
+            }
+        });
+    </script>
+</body>
+</html>`;
     }
 }
 

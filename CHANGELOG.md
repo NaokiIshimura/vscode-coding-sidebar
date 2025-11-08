@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.7] - 2025-11-08
+
+### Added
+- **Markdown Editor View**: Added a new sidebar view for editing Markdown files directly in the extension
+  - Automatically displays when selecting a Markdown file in Markdown List
+  - Edit Markdown content in a dedicated textarea editor
+  - Save files with `Cmd+S` / `Ctrl+S` keyboard shortcut
+  - Shows the file path in the header for context
+  - Positioned below Markdown List for easy access
+  - Provides a seamless workflow for editing AI coding instructions without leaving the sidebar
+
 ## [0.3.6] - 2025-11-08
 
 ### Fixed
@@ -176,6 +187,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.3.7]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.6...v0.3.7
 [0.3.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.5...v0.3.6
 [0.3.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.4...v0.3.5
 [0.3.4]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.3...v0.3.4

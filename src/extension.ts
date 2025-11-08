@@ -965,6 +965,57 @@ export function activate(context: vscode.ExtensionContext) {
         await vscode.commands.executeCommand('aiCodingSidebar.delete', item);
     });
 
+    // ブランチチェックアウトコマンドを登録
+    const checkoutBranchCommand = vscode.commands.registerCommand('aiCodingSidebar.checkoutBranch', async (item?: FileItem) => {
+        if (!item || !item.isDirectory) {
+            vscode.window.showErrorMessage('No folder is selected');
+            return;
+        }
+
+        // ディレクトリ名をブランチ名として使用
+        const branchName = path.basename(item.filePath);
+
+        // Git ブランチ名として不正な文字をチェック
+        if (branchName.match(/[\s~^:?*\[\\]/)) {
+            vscode.window.showErrorMessage(`Directory name "${branchName}" contains invalid characters for git branch name`);
+            return;
+        }
+
+        try {
+            // Git リポジトリのルートディレクトリを取得
+            const gitExtension = vscode.extensions.getExtension('vscode.git')?.exports;
+            const git = gitExtension?.getAPI(1);
+
+            if (!git) {
+                vscode.window.showErrorMessage('Git extension is not available');
+                return;
+            }
+
+            if (git.repositories.length === 0) {
+                vscode.window.showErrorMessage('No git repository found');
+                return;
+            }
+
+            const repository = git.repositories[0];
+
+            // 既存のブランチを確認
+            const branches = await repository.getBranches({ remote: false });
+            const existingBranch = branches.find((branch: any) => branch.name === branchName);
+
+            if (existingBranch) {
+                // 既存のブランチにチェックアウト
+                await repository.checkout(branchName);
+                vscode.window.showInformationMessage(`Checked out branch "${branchName}"`);
+            } else {
+                // 新しいブランチを作成してチェックアウト
+                await repository.createBranch(branchName, true);
+                vscode.window.showInformationMessage(`Created and checked out branch "${branchName}"`);
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to checkout branch: ${error}`);
+        }
+    });
+
     // 相対パスをコピーコマンドを登録
     const copyRelativePathCommand = vscode.commands.registerCommand('aiCodingSidebar.copyRelativePath', async (item?: FileItem | vscode.Uri) => {
         if (!item) {
@@ -1022,7 +1073,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addFolderCommand, deleteFolderCommand, copyRelativePathCommand, createDefaultPathCommand);
+    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addFolderCommand, deleteFolderCommand, checkoutBranchCommand, copyRelativePathCommand, createDefaultPathCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({

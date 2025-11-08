@@ -78,6 +78,7 @@ Use the following variables inside a template:
 | Delete | Delete files and folders (moved to trash). |
 | Copy / Cut / Paste | Perform standard clipboard operations. |
 | Drag & Drop | Move files or folders by dragging them. |
+| Checkout Branch | Right-click a directory to checkout a git branch using the directory name. Creates the branch if it doesn't exist, or switches to it if it already exists. |
 
 ## Other Features
 

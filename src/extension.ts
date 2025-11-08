@@ -1024,8 +1024,16 @@ export function activate(context: vscode.ExtensionContext) {
                 await markdownEditorProvider.showFile(filePath);
 
                 vscode.window.showInformationMessage(`Created markdown file ${fileName} in "${trimmedFolderName}"`);
+
+                // 作成したディレクトリを選択状態にする
+                await aiCodingSidebarProvider.revealDirectory(folderPath);
             } else {
                 vscode.window.showWarningMessage(`Folder created but failed to create markdown file: ${result.error}`);
+
+                // 失敗時もビューを更新してディレクトリを選択状態にする
+                aiCodingSidebarDetailsProvider.refresh();
+                aiCodingSidebarProvider.refresh();
+                await aiCodingSidebarProvider.revealDirectory(folderPath);
             }
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to create folder: ${error}`);
@@ -1719,6 +1727,32 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
         this.setActiveFolder(this.rootPath, true);
     }
 
+    async revealDirectory(directoryPath: string): Promise<void> {
+        if (!this.treeView) {
+            return;
+        }
+
+        try {
+            const stat = fs.statSync(directoryPath);
+            if (!stat.isDirectory()) {
+                return;
+            }
+
+            const item = new FileItem(
+                path.basename(directoryPath),
+                vscode.TreeItemCollapsibleState.Collapsed,
+                directoryPath,
+                true,
+                0,
+                stat.mtime
+            );
+
+            await this.treeView.reveal(item, { select: true, focus: false, expand: false });
+        } catch (error) {
+            console.error('Failed to reveal directory:', error);
+        }
+    }
+
     private getFilesInDirectory(dirPath: string): FileInfo[] {
         const files: FileInfo[] = [];
 
@@ -2129,6 +2163,17 @@ class FileItem extends vscode.TreeItem {
     private getFileIcon(fileName: string): vscode.ThemeIcon {
         const ext = path.extname(fileName).toLowerCase();
 
+        // Markdownファイルの場合、タイムスタンプ形式かどうかで分ける
+        if (ext === '.md') {
+            const timestampPattern = /^\d{4}_\d{4}_\d{4}\.md$/;
+            // タイムスタンプ形式の場合はeditアイコン（Markdown Editorで開く）
+            if (timestampPattern.test(fileName)) {
+                return new vscode.ThemeIcon('edit');
+            }
+            // それ以外はmarkdownアイコン（通常のエディタで開く）
+            return new vscode.ThemeIcon('markdown');
+        }
+
         // 拡張子に応じてアイコンを選択
         const iconMap: { [key: string]: string } = {
             '.ts': 'symbol-method',
@@ -2136,7 +2181,6 @@ class FileItem extends vscode.TreeItem {
             '.js': 'symbol-function',
             '.jsx': 'symbol-function',
             '.json': 'json',
-            '.md': 'markdown',
             '.txt': 'file-text',
             '.py': 'symbol-class',
             '.java': 'symbol-class',

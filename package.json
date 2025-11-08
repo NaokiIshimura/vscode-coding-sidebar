@@ -125,7 +125,7 @@
       },
       {
         "command": "aiCodingSidebar.createBranch",
-        "title": "Create Branch",
+        "title": "Checkout Branch",
         "icon": "$(git-branch)"
       }
     ],

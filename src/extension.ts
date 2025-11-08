@@ -1014,12 +1014,21 @@ export function activate(context: vscode.ExtensionContext) {
 
             const repository = git.repositories[0];
 
-            // ブランチを作成して切り替え
-            await repository.createBranch(trimmedBranchName, true);
+            // 既存のブランチを確認
+            const branches = await repository.getBranches({ remote: false });
+            const existingBranch = branches.find((branch: any) => branch.name === trimmedBranchName);
 
-            vscode.window.showInformationMessage(`Created and switched to branch "${trimmedBranchName}"`);
+            if (existingBranch) {
+                // 既存のブランチにスイッチ
+                await repository.checkout(trimmedBranchName);
+                vscode.window.showInformationMessage(`Switched to branch "${trimmedBranchName}"`);
+            } else {
+                // 新しいブランチを作成して切り替え
+                await repository.createBranch(trimmedBranchName, true);
+                vscode.window.showInformationMessage(`Created and switched to branch "${trimmedBranchName}"`);
+            }
         } catch (error) {
-            vscode.window.showErrorMessage(`Failed to create branch: ${error}`);
+            vscode.window.showErrorMessage(`Failed to create or switch branch: ${error}`);
         }
     });
 

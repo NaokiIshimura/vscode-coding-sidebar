@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.5] - 2025-11-08
+
+### Added
+- **Shortcut Menu in Settings View**: Added a new "Shortcut" section in the Settings view for quick access to common actions
+  - **Open Terminal**: Quickly toggle the integrated terminal in VS Code with a status message
+  - **Checkout Default Branch**: Automatically switch to the default branch (main/master/develop) with intelligent detection
+  - **Git Pull**: Pull the latest changes from the remote repository with progress feedback
+  - The Shortcut menu provides a centralized location for frequently used Git and workspace actions
+  - Positioned between Workspace and Note sections in the Settings view
+
+
 ## [0.3.4] - 2025-01-08
 
 ### Added
@@ -136,6 +147,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+<<<<<<< HEAD
+[0.3.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.4...v0.3.5
+=======
+>>>>>>> origin/main
 [0.3.4]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.1...v0.3.2

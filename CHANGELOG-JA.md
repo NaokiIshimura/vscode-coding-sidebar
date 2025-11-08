@@ -5,6 +5,13 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.3.6] - 2025-11-08
+
+### 修正
+- **Markdown Listの更新機能**: Markdown Listビューの更新ボタンがファイルリストを更新しない問題を修正
+  - 更新コマンドがDirectory ListとMarkdown Listの両方のビューを正しく更新するように変更
+  - Markdown Listビューで更新ボタンをクリックしても効果がなかった問題を解決
+
 ## [0.3.0] - 2025-01-12
 
 ### 削除

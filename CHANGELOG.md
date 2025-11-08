@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.6] - 2025-11-08
+
+### Fixed
+- **Markdown List Refresh**: Fixed refresh button not updating file list in Markdown List view
+  - The refresh command now properly refreshes both Directory List and Markdown List views
+  - Resolved issue where clicking the refresh button in Markdown List view had no effect
+
 ## [0.3.5] - 2025-11-08
 
 ### Added

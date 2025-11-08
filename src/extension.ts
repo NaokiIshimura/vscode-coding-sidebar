@@ -317,6 +317,7 @@ export function activate(context: vscode.ExtensionContext) {
     // 更新コマンドを登録
     const refreshCommand = vscode.commands.registerCommand('aiCodingSidebar.refresh', () => {
         aiCodingSidebarProvider.refresh();
+        aiCodingSidebarDetailsProvider.refresh();
     });
 
     // 下ペイン表示コマンドを登録

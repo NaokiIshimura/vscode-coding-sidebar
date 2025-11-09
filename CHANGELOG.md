@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.8] - 2025-11-10
+
+### Changed
+- **Start Task Command**: Renamed "Create Task" to "Start Task" and changed icon to rocket (🚀)
+  - Creates a new directory under the default path and automatically generates a timestamped Markdown file
+  - The created file is automatically selected in Markdown List with "editing" label
+  - The file opens in Markdown Editor View for immediate editing
+  - Provides a streamlined workflow for starting new tasks
+- **Add Directory Behavior**: Changed to create directories under the currently selected directory instead of the root path
+  - Right-click menu "New Directory" now creates subdirectories in the selected location
+  - Allows for better organization and nested directory structures
+
 ## [0.4.6] - 2025-11-09
 
 ### Added

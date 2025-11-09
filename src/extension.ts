@@ -314,6 +314,7 @@ export function activate(context: vscode.ExtensionContext) {
     treeView.onDidChangeSelection(async (e) => {
         if (e.selection.length > 0) {
             const selectedItem = e.selection[0];
+            aiCodingSidebarProvider.setSelectedItem(selectedItem);
             if (selectedItem.isDirectory) {
                 aiCodingSidebarDetailsProvider.setRootPath(selectedItem.filePath);
             }
@@ -938,15 +939,91 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    // フォルダを追加コマンドを登録（フォルダツリーview用）
+    // フォルダを追加コマンドを登録（右クリックメニュー用）
     const addDirectoryCommand = vscode.commands.registerCommand('aiCodingSidebar.addDirectory', async (item?: FileItem) => {
-        // 常にdirectory listで開いているディレクトリ配下にディレクトリを作成
-        const currentPath = aiCodingSidebarProvider.getRootPath();
-        if (!currentPath) {
-            vscode.window.showErrorMessage('No folder is open');
+        // directory listで選択されているディレクトリ配下にディレクトリを作成
+        let targetItem = item;
+
+        // itemが渡されていない場合は、現在選択されているアイテムを取得
+        if (!targetItem) {
+            targetItem = aiCodingSidebarProvider.getSelectedItem();
+        }
+
+        // 選択されたアイテムがディレクトリでない場合はルートパスを使用
+        let targetPath: string;
+        if (targetItem && targetItem.isDirectory) {
+            targetPath = targetItem.filePath;
+        } else {
+            const currentPath = aiCodingSidebarProvider.getRootPath();
+            if (!currentPath) {
+                vscode.window.showErrorMessage('No folder is open');
+                return;
+            }
+            targetPath = currentPath;
+        }
+
+        // フォルダ名をユーザーに入力してもらう
+        const folderName = await vscode.window.showInputBox({
+            prompt: 'Enter new folder name',
+            placeHolder: 'Folder name',
+            validateInput: (value) => {
+                if (!value || value.trim() === '') {
+                    return 'Please enter a folder name';
+                }
+                // 不正な文字をチェック
+                if (value.match(/[<>:"|?*\/\\]/)) {
+                    return 'Contains invalid characters: < > : " | ? * / \\';
+                }
+                // 既存フォルダとの重複チェック
+                const folderPath = path.join(targetPath, value.trim());
+                if (fs.existsSync(folderPath)) {
+                    return `Folder "${value.trim()}" already exists`;
+                }
+                return null;
+            }
+        });
+
+        if (!folderName || folderName.trim() === '') {
             return;
         }
-        const targetPath = currentPath;
+
+        const trimmedFolderName = folderName.trim();
+        const folderPath = path.join(targetPath, trimmedFolderName);
+
+        try {
+            // フォルダを作成
+            fs.mkdirSync(folderPath, { recursive: true });
+            vscode.window.showInformationMessage(`Created folder "${trimmedFolderName}"`);
+
+            // ビューを更新
+            aiCodingSidebarDetailsProvider.refresh();
+            aiCodingSidebarProvider.refresh();
+
+            // 作成したディレクトリを選択状態にする
+            await aiCodingSidebarProvider.revealDirectory(folderPath);
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to create folder: ${error}`);
+        }
+    });
+
+    // 新しいディレクトリを作成してMarkdownファイルも作成するコマンド（タイトルメニュー用）
+    const newDirectoryCommand = vscode.commands.registerCommand('aiCodingSidebar.newDirectory', async (item?: FileItem) => {
+        // default path配下にディレクトリを作成
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (!workspaceFolders || workspaceFolders.length === 0) {
+            vscode.window.showErrorMessage('No workspace folder is open');
+            return;
+        }
+
+        const workspaceRoot = workspaceFolders[0].uri.fsPath;
+        const defaultRelativePath = configProvider.getDefaultRelativePath();
+
+        if (!defaultRelativePath || defaultRelativePath.trim() === '') {
+            vscode.window.showErrorMessage('Default relative path is not configured');
+            return;
+        }
+
+        const targetPath = path.join(workspaceRoot, defaultRelativePath);
 
         // フォルダ名をユーザーに入力してもらう
         const folderName = await vscode.window.showInputBox({
@@ -1010,17 +1087,26 @@ export function activate(context: vscode.ExtensionContext) {
             const result = await fileOperationService.createFile(filePath, content);
 
             if (result.success) {
-                // ビューを更新
-                aiCodingSidebarDetailsProvider.refresh();
+                // Directory Listを更新
                 aiCodingSidebarProvider.refresh();
+
+                // 作成したディレクトリをDirectory Listで選択状態にする（先に実行）
+                await aiCodingSidebarProvider.revealDirectory(folderPath);
+
+                // ビューの更新を待つ（getChildrenが呼ばれてキャッシュが構築されるまで待つ）
+                await new Promise(resolve => setTimeout(resolve, 300));
 
                 // 作成したファイルをMarkdown Editor Viewで開く
                 await markdownEditorProvider.showFile(filePath);
 
-                vscode.window.showInformationMessage(`Created markdown file ${fileName} in "${trimmedFolderName}"`);
+                // ビューの更新を待つ
+                await new Promise(resolve => setTimeout(resolve, 150));
 
-                // 作成したディレクトリを選択状態にする
-                await aiCodingSidebarProvider.revealDirectory(folderPath);
+                // Markdown List Viewで作成したファイルを選択状態にする
+                // これによりediting表記も自動的に反映される
+                await aiCodingSidebarDetailsProvider.revealFile(filePath);
+
+                vscode.window.showInformationMessage(`Created markdown file ${fileName} in "${trimmedFolderName}"`);
             } else {
                 vscode.window.showWarningMessage(`Folder created but failed to create markdown file: ${result.error}`);
 
@@ -1284,7 +1370,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, renameDirectoryCommand, deleteDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand);
+    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, newDirectoryCommand, renameDirectoryCommand, deleteDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({
@@ -1403,6 +1489,7 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
 
     private rootPath: string | undefined;
     private treeView: vscode.TreeView<FileItem> | undefined;
+    private selectedItem: FileItem | undefined;
     private itemCache: Map<string, FileItem[]> = new Map();  // パスをキーとしたFileItemのキャッシュ
     private activeFolderPath: string | undefined;
     private refreshDebounceTimer: NodeJS.Timeout | undefined;
@@ -1489,6 +1576,14 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
 
     getRootPath(): string | undefined {
         return this.rootPath;
+    }
+
+    setSelectedItem(item: FileItem | undefined): void {
+        this.selectedItem = item;
+    }
+
+    getSelectedItem(): FileItem | undefined {
+        return this.selectedItem;
     }
 
     refresh(targetPath?: string): void {
@@ -1899,6 +1994,52 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
         return this.selectedItem;
     }
 
+    /**
+     * Markdown List Viewで指定されたファイルを選択状態にする
+     */
+    async revealFile(filePath: string): Promise<void> {
+        if (!this.treeView || !this.rootPath) {
+            return;
+        }
+
+        try {
+            // ファイルが存在するか確認
+            if (!fs.existsSync(filePath)) {
+                return;
+            }
+
+            // ファイルが現在のrootPath配下にあるか確認
+            if (!filePath.startsWith(this.rootPath)) {
+                return;
+            }
+
+            // キャッシュから該当するFileItemを探す
+            let fileItems = this.itemCache.get(this.rootPath);
+
+            // キャッシュになければ、getChildrenを呼んで取得
+            if (!fileItems) {
+                await this.getChildren();
+                fileItems = this.itemCache.get(this.rootPath);
+            }
+
+            if (!fileItems) {
+                return;
+            }
+
+            // ファイルパスが一致するFileItemを探す
+            const fileItem = fileItems.find(item => item.filePath === filePath);
+
+            if (!fileItem) {
+                return;
+            }
+
+            // ファイルを選択状態にする（focus: falseで他のビューへの影響を最小化）
+            await this.treeView.reveal(fileItem, { select: true, focus: false, expand: false });
+        } catch (error) {
+            console.error('Failed to reveal file:', error);
+        }
+    }
+
     private setupFileWatcher(): void {
         // リスナーはコンストラクタで登録済み
         // この関数は互換性のために残す
@@ -2079,7 +2220,7 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
                 let displayPath: string;
                 if (directoryListRoot) {
                     const relativePath = path.relative(directoryListRoot, this.rootPath);
-                    displayPath = relativePath === '' ? '.' : relativePath;
+                    displayPath = relativePath === '' ? '(not selected)' : relativePath;
                 } else {
                     displayPath = path.basename(this.rootPath);
                 }

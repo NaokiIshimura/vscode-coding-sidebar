@@ -2930,8 +2930,12 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
         });
 
         // Restore previously opened file if exists
+        // Use setTimeout to ensure webview is fully initialized before sending messages
         if (this._currentFilePath) {
-            this.showFile(this._currentFilePath);
+            const filePathToRestore = this._currentFilePath;
+            setTimeout(() => {
+                this.showFile(filePathToRestore);
+            }, 100);
         }
     }
 

@@ -1014,16 +1014,16 @@ export function activate(context: vscode.ExtensionContext) {
                 aiCodingSidebarDetailsProvider.refresh();
                 aiCodingSidebarProvider.refresh();
 
-                // 作成したファイルをMarkdown Editor Viewで開く
-                await markdownEditorProvider.showFile(filePath);
+                // 1. 作成したディレクトリをDirectory Listで選択（Markdown List Viewが更新される）
+                await aiCodingSidebarProvider.revealDirectory(folderPath);
 
-                // Markdown List Viewで作成したファイルを選択状態にする
+                // 2. Markdown List Viewで作成したファイルを選択状態にする
                 await aiCodingSidebarDetailsProvider.revealFile(filePath);
 
-                vscode.window.showInformationMessage(`Created markdown file ${fileName} in "${trimmedFolderName}"`);
+                // 3. 作成したファイルをMarkdown Editor Viewで開く
+                await markdownEditorProvider.showFile(filePath);
 
-                // 作成したディレクトリを選択状態にする
-                await aiCodingSidebarProvider.revealDirectory(folderPath);
+                vscode.window.showInformationMessage(`Created markdown file ${fileName} in "${trimmedFolderName}"`);
             } else {
                 vscode.window.showWarningMessage(`Folder created but failed to create markdown file: ${result.error}`);
 

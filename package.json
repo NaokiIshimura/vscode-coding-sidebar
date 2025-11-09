@@ -191,7 +191,7 @@
         {
           "id": "aiCodingSidebarView",
           "title": "AI Coding Sidebar",
-          "icon": "$(note)"
+          "icon": "$(layout-sidebar-left)"
         }
       ]
     },

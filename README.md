@@ -88,7 +88,8 @@ Use the following variables inside a template:
 
 | Item | Steps |
 | --- | --- |
-| Create a folder | Click the folder icon in Directory List.<br>Enter a folder name to create it.<br>A timestamped Markdown file is automatically created in the new directory and opens in Markdown Editor View. |
+| Start Task | Click the rocket icon (🚀) in Directory List title menu.<br>Creates a new directory under the default path and automatically generates a timestamped Markdown file.<br>The file is selected in Markdown List with "editing" label and opens in Markdown Editor View. |
+| New Directory | Click the folder icon in Directory List.<br>Creates a new directory under the currently selected directory. |
 | Create a file | Click the "+" icon in Markdown List.<br>A timestamped Markdown file is created (for example, `2025_1103_1227.md`) and opens in Markdown Editor View. |
 
 ### Configure the Default Relative Path

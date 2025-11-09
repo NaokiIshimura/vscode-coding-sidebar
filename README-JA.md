@@ -93,7 +93,8 @@ file: {{filename}}
 
 | 項目 | 手順 |
 | --- | --- |
-| フォルダ作成 | Directory Listのフォルダアイコンをクリック<br>フォルダ名を入力して作成<br>新しいディレクトリ内にタイムスタンプ付きのMarkdownファイルが自動作成され、Markdown Editor Viewで開かれます |
+| Start Task | Directory Listのタイトルメニューにあるロケットアイコン（🚀）をクリック<br>デフォルトパス配下に新しいディレクトリを作成し、タイムスタンプ付きのMarkdownファイルを自動生成します<br>作成されたファイルはMarkdown Listで「editing」ラベルとともに選択され、Markdown Editor Viewで開かれます |
+| 新規ディレクトリ | Directory Listのフォルダアイコンをクリック<br>現在選択中のディレクトリ配下に新しいディレクトリを作成します |
 | ファイル作成 | Markdown Listの「+」アイコンをクリック<br>タイムスタンプ付きのMarkdownファイルが作成され、Markdown Editor Viewで開かれます（例: `2025_1103_1227.md`） |
 
 ### 相対パスの設定

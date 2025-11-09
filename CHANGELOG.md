@@ -8,10 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.4.5] - 2025-11-09
 
 ### Changed
-- **Markdown List - Auto-select File After Directory Creation**: When creating a directory via "Add Directory" command, the auto-created markdown file is now automatically selected in Markdown List view
+- **Extension Icon**: Changed extension icon to "layout-sidebar-left" for better visual representation
+  - Updated from the previous icon to match the sidebar layout concept
+  - Provides more intuitive visual identity in the activity bar
+- **Command Reorganization**: Improved directory and task creation commands for better clarity and consistency
+  - **Directory List Title Menu**:
+    - **Create Task**: Creates a new directory with markdown file in the root path
+    - **New Directory**: Creates a new directory only (without markdown file)
+  - **Directory List Context Menu**:
+    - **New Directory**: Creates a new directory only (without markdown file)
+  - Provides clearer separation between task creation (with markdown) and simple directory creation
+  - Simplified workflow: Use "Create Task" when you need a directory with markdown file, "New Directory" for plain directories
+- **Markdown List - Auto-select File After Directory Creation**: When creating a task via "Create Task" command, the auto-created markdown file is now automatically selected in Markdown List view
   - The created file appears selected (in "editing" state) in Markdown List view
   - Provides better visual feedback and immediate editing workflow
   - Complements the existing Markdown Editor View auto-display feature
+  - Proper execution order: 1) Select directory in Directory List, 2) Select file in Markdown List, 3) Display in Markdown Editor
 - **Markdown List - Directory Header Display**: Changed directory header display when no directory is selected
   - Previously showed "." when viewing the same directory as Directory List root
   - Now shows "(not selected)" for better clarity

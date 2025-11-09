@@ -115,7 +115,7 @@
       },
       {
         "command": "aiCodingSidebar.addDirectoryToSelected",
-        "title": "Add Directory",
+        "title": "New Directory",
         "icon": "$(new-folder)"
       },
       {

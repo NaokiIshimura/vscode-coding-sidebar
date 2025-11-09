@@ -177,7 +177,8 @@
         {
           "id": "markdownEditor",
           "name": "Markdown Editor",
-          "type": "webview"
+          "type": "webview",
+          "retainContextWhenHidden": true
         },
         {
           "id": "gitChanges",

@@ -2942,6 +2942,14 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
         if (this._currentFilePath) {
             this._pendingFileToRestore = this._currentFilePath;
         }
+
+        // Listen to visibility changes to restore file when view becomes visible
+        webviewView.onDidChangeVisibility(() => {
+            if (webviewView.visible && this._currentFilePath) {
+                // Re-send the file content when view becomes visible
+                this.showFile(this._currentFilePath);
+            }
+        });
     }
 
     public async showFile(filePath: string) {

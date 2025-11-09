@@ -2053,9 +2053,9 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
                     file.size,
                     file.modified
                 );
-                // 現在Markdown Editorで開いているファイルに「selected」表記を追加
+                // 現在Markdown Editorで編集中のファイルに「editing」表記を追加
                 if (!file.isDirectory && currentFilePath && file.path === currentFilePath) {
-                    item.description = 'selected';
+                    item.description = 'editing';
                 }
                 return item;
             });

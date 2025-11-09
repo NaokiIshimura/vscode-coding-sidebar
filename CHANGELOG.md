@@ -16,9 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Previously showed path relative to project root
   - Now displays path relative to the current Directory List root directory
   - Provides better context when navigating within specific directory structures
-- **Markdown List - Selected File Indicator**: Added "selected" indicator for currently open files
-  - Files currently open in Markdown Editor View now show "selected" in their description
-  - Makes it easier to identify which file is being edited in the sidebar
+- **Markdown List - Editing File Indicator**: Added "editing" indicator for files being edited in Markdown Editor
+  - Files currently being edited in Markdown Editor View now show "editing" in their description
+  - Makes it easier to identify which file is actively being edited in the sidebar
 - **Markdown Editor - Title Display**: Simplified title to show only the filename
   - Previously showed the full relative path from project root
   - Now displays only the filename for cleaner UI

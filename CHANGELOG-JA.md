@@ -5,6 +5,24 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.4.6] - 2025-11-09
+
+### 追加
+- **Markdown List - ソート順のカスタマイズ**: マークダウンファイルのソート方法をカスタマイズする設定を追加
+  - 新しい設定 `aiCodingSidebar.markdownList.sortBy`: ソート基準を選択（name、created、modified）
+  - 新しい設定 `aiCodingSidebar.markdownList.sortOrder`: ソート方向を選択（ascending、descending）
+  - 設定変更は更新不要でリアルタイムに反映されます
+- **Markdown List - ソート順の表示**: 現在のソート順がビュータイトルに表示されるように変更
+  - ソート基準と方向を表示（例：「Markdown List (Created ↑)」）
+  - 設定変更時に自動的に更新されます
+  - 現在ファイルがどのようにソートされているかが一目で分かります
+
+### 変更
+- **Markdown List - デフォルトソート順**: デフォルトのファイルソート順を名前（昇順）から作成日時（昇順）に変更
+  - ファイルはデフォルトで作成日時の昇順でソートされるようになりました
+  - タイムスタンプ形式のファイル（例：`2025_1109_1230.md`）が自然な時系列順に表示されます
+  - 以前の動作（名前順）は`aiCodingSidebar.markdownList.sortBy`を"name"に変更することで復元できます
+
 ## [0.4.5] - 2025-11-09
 
 ### 修正

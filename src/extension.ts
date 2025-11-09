@@ -1331,7 +1331,8 @@ async function getFileList(dirPath: string): Promise<FileInfo[]> {
                 path: fullPath,
                 isDirectory: entry.isDirectory(),
                 size: entry.isFile() ? stat.size : 0,
-                modified: stat.mtime
+                modified: stat.mtime,
+                created: stat.birthtime
             });
         }
 
@@ -1392,6 +1393,7 @@ interface FileInfo {
     isDirectory: boolean;
     size: number;
     modified: Date;
+    created: Date;
 }
 
 // TreeDataProvider実装（フォルダのみ表示）
@@ -1756,7 +1758,8 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
                         path: fullPath,
                         isDirectory: true,
                         size: 0,
-                        modified: stat.mtime
+                        modified: stat.mtime,
+                        created: stat.birthtime
                     });
                 }
             }
@@ -1794,6 +1797,7 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
     private readonly listenerId = 'ai-coding-sidebar-details';
     private fileWatcherService: FileWatcherService | undefined;
     private markdownEditorProvider: MarkdownEditorProvider | undefined;
+    private configChangeDisposable: vscode.Disposable | undefined;
 
     constructor(
         private readonly folderTreeProvider: AiCodingSidebarProvider,
@@ -1810,6 +1814,14 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
                 this.debouncedRefresh(uri.fsPath);
             });
         }
+        // 設定変更を監視してタイトルと表示を更新
+        this.configChangeDisposable = vscode.workspace.onDidChangeConfiguration((e) => {
+            if (e.affectsConfiguration('aiCodingSidebar.markdownList.sortBy') ||
+                e.affectsConfiguration('aiCodingSidebar.markdownList.sortOrder')) {
+                this.updateTitle();
+                this.refresh();
+            }
+        });
     }
 
     setTreeView(treeView: vscode.TreeView<FileItem>): void {
@@ -1841,7 +1853,15 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
 
     private updateTitle(): void {
         if (this.treeView) {
-            this.treeView.title = 'Markdown List';
+            const config = vscode.workspace.getConfiguration('aiCodingSidebar.markdownList');
+            const sortBy = config.get<string>('sortBy', 'created');
+            const sortOrder = config.get<string>('sortOrder', 'ascending');
+
+            // Create readable labels
+            const sortByLabel = sortBy === 'name' ? 'Name' : sortBy === 'created' ? 'Created' : 'Modified';
+            const sortOrderLabel = sortOrder === 'ascending' ? '↑' : '↓';
+
+            this.treeView.title = `Markdown List (${sortByLabel} ${sortOrderLabel})`;
         }
     }
 
@@ -1906,6 +1926,10 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
         if (this.refreshDebounceTimer) {
             clearTimeout(this.refreshDebounceTimer);
             this.refreshDebounceTimer = undefined;
+        }
+        if (this.configChangeDisposable) {
+            this.configChangeDisposable.dispose();
+            this.configChangeDisposable = undefined;
         }
     }
 
@@ -2112,12 +2136,36 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
                     path: fullPath,
                     isDirectory: false,
                     size: stat.size,
-                    modified: stat.mtime
+                    modified: stat.mtime,
+                    created: stat.birthtime
                 });
             }
 
-            // ファイルのみなので名前順でソート
-            files.sort((a, b) => a.name.localeCompare(b.name));
+            // Get sort configuration
+            const config = vscode.workspace.getConfiguration('aiCodingSidebar.markdownList');
+            const sortBy = config.get<string>('sortBy', 'created');
+            const sortOrder = config.get<string>('sortOrder', 'ascending');
+
+            // Sort files based on configuration
+            files.sort((a, b) => {
+                let comparison = 0;
+
+                switch (sortBy) {
+                    case 'name':
+                        comparison = a.name.localeCompare(b.name);
+                        break;
+                    case 'created':
+                        comparison = a.created.getTime() - b.created.getTime();
+                        break;
+                    case 'modified':
+                        comparison = a.modified.getTime() - b.modified.getTime();
+                        break;
+                    default:
+                        comparison = a.created.getTime() - b.created.getTime();
+                }
+
+                return sortOrder === 'descending' ? -comparison : comparison;
+            });
 
         } catch (error) {
             const err = error as NodeJS.ErrnoException;

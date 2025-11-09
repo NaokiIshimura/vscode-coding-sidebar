@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.6] - 2025-11-09
+
+### Added
+- **Markdown List - Configurable Sort Order**: Added settings to customize how markdown files are sorted
+  - New setting `aiCodingSidebar.markdownList.sortBy`: Choose sort criteria (name, created, modified)
+  - New setting `aiCodingSidebar.markdownList.sortOrder`: Choose sort direction (ascending, descending)
+  - Settings changes are reflected in real-time without requiring refresh
+- **Markdown List - Sort Order Display**: Current sort order is now displayed in the view title
+  - Shows sort criteria and direction (e.g., "Markdown List (Created ↑)")
+  - Updates automatically when settings change
+  - Makes it clear how files are currently sorted
+
+### Changed
+- **Markdown List - Default Sort Order**: Changed default file sort order from name (ascending) to creation date (ascending)
+  - Files are now sorted by creation date in ascending order by default
+  - Timestamp-named files (e.g., `2025_1109_1230.md`) naturally appear in chronological order
+  - Previous behavior (sort by name) can be restored by changing `aiCodingSidebar.markdownList.sortBy` to "name"
+
 ## [0.4.5] - 2025-11-09
 
 ### Fixed

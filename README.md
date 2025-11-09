@@ -8,7 +8,7 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 | Feature | Description |
 | --- | --- |
 | **Directory List** | Display directories under a specified path.<br>Configure a default path in settings.<br>Create new directories. |
-| **Markdown List** | Display Markdown files and create new ones. |
+| **Markdown List** | Display Markdown files and create new ones.<br>Files are sorted by creation date (ascending) by default.<br>The current sort order is shown in the view title (e.g., "Markdown List (Created ↑)").<br>Customize sort order in settings. |
 | **Markdown Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a timestamp-named Markdown file (format: `YYYY_MMDD_HHMM.md`).<br>Other Markdown files open in the standard editor.<br>Save with `Cmd+S` / `Ctrl+S`.<br>Automatically switches to read-only mode when the file is active in VSCode editor. |
 | **File Changes** | List modified files and review diffs. |
 | **Settings** | Open user or global settings.<br>Customize templates.<br>Quick shortcuts: Open terminal, Checkout default branch, Git pull. |
@@ -127,6 +127,8 @@ If the default relative path doesn't exist, Directory List displays a "Create di
 | `showFileIcons` | Show file icons | boolean | `true` | - |
 | `autoRefresh` | Refresh automatically on filesystem changes | boolean | `true` | - |
 | `viewMode` | Display mode | string | `"tree"` | `"tree"` (tree view)<br>`"list"` (list view) |
+| `markdownList.sortBy` | Sort markdown files by | string | `"created"` | `"name"` (file name)<br>`"created"` (creation date)<br>`"modified"` (modified date) |
+| `markdownList.sortOrder` | Sort order for markdown files | string | `"ascending"` | `"ascending"` (ascending)<br>`"descending"` (descending) |
 
 ### Example configuration
 
@@ -140,7 +142,9 @@ Add the following to `.vscode/settings.json`:
   "aiCodingSidebar.showHidden": false,
   "aiCodingSidebar.showFileIcons": true,
   "aiCodingSidebar.autoRefresh": true,
-  "aiCodingSidebar.viewMode": "tree"
+  "aiCodingSidebar.viewMode": "tree",
+  "aiCodingSidebar.markdownList.sortBy": "created",
+  "aiCodingSidebar.markdownList.sortOrder": "ascending"
 }
 ```
 

@@ -1136,6 +1136,60 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    // 新しいディレクトリを作成コマンドを登録（ディレクトリ作成のみ、右クリックメニュー用）
+    const newDirectoryCommand = vscode.commands.registerCommand('aiCodingSidebar.newDirectory', async (item?: FileItem) => {
+        // Markdown List Viewで表示されているディレクトリ（=選択中のディレクトリ）配下にディレクトリを作成
+        const currentPath = aiCodingSidebarDetailsProvider.getCurrentPath();
+        if (!currentPath) {
+            vscode.window.showErrorMessage('No directory is selected');
+            return;
+        }
+        const targetPath = currentPath;
+
+        // フォルダ名をユーザーに入力してもらう
+        const folderName = await vscode.window.showInputBox({
+            prompt: 'Enter new folder name',
+            placeHolder: 'Folder name',
+            validateInput: (value) => {
+                if (!value || value.trim() === '') {
+                    return 'Please enter a folder name';
+                }
+                // 不正な文字をチェック
+                if (value.match(/[<>:"|?*\/\\]/)) {
+                    return 'Contains invalid characters: < > : " | ? * / \\';
+                }
+                // 既存フォルダとの重複チェック
+                const folderPath = path.join(targetPath, value.trim());
+                if (fs.existsSync(folderPath)) {
+                    return `Folder "${value.trim()}" already exists`;
+                }
+                return null;
+            }
+        });
+
+        if (!folderName || folderName.trim() === '') {
+            return;
+        }
+
+        const trimmedFolderName = folderName.trim();
+        const folderPath = path.join(targetPath, trimmedFolderName);
+
+        try {
+            // フォルダを作成
+            fs.mkdirSync(folderPath, { recursive: true });
+            vscode.window.showInformationMessage(`Created folder "${trimmedFolderName}"`);
+
+            // ビューを更新
+            aiCodingSidebarDetailsProvider.refresh();
+            aiCodingSidebarProvider.refresh();
+
+            // 作成したディレクトリを選択状態にする
+            await aiCodingSidebarProvider.revealDirectory(folderPath);
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to create folder: ${error}`);
+        }
+    });
+
     // ディレクトリ名変更コマンドを登録
     const renameDirectoryCommand = vscode.commands.registerCommand('aiCodingSidebar.renameDirectory', async (item?: FileItem) => {
         if (!item || !item.isDirectory) {
@@ -1386,7 +1440,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, createTaskCommand, addDirectoryToSelectedCommand, renameDirectoryCommand, deleteDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand);
+    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, createTaskCommand, addDirectoryToSelectedCommand, newDirectoryCommand, renameDirectoryCommand, deleteDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({

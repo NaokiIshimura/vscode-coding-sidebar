@@ -119,6 +119,11 @@
         "icon": "$(new-folder)"
       },
       {
+        "command": "aiCodingSidebar.newDirectory",
+        "title": "New Directory",
+        "icon": "$(new-folder)"
+      },
+      {
         "command": "aiCodingSidebar.renameDirectory",
         "title": "Rename Directory",
         "icon": "$(edit)"
@@ -245,7 +250,7 @@
           "group": "inline"
         },
         {
-          "command": "aiCodingSidebar.addDirectoryToSelected",
+          "command": "aiCodingSidebar.newDirectory",
           "when": "view == aiCodingSidebarExplorer && viewItem == directory",
           "group": "2_workspace@2"
         },

@@ -8,21 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.4.4] - 2025-11-09
 
 ### Changed
-- **Directory List - Add Directory Behavior**: "Add Directory" command now always creates directories in the Directory List root
-  - Previously created directories under the selected directory when invoked from context menu
-  - Now consistently creates directories in the Directory List's root directory regardless of how the command is invoked
-  - Provides more predictable behavior for directory creation
-- **Markdown List - Title Display**: Changed title path display to show relative path from Directory List root
-  - Previously showed path relative to project root
-  - Now displays path relative to the current Directory List root directory
-  - Provides better context when navigating within specific directory structures
+- **View Titles Simplification**: Simplified all view titles for cleaner UI
+  - Directory List: Removed relative path from title, now shows only "Directory List"
+  - Markdown List: Removed relative path from title, now shows only "Markdown List"
+  - Provides consistent and simpler interface across all views
+- **Markdown List - Directory Header**: Added directory name display at the top of file list
+  - Shows the current directory path relative to Directory List root
+  - Similar to Markdown Editor's filename display for consistency
+  - Makes it clear which directory you're browsing without cluttering the title
 - **Markdown List - Editing File Indicator**: Added "editing" indicator for files being edited in Markdown Editor
   - Files currently being edited in Markdown Editor View now show "editing" in their description
+  - Automatically updates when switching files without manual refresh
   - Makes it easier to identify which file is actively being edited in the sidebar
 - **Markdown Editor - Title Display**: Simplified title to show only the filename
   - Previously showed the full relative path from project root
   - Now displays only the filename for cleaner UI
-  - Full path information is still available via tooltip or other context
+- **Markdown Editor - Auto-clear on Folder Switch**: Editor now clears when switching folders in Markdown List
+  - Prevents confusion by not showing files from previous folders
+  - Automatically resets editor state when navigating to different directories
+- **Directory List - Add Directory Behavior**: "Add Directory" command now always creates directories in the Directory List root
+  - Previously created directories under the selected directory when invoked from context menu
+  - Now consistently creates directories in the Directory List's root directory regardless of how the command is invoked
+  - Provides more predictable behavior for directory creation
 
 ## [0.4.3] - 2025-11-09
 

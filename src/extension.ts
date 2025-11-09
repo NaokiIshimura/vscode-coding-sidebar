@@ -2860,6 +2860,7 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
     private _currentContent?: string;
     private _isDirty: boolean = false;
     private _detailsProvider?: AiCodingSidebarDetailsProvider;
+    private _pendingFileToRestore?: string;
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
@@ -2902,6 +2903,13 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
         // Webviewからのメッセージを受信
         webviewView.webview.onDidReceiveMessage(async (data) => {
             switch (data.type) {
+                case 'webviewReady':
+                    // Webviewの準備が完了したら、保留中のファイルを復元
+                    if (this._pendingFileToRestore) {
+                        await this.showFile(this._pendingFileToRestore);
+                        this._pendingFileToRestore = undefined;
+                    }
+                    break;
                 case 'save':
                     if (this._currentFilePath) {
                         try {
@@ -2930,12 +2938,9 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
         });
 
         // Restore previously opened file if exists
-        // Use setTimeout to ensure webview is fully initialized before sending messages
+        // Store file path to restore after webview is ready
         if (this._currentFilePath) {
-            const filePathToRestore = this._currentFilePath;
-            setTimeout(() => {
-                this.showFile(filePathToRestore);
-            }, 100);
+            this._pendingFileToRestore = this._currentFilePath;
         }
     }
 
@@ -3205,6 +3210,11 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
                     content: editor.value
                 });
             }
+        });
+
+        // Notify extension that webview is ready
+        window.addEventListener('load', () => {
+            vscode.postMessage({ type: 'webviewReady' });
         });
     </script>
 </body>

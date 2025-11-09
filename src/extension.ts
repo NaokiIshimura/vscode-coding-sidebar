@@ -1841,6 +1841,10 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
         this.setupFileWatcher();
         this.refresh();
         this.folderTreeProvider.setActiveFolder(path);
+        // フォルダ切り替え時にMarkdown Editorのファイルをクリア
+        if (this.markdownEditorProvider) {
+            this.markdownEditorProvider.clearFile();
+        }
     }
 
     private updateTitle(): void {
@@ -2964,6 +2968,18 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
         this._detailsProvider = provider;
     }
 
+    public clearFile(): void {
+        this._currentFilePath = undefined;
+        this._currentContent = undefined;
+        this._isDirty = false;
+
+        if (this._view) {
+            this._view.webview.postMessage({
+                type: 'clearContent'
+            });
+        }
+    }
+
     private _getHtmlForWebview(webview: vscode.Webview) {
         return `<!DOCTYPE html>
 <html lang="en">
@@ -3127,6 +3143,17 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
                             saveHint.classList.add('show');
                         }
                     }
+                    break;
+                case 'clearContent':
+                    editor.value = '';
+                    originalContent = '';
+                    currentFilePath = '';
+                    filePathElement.textContent = '';
+                    dirtyIndicator.classList.remove('show');
+                    saveHint.classList.remove('show');
+                    readonlyIndicator.classList.remove('show');
+                    editor.removeAttribute('readonly');
+                    isReadOnly = false;
                     break;
             }
         });

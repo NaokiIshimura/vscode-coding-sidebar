@@ -8,7 +8,7 @@ AIコーディングツールとの連携を強化するサイドバー拡張機
 | 機能 | 説明 |
 | --- | --- |
 | **Directory List** | 指定したディレクトリ配下を表示できる<br>settingsでデフォルトのパスを設定できる<br>ディレクトリを作成できる |
-| **Markdown List** | マークダウンリストを表示<br>マークダウンファイルを作成できる |
+| **Markdown List** | マークダウンリストを表示<br>マークダウンファイルを作成できる<br>デフォルトでファイル作成日時の昇順でソート<br>現在のソート順がビュータイトルに表示される（例: "Markdown List (Created ↑)"）<br>ソート順は設定でカスタマイズ可能 |
 | **Markdown Editor** | サイドバー内でMarkdownファイルを直接編集可能<br>タイムスタンプ形式のMarkdownファイル（形式: `YYYY_MMDD_HHMM.md`）を選択すると自動的に表示<br>その他のMarkdownファイルは通常のエディタで開く<br>`Cmd+S` / `Ctrl+S`で保存<br>VSCodeエディタでファイルがアクティブになると自動的に読み取り専用モードに切り替わる |
 | **File Changes** | 変更されたファイルを一覧表示し、差分を確認できる |
 | **Settings** | ユーザ設定を開く<br>グローバル設定を開く<br>テンプレートをカスタマイズ<br>ショートカット機能: ターミナルを開く、デフォルトブランチへ切り替え、Git pull |
@@ -132,6 +132,8 @@ file: {{filename}}
 | `showFileIcons` | ファイルアイコンを表示する | boolean | `true` | - |
 | `autoRefresh` | ファイルシステム変更時に自動更新する | boolean | `true` | - |
 | `viewMode` | 表示モード | string | `"tree"` | `"tree"`: ツリー表示<br>`"list"`: リスト表示 |
+| `markdownList.sortBy` | マークダウンファイルのソート基準 | string | `"created"` | `"name"`: ファイル名<br>`"created"`: 作成日時<br>`"modified"`: 更新日時 |
+| `markdownList.sortOrder` | マークダウンファイルのソート順序 | string | `"ascending"` | `"ascending"`: 昇順<br>`"descending"`: 降順 |
 
 ### 設定例
 
@@ -145,7 +147,9 @@ file: {{filename}}
   "aiCodingSidebar.showHidden": false,
   "aiCodingSidebar.showFileIcons": true,
   "aiCodingSidebar.autoRefresh": true,
-  "aiCodingSidebar.viewMode": "tree"
+  "aiCodingSidebar.viewMode": "tree",
+  "aiCodingSidebar.markdownList.sortBy": "created",
+  "aiCodingSidebar.markdownList.sortOrder": "ascending"
 }
 ```
 

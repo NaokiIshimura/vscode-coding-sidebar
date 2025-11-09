@@ -114,11 +114,6 @@
         "icon": "$(folder-active)"
       },
       {
-        "command": "aiCodingSidebar.addDirectoryToSelected",
-        "title": "New Directory",
-        "icon": "$(new-folder)"
-      },
-      {
         "command": "aiCodingSidebar.newDirectory",
         "title": "New Directory",
         "icon": "$(new-folder)"

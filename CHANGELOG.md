@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.5] - 2025-11-09
+
+### Changed
+- **Markdown List - Auto-select File After Directory Creation**: When creating a directory via "Add Directory" command, the auto-created markdown file is now automatically selected in Markdown List view
+  - The created file appears selected (in "editing" state) in Markdown List view
+  - Provides better visual feedback and immediate editing workflow
+  - Complements the existing Markdown Editor View auto-display feature
+- **Markdown List - Directory Header Display**: Changed directory header display when no directory is selected
+  - Previously showed "." when viewing the same directory as Directory List root
+  - Now shows "(not selected)" for better clarity
+  - Makes it clearer when browsing the root directory
+
 ## [0.4.4] - 2025-11-09
 
 ### Changed
@@ -264,6 +276,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.4.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.4...v0.4.5
 [0.4.4]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.3...v0.4.4
 [0.4.3]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.1...v0.4.2

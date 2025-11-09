@@ -1017,6 +1017,9 @@ export function activate(context: vscode.ExtensionContext) {
                 // 作成したファイルをMarkdown Editor Viewで開く
                 await markdownEditorProvider.showFile(filePath);
 
+                // Markdown List Viewで作成したファイルを選択状態にする
+                await aiCodingSidebarDetailsProvider.revealFile(filePath);
+
                 vscode.window.showInformationMessage(`Created markdown file ${fileName} in "${trimmedFolderName}"`);
 
                 // 作成したディレクトリを選択状態にする
@@ -1879,6 +1882,32 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
         return this.selectedItem;
     }
 
+    async revealFile(filePath: string): Promise<void> {
+        if (!this.treeView) {
+            return;
+        }
+
+        try {
+            const stat = fs.statSync(filePath);
+            if (stat.isDirectory()) {
+                return;
+            }
+
+            const item = new FileItem(
+                path.basename(filePath),
+                vscode.TreeItemCollapsibleState.None,
+                filePath,
+                false,
+                stat.size,
+                stat.mtime
+            );
+
+            await this.treeView.reveal(item, { select: true, focus: true, expand: false });
+        } catch (error) {
+            console.error('Failed to reveal file:', error);
+        }
+    }
+
     private setupFileWatcher(): void {
         // リスナーはコンストラクタで登録済み
         // この関数は互換性のために残す
@@ -2055,7 +2084,7 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
                 let displayPath: string;
                 if (directoryListRoot) {
                     const relativePath = path.relative(directoryListRoot, this.rootPath);
-                    displayPath = relativePath === '' ? '.' : relativePath;
+                    displayPath = relativePath === '' ? '(not selected)' : relativePath;
                 } else {
                     displayPath = path.basename(this.rootPath);
                 }

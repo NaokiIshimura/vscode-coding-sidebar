@@ -29,6 +29,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Now shows "(not selected)" for better clarity
   - Makes it clearer when browsing the root directory
 
+## [0.4.6] - 2025-11-09
+
+### Added
+- **Markdown List - Configurable Sort Order**: Added settings to customize how markdown files are sorted
+  - New setting `aiCodingSidebar.markdownList.sortBy`: Choose sort criteria (name, created, modified)
+  - New setting `aiCodingSidebar.markdownList.sortOrder`: Choose sort direction (ascending, descending)
+  - Settings changes are reflected in real-time without requiring refresh
+- **Markdown List - Sort Order Display**: Current sort order is now displayed in the view title
+  - Shows sort criteria and direction (e.g., "Markdown List (Created ↑)")
+  - Updates automatically when settings change
+  - Makes it clear how files are currently sorted
+
+### Changed
+- **Markdown List - Default Sort Order**: Changed default file sort order from name (ascending) to creation date (ascending)
+  - Files are now sorted by creation date in ascending order by default
+  - Timestamp-named files (e.g., `2025_1109_1230.md`) naturally appear in chronological order
+  - Previous behavior (sort by name) can be restored by changing `aiCodingSidebar.markdownList.sortBy` to "name"
+
+## [0.4.5] - 2025-11-09
+
+### Fixed
+- **Markdown Editor State Persistence**: Fixed issue where Markdown Editor loses file state when extension becomes inactive/active
+  - Previously, when the extension sidebar became inactive and then active again, the Markdown Editor would show empty content
+  - Added `retainContextWhenHidden: true` to markdownEditor view configuration to preserve webview context when hidden
+  - Added `onDidChangeVisibility` listener to restore file content when view becomes visible
+  - Added webview ready message handling to ensure file restoration after webview initialization
+  - Now, the previously selected file is automatically restored when the extension becomes active
+  - Maintains seamless editing experience across extension lifecycle changes
+
 ## [0.4.4] - 2025-11-09
 
 ### Changed
@@ -289,6 +318,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
 [0.4.7]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.6...v0.4.7
+[0.4.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.5...v0.4.6
+[0.4.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.4...v0.4.5
 [0.4.4]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.3...v0.4.4
 [0.4.3]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.1...v0.4.2

@@ -187,7 +187,8 @@
         {
           "id": "markdownEditor",
           "name": "Markdown Editor",
-          "type": "webview"
+          "type": "webview",
+          "retainContextWhenHidden": true
         },
         {
           "id": "gitChanges",
@@ -385,6 +386,34 @@
           "type": "boolean",
           "default": true,
           "description": "Show file icons"
+        },
+        "aiCodingSidebar.markdownList.sortBy": {
+          "type": "string",
+          "enum": [
+            "name",
+            "created",
+            "modified"
+          ],
+          "default": "created",
+          "description": "Sort markdown files by",
+          "enumDescriptions": [
+            "Sort by file name",
+            "Sort by creation date",
+            "Sort by modified date"
+          ]
+        },
+        "aiCodingSidebar.markdownList.sortOrder": {
+          "type": "string",
+          "enum": [
+            "ascending",
+            "descending"
+          ],
+          "default": "ascending",
+          "description": "Sort order for markdown files",
+          "enumDescriptions": [
+            "Ascending order",
+            "Descending order"
+          ]
         }
       }
     }

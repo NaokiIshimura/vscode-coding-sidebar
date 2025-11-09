@@ -938,8 +938,8 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    // タスクを作成コマンドを登録（ディレクトリ + Markdownファイル作成）
-    const createTaskCommand = vscode.commands.registerCommand('aiCodingSidebar.createTask', async (item?: FileItem) => {
+    // フォルダを追加コマンドを登録（フォルダツリーview用）
+    const addDirectoryCommand = vscode.commands.registerCommand('aiCodingSidebar.addDirectory', async (item?: FileItem) => {
         // 常にdirectory listで開いているディレクトリ配下にディレクトリを作成
         const currentPath = aiCodingSidebarProvider.getRootPath();
         if (!currentPath) {
@@ -1014,16 +1014,13 @@ export function activate(context: vscode.ExtensionContext) {
                 aiCodingSidebarDetailsProvider.refresh();
                 aiCodingSidebarProvider.refresh();
 
-                // 1. 作成したディレクトリをDirectory Listで選択（Markdown List Viewが更新される）
-                await aiCodingSidebarProvider.revealDirectory(folderPath);
-
-                // 2. Markdown List Viewで作成したファイルを選択状態にする
-                await aiCodingSidebarDetailsProvider.revealFile(filePath);
-
-                // 3. 作成したファイルをMarkdown Editor Viewで開く
+                // 作成したファイルをMarkdown Editor Viewで開く
                 await markdownEditorProvider.showFile(filePath);
 
                 vscode.window.showInformationMessage(`Created markdown file ${fileName} in "${trimmedFolderName}"`);
+
+                // 作成したディレクトリを選択状態にする
+                await aiCodingSidebarProvider.revealDirectory(folderPath);
             } else {
                 vscode.window.showWarningMessage(`Folder created but failed to create markdown file: ${result.error}`);
 
@@ -1032,159 +1029,6 @@ export function activate(context: vscode.ExtensionContext) {
                 aiCodingSidebarProvider.refresh();
                 await aiCodingSidebarProvider.revealDirectory(folderPath);
             }
-        } catch (error) {
-            vscode.window.showErrorMessage(`Failed to create folder: ${error}`);
-        }
-    });
-
-    // 選択中のディレクトリにディレクトリを追加コマンドを登録（タイトルメニュー用）
-    const addDirectoryToSelectedCommand = vscode.commands.registerCommand('aiCodingSidebar.addDirectoryToSelected', async (item?: FileItem) => {
-        // Markdown List Viewで表示されているディレクトリ（=選択中のディレクトリ）配下にディレクトリを作成
-        const currentPath = aiCodingSidebarDetailsProvider.getCurrentPath();
-        if (!currentPath) {
-            vscode.window.showErrorMessage('No directory is selected');
-            return;
-        }
-        const targetPath = currentPath;
-
-        // フォルダ名をユーザーに入力してもらう
-        const folderName = await vscode.window.showInputBox({
-            prompt: 'Enter new folder name',
-            placeHolder: 'Folder name',
-            validateInput: (value) => {
-                if (!value || value.trim() === '') {
-                    return 'Please enter a folder name';
-                }
-                // 不正な文字をチェック
-                if (value.match(/[<>:"|?*\/\\]/)) {
-                    return 'Contains invalid characters: < > : " | ? * / \\';
-                }
-                // 既存フォルダとの重複チェック
-                const folderPath = path.join(targetPath, value.trim());
-                if (fs.existsSync(folderPath)) {
-                    return `Folder "${value.trim()}" already exists`;
-                }
-                return null;
-            }
-        });
-
-        if (!folderName || folderName.trim() === '') {
-            return;
-        }
-
-        const trimmedFolderName = folderName.trim();
-        const folderPath = path.join(targetPath, trimmedFolderName);
-
-        try {
-            // フォルダを作成
-            fs.mkdirSync(folderPath, { recursive: true });
-            vscode.window.showInformationMessage(`Created folder "${trimmedFolderName}"`);
-
-            // ビューを更新
-            aiCodingSidebarDetailsProvider.refresh();
-            aiCodingSidebarProvider.refresh();
-
-            // 作成したディレクトリ内にMarkdownファイルを作成
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hour = String(now.getHours()).padStart(2, '0');
-            const minute = String(now.getMinutes()).padStart(2, '0');
-
-            const timestamp = `${year}_${month}${day}_${hour}${minute}`;
-            const fileName = `${timestamp}.md`;
-            const filePath = path.join(folderPath, fileName);
-
-            // テンプレートを使用してファイル内容を生成
-            const variables = {
-                datetime: now.toLocaleString(),
-                filename: fileName,
-                timestamp: timestamp
-            };
-
-            const content = loadTemplate(context, variables);
-
-            // FileOperationServiceを使用してファイル作成
-            const result = await fileOperationService.createFile(filePath, content);
-
-            if (result.success) {
-                // ビューを更新
-                aiCodingSidebarDetailsProvider.refresh();
-                aiCodingSidebarProvider.refresh();
-
-                // 1. 作成したディレクトリをDirectory Listで選択（Markdown List Viewが更新される）
-                await aiCodingSidebarProvider.revealDirectory(folderPath);
-
-                // 2. Markdown List Viewで作成したファイルを選択状態にする
-                await aiCodingSidebarDetailsProvider.revealFile(filePath);
-
-                // 3. 作成したファイルをMarkdown Editor Viewで開く
-                await markdownEditorProvider.showFile(filePath);
-
-                vscode.window.showInformationMessage(`Created markdown file ${fileName} in "${trimmedFolderName}"`);
-            } else {
-                vscode.window.showWarningMessage(`Folder created but failed to create markdown file: ${result.error}`);
-
-                // 失敗時もビューを更新してディレクトリを選択状態にする
-                aiCodingSidebarDetailsProvider.refresh();
-                aiCodingSidebarProvider.refresh();
-                await aiCodingSidebarProvider.revealDirectory(folderPath);
-            }
-        } catch (error) {
-            vscode.window.showErrorMessage(`Failed to create folder: ${error}`);
-        }
-    });
-
-    // 新しいディレクトリを作成コマンドを登録（ディレクトリ作成のみ、右クリックメニュー用）
-    const newDirectoryCommand = vscode.commands.registerCommand('aiCodingSidebar.newDirectory', async (item?: FileItem) => {
-        // Markdown List Viewで表示されているディレクトリ（=選択中のディレクトリ）配下にディレクトリを作成
-        const currentPath = aiCodingSidebarDetailsProvider.getCurrentPath();
-        if (!currentPath) {
-            vscode.window.showErrorMessage('No directory is selected');
-            return;
-        }
-        const targetPath = currentPath;
-
-        // フォルダ名をユーザーに入力してもらう
-        const folderName = await vscode.window.showInputBox({
-            prompt: 'Enter new folder name',
-            placeHolder: 'Folder name',
-            validateInput: (value) => {
-                if (!value || value.trim() === '') {
-                    return 'Please enter a folder name';
-                }
-                // 不正な文字をチェック
-                if (value.match(/[<>:"|?*\/\\]/)) {
-                    return 'Contains invalid characters: < > : " | ? * / \\';
-                }
-                // 既存フォルダとの重複チェック
-                const folderPath = path.join(targetPath, value.trim());
-                if (fs.existsSync(folderPath)) {
-                    return `Folder "${value.trim()}" already exists`;
-                }
-                return null;
-            }
-        });
-
-        if (!folderName || folderName.trim() === '') {
-            return;
-        }
-
-        const trimmedFolderName = folderName.trim();
-        const folderPath = path.join(targetPath, trimmedFolderName);
-
-        try {
-            // フォルダを作成
-            fs.mkdirSync(folderPath, { recursive: true });
-            vscode.window.showInformationMessage(`Created folder "${trimmedFolderName}"`);
-
-            // ビューを更新
-            aiCodingSidebarDetailsProvider.refresh();
-            aiCodingSidebarProvider.refresh();
-
-            // 作成したディレクトリを選択状態にする
-            await aiCodingSidebarProvider.revealDirectory(folderPath);
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to create folder: ${error}`);
         }
@@ -1440,7 +1284,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, createTaskCommand, addDirectoryToSelectedCommand, newDirectoryCommand, renameDirectoryCommand, deleteDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand);
+    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, renameDirectoryCommand, deleteDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({
@@ -1487,7 +1331,8 @@ async function getFileList(dirPath: string): Promise<FileInfo[]> {
                 path: fullPath,
                 isDirectory: entry.isDirectory(),
                 size: entry.isFile() ? stat.size : 0,
-                modified: stat.mtime
+                modified: stat.mtime,
+                created: stat.birthtime
             });
         }
 
@@ -1548,6 +1393,7 @@ interface FileInfo {
     isDirectory: boolean;
     size: number;
     modified: Date;
+    created: Date;
 }
 
 // TreeDataProvider実装（フォルダのみ表示）
@@ -1912,7 +1758,8 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
                         path: fullPath,
                         isDirectory: true,
                         size: 0,
-                        modified: stat.mtime
+                        modified: stat.mtime,
+                        created: stat.birthtime
                     });
                 }
             }
@@ -1950,6 +1797,7 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
     private readonly listenerId = 'ai-coding-sidebar-details';
     private fileWatcherService: FileWatcherService | undefined;
     private markdownEditorProvider: MarkdownEditorProvider | undefined;
+    private configChangeDisposable: vscode.Disposable | undefined;
 
     constructor(
         private readonly folderTreeProvider: AiCodingSidebarProvider,
@@ -1966,6 +1814,14 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
                 this.debouncedRefresh(uri.fsPath);
             });
         }
+        // 設定変更を監視してタイトルと表示を更新
+        this.configChangeDisposable = vscode.workspace.onDidChangeConfiguration((e) => {
+            if (e.affectsConfiguration('aiCodingSidebar.markdownList.sortBy') ||
+                e.affectsConfiguration('aiCodingSidebar.markdownList.sortOrder')) {
+                this.updateTitle();
+                this.refresh();
+            }
+        });
     }
 
     setTreeView(treeView: vscode.TreeView<FileItem>): void {
@@ -1997,7 +1853,15 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
 
     private updateTitle(): void {
         if (this.treeView) {
-            this.treeView.title = 'Markdown List';
+            const config = vscode.workspace.getConfiguration('aiCodingSidebar.markdownList');
+            const sortBy = config.get<string>('sortBy', 'created');
+            const sortOrder = config.get<string>('sortOrder', 'ascending');
+
+            // Create readable labels
+            const sortByLabel = sortBy === 'name' ? 'Name' : sortBy === 'created' ? 'Created' : 'Modified';
+            const sortOrderLabel = sortOrder === 'ascending' ? '↑' : '↓';
+
+            this.treeView.title = `Markdown List (${sortByLabel} ${sortOrderLabel})`;
         }
     }
 
@@ -2035,32 +1899,6 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
         return this.selectedItem;
     }
 
-    async revealFile(filePath: string): Promise<void> {
-        if (!this.treeView) {
-            return;
-        }
-
-        try {
-            const stat = fs.statSync(filePath);
-            if (stat.isDirectory()) {
-                return;
-            }
-
-            const item = new FileItem(
-                path.basename(filePath),
-                vscode.TreeItemCollapsibleState.None,
-                filePath,
-                false,
-                stat.size,
-                stat.mtime
-            );
-
-            await this.treeView.reveal(item, { select: true, focus: true, expand: false });
-        } catch (error) {
-            console.error('Failed to reveal file:', error);
-        }
-    }
-
     private setupFileWatcher(): void {
         // リスナーはコンストラクタで登録済み
         // この関数は互換性のために残す
@@ -2088,6 +1926,10 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
         if (this.refreshDebounceTimer) {
             clearTimeout(this.refreshDebounceTimer);
             this.refreshDebounceTimer = undefined;
+        }
+        if (this.configChangeDisposable) {
+            this.configChangeDisposable.dispose();
+            this.configChangeDisposable = undefined;
         }
     }
 
@@ -2237,7 +2079,7 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
                 let displayPath: string;
                 if (directoryListRoot) {
                     const relativePath = path.relative(directoryListRoot, this.rootPath);
-                    displayPath = relativePath === '' ? '(not selected)' : relativePath;
+                    displayPath = relativePath === '' ? '.' : relativePath;
                 } else {
                     displayPath = path.basename(this.rootPath);
                 }
@@ -2294,12 +2136,36 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
                     path: fullPath,
                     isDirectory: false,
                     size: stat.size,
-                    modified: stat.mtime
+                    modified: stat.mtime,
+                    created: stat.birthtime
                 });
             }
 
-            // ファイルのみなので名前順でソート
-            files.sort((a, b) => a.name.localeCompare(b.name));
+            // Get sort configuration
+            const config = vscode.workspace.getConfiguration('aiCodingSidebar.markdownList');
+            const sortBy = config.get<string>('sortBy', 'created');
+            const sortOrder = config.get<string>('sortOrder', 'ascending');
+
+            // Sort files based on configuration
+            files.sort((a, b) => {
+                let comparison = 0;
+
+                switch (sortBy) {
+                    case 'name':
+                        comparison = a.name.localeCompare(b.name);
+                        break;
+                    case 'created':
+                        comparison = a.created.getTime() - b.created.getTime();
+                        break;
+                    case 'modified':
+                        comparison = a.modified.getTime() - b.modified.getTime();
+                        break;
+                    default:
+                        comparison = a.created.getTime() - b.created.getTime();
+                }
+
+                return sortOrder === 'descending' ? -comparison : comparison;
+            });
 
         } catch (error) {
             const err = error as NodeJS.ErrnoException;
@@ -3042,6 +2908,7 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
     private _currentContent?: string;
     private _isDirty: boolean = false;
     private _detailsProvider?: AiCodingSidebarDetailsProvider;
+    private _pendingFileToRestore?: string;
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
@@ -3084,6 +2951,13 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
         // Webviewからのメッセージを受信
         webviewView.webview.onDidReceiveMessage(async (data) => {
             switch (data.type) {
+                case 'webviewReady':
+                    // Webviewの準備が完了したら、保留中のファイルを復元
+                    if (this._pendingFileToRestore) {
+                        await this.showFile(this._pendingFileToRestore);
+                        this._pendingFileToRestore = undefined;
+                    }
+                    break;
                 case 'save':
                     if (this._currentFilePath) {
                         try {
@@ -3108,6 +2982,20 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
                         this._isDirty = isDirty;
                     }
                     break;
+            }
+        });
+
+        // Restore previously opened file if exists
+        // Store file path to restore after webview is ready
+        if (this._currentFilePath) {
+            this._pendingFileToRestore = this._currentFilePath;
+        }
+
+        // Listen to visibility changes to restore file when view becomes visible
+        webviewView.onDidChangeVisibility(() => {
+            if (webviewView.visible && this._currentFilePath) {
+                // Re-send the file content when view becomes visible
+                this.showFile(this._currentFilePath);
             }
         });
     }
@@ -3378,6 +3266,11 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
                     content: editor.value
                 });
             }
+        });
+
+        // Notify extension that webview is ready
+        window.addEventListener('load', () => {
+            vscode.postMessage({ type: 'webviewReady' });
         });
     </script>
 </body>

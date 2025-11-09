@@ -2860,6 +2860,7 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
     private _currentContent?: string;
     private _isDirty: boolean = false;
     private _detailsProvider?: AiCodingSidebarDetailsProvider;
+    private _pendingFileToRestore?: string;
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
@@ -2902,6 +2903,13 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
         // Webviewからのメッセージを受信
         webviewView.webview.onDidReceiveMessage(async (data) => {
             switch (data.type) {
+                case 'webviewReady':
+                    // Webviewの準備が完了したら、保留中のファイルを復元
+                    if (this._pendingFileToRestore) {
+                        await this.showFile(this._pendingFileToRestore);
+                        this._pendingFileToRestore = undefined;
+                    }
+                    break;
                 case 'save':
                     if (this._currentFilePath) {
                         try {
@@ -2926,6 +2934,20 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
                         this._isDirty = isDirty;
                     }
                     break;
+            }
+        });
+
+        // Restore previously opened file if exists
+        // Store file path to restore after webview is ready
+        if (this._currentFilePath) {
+            this._pendingFileToRestore = this._currentFilePath;
+        }
+
+        // Listen to visibility changes to restore file when view becomes visible
+        webviewView.onDidChangeVisibility(() => {
+            if (webviewView.visible && this._currentFilePath) {
+                // Re-send the file content when view becomes visible
+                this.showFile(this._currentFilePath);
             }
         });
     }
@@ -3196,6 +3218,11 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
                     content: editor.value
                 });
             }
+        });
+
+        // Notify extension that webview is ready
+        window.addEventListener('load', () => {
+            vscode.postMessage({ type: 'webviewReady' });
         });
     </script>
 </body>

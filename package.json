@@ -109,11 +109,6 @@
         "icon": "$(trash)"
       },
       {
-        "command": "aiCodingSidebar.addDirectory",
-        "title": "Add Directory",
-        "icon": "$(new-folder)"
-      },
-      {
         "command": "aiCodingSidebar.createTask",
         "title": "Create Task",
         "icon": "$(new-folder)"
@@ -250,7 +245,7 @@
           "group": "inline"
         },
         {
-          "command": "aiCodingSidebar.addDirectory",
+          "command": "aiCodingSidebar.addDirectoryToSelected",
           "when": "view == aiCodingSidebarExplorer && viewItem == directory",
           "group": "2_workspace@2"
         },

@@ -1480,16 +1480,8 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
     }
 
     private updateTitle(): void {
-        if (this.treeView && this.rootPath) {
-            const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-            if (workspaceRoot) {
-                const relativePath = path.relative(workspaceRoot, this.rootPath);
-                const displayPath = relativePath === '' ? '.' : relativePath;
-                this.treeView.title = `Directory List - ${displayPath}`;
-            } else {
-                const folderName = path.basename(this.rootPath);
-                this.treeView.title = `Directory List - ${folderName}`;
-            }
+        if (this.treeView) {
+            this.treeView.title = 'Directory List';
         }
     }
 

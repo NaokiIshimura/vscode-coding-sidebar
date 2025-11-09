@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.4.5] - 2025-11-09
+## [0.4.7] - 2025-11-09
 
 ### Changed
 - **Extension Icon**: Changed extension icon to "layout-sidebar-left" for better visual representation
@@ -288,7 +288,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
-[0.4.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.4...v0.4.5
+[0.4.7]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.6...v0.4.7
 [0.4.4]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.3...v0.4.4
 [0.4.3]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.1...v0.4.2

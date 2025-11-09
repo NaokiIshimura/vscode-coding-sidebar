@@ -1848,17 +1848,8 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
     }
 
     private updateTitle(): void {
-        if (this.treeView && this.rootPath) {
-            // directory listのルートパスを取得
-            const directoryListRoot = this.folderTreeProvider.getRootPath();
-            if (directoryListRoot) {
-                const relativePath = path.relative(directoryListRoot, this.rootPath);
-                const displayPath = relativePath === '' ? '.' : relativePath;
-                this.treeView.title = `Markdown List - ${displayPath}`;
-            } else {
-                const folderName = path.basename(this.rootPath);
-                this.treeView.title = `Markdown List - ${folderName}`;
-            }
+        if (this.treeView) {
+            this.treeView.title = 'Markdown List';
         }
     }
 
@@ -2065,6 +2056,30 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
                 }
                 return item;
             });
+
+            // ルートレベルの場合、最上部にディレクトリ名を表示
+            if (!element) {
+                const directoryListRoot = this.folderTreeProvider.getRootPath();
+                let displayPath: string;
+                if (directoryListRoot) {
+                    const relativePath = path.relative(directoryListRoot, this.rootPath);
+                    displayPath = relativePath === '' ? '.' : relativePath;
+                } else {
+                    displayPath = path.basename(this.rootPath);
+                }
+
+                const headerItem = new FileItem(
+                    displayPath,
+                    vscode.TreeItemCollapsibleState.None,
+                    this.rootPath,
+                    false,
+                    0,
+                    new Date()
+                );
+                headerItem.contextValue = 'directoryHeader';
+                headerItem.command = undefined; // クリックできないようにする
+                fileItems.unshift(headerItem); // 最上部に追加
+            }
 
             // キャッシュに保存
             this.itemCache.set(targetPath, fileItems);

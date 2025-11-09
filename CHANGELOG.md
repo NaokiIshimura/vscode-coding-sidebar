@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.4] - 2025-11-09
+
+### Changed
+- **Directory List - Add Directory Behavior**: "Add Directory" command now always creates directories in the Directory List root
+  - Previously created directories under the selected directory when invoked from context menu
+  - Now consistently creates directories in the Directory List's root directory regardless of how the command is invoked
+  - Provides more predictable behavior for directory creation
+- **Markdown List - Title Display**: Changed title path display to show relative path from Directory List root
+  - Previously showed path relative to project root
+  - Now displays path relative to the current Directory List root directory
+  - Provides better context when navigating within specific directory structures
+- **Markdown List - Selected File Indicator**: Added "selected" indicator for currently open files
+  - Files currently open in Markdown Editor View now show "selected" in their description
+  - Makes it easier to identify which file is being edited in the sidebar
+- **Markdown Editor - Title Display**: Simplified title to show only the filename
+  - Previously showed the full relative path from project root
+  - Now displays only the filename for cleaner UI
+  - Full path information is still available via tooltip or other context
+
 ## [0.4.3] - 2025-11-09
 
 ### Changed
@@ -238,6 +257,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.4.4]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.3...v0.4.4
+[0.4.3]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.2...v0.4.3
+[0.4.2]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.1...v0.4.2
+[0.4.1]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.7...v0.4.0
 [0.3.7]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.6...v0.3.7
 [0.3.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.5...v0.3.6

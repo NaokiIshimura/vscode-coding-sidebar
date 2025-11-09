@@ -28,3 +28,17 @@ x.x.x
 
 # タスク
 
+## settings
+
+
+## directory list
+
+
+## markdown list
+
+
+## markdown editor
+
+## file changes
+
+

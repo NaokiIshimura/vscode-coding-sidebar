@@ -192,6 +192,11 @@ export function activate(context: vscode.ExtensionContext) {
     const gitChangesProvider = new GitChangesProvider(fileWatcherService);
     const markdownEditorProvider = new MarkdownEditorProvider(context.extensionUri);
 
+    // Markdown EditorプロバイダーをMarkdown Listプロバイダーに設定
+    aiCodingSidebarDetailsProvider.setMarkdownEditorProvider(markdownEditorProvider);
+    // Markdown ListプロバイダーをMarkdown Editorプロバイダーに設定
+    markdownEditorProvider.setDetailsProvider(aiCodingSidebarDetailsProvider);
+
     // プロジェクトルートを設定
     const initializeWithWorkspaceRoot = async () => {
         if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
@@ -935,24 +940,13 @@ export function activate(context: vscode.ExtensionContext) {
 
     // フォルダを追加コマンドを登録（フォルダツリーview用）
     const addDirectoryCommand = vscode.commands.registerCommand('aiCodingSidebar.addDirectory', async (item?: FileItem) => {
-        let targetPath: string;
-
-        // コンテキストメニューから呼ばれた場合
-        if (item) {
-            if (item.isDirectory) {
-                targetPath = item.filePath;
-            } else {
-                targetPath = path.dirname(item.filePath);
-            }
-        } else {
-            // フォルダツリーviewで現在選択されているフォルダまたはルートフォルダを使用
-            const currentPath = aiCodingSidebarProvider.getRootPath();
-            if (!currentPath) {
-                vscode.window.showErrorMessage('No folder is open');
-                return;
-            }
-            targetPath = currentPath;
+        // 常にdirectory listで開いているディレクトリ配下にディレクトリを作成
+        const currentPath = aiCodingSidebarProvider.getRootPath();
+        if (!currentPath) {
+            vscode.window.showErrorMessage('No folder is open');
+            return;
         }
+        const targetPath = currentPath;
 
         // フォルダ名をユーザーに入力してもらう
         const folderName = await vscode.window.showInputBox({
@@ -1486,16 +1480,8 @@ class AiCodingSidebarProvider implements vscode.TreeDataProvider<FileItem> {
     }
 
     private updateTitle(): void {
-        if (this.treeView && this.rootPath) {
-            const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-            if (workspaceRoot) {
-                const relativePath = path.relative(workspaceRoot, this.rootPath);
-                const displayPath = relativePath === '' ? '.' : relativePath;
-                this.treeView.title = `Directory List - ${displayPath}`;
-            } else {
-                const folderName = path.basename(this.rootPath);
-                this.treeView.title = `Directory List - ${folderName}`;
-            }
+        if (this.treeView) {
+            this.treeView.title = 'Directory List';
         }
     }
 
@@ -1807,6 +1793,7 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
     private refreshDebounceTimer: NodeJS.Timeout | undefined;
     private readonly listenerId = 'ai-coding-sidebar-details';
     private fileWatcherService: FileWatcherService | undefined;
+    private markdownEditorProvider: MarkdownEditorProvider | undefined;
 
     constructor(
         private readonly folderTreeProvider: AiCodingSidebarProvider,
@@ -1829,6 +1816,10 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
         this.treeView = treeView;
     }
 
+    setMarkdownEditorProvider(provider: MarkdownEditorProvider): void {
+        this.markdownEditorProvider = provider;
+    }
+
     setFiles(dirPath: string, files: FileInfo[]): void {
         this.rootPath = dirPath;
         this.updateTitle();
@@ -1842,18 +1833,15 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
         this.setupFileWatcher();
         this.refresh();
         this.folderTreeProvider.setActiveFolder(path);
+        // フォルダ切り替え時にMarkdown Editorのファイルをクリア
+        if (this.markdownEditorProvider) {
+            this.markdownEditorProvider.clearFile();
+        }
     }
 
     private updateTitle(): void {
-        if (this.treeView && this.rootPath) {
-            if (this.projectRootPath) {
-                const relativePath = path.relative(this.projectRootPath, this.rootPath);
-                const displayPath = relativePath === '' ? '.' : relativePath;
-                this.treeView.title = `Markdown List - ${displayPath}`;
-            } else {
-                const folderName = path.basename(this.rootPath);
-                this.treeView.title = `Markdown List - ${folderName}`;
-            }
+        if (this.treeView) {
+            this.treeView.title = 'Markdown List';
         }
     }
 
@@ -2044,14 +2032,46 @@ class AiCodingSidebarDetailsProvider implements vscode.TreeDataProvider<FileItem
 
         try {
             const files = this.getFilesInDirectory(targetPath);
-            const fileItems = files.map(file => new FileItem(
-                file.name,
-                file.isDirectory ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.None,
-                file.path,
-                file.isDirectory,
-                file.size,
-                file.modified
-            ));
+            const currentFilePath = this.markdownEditorProvider?.getCurrentFilePath();
+            const fileItems = files.map(file => {
+                const item = new FileItem(
+                    file.name,
+                    file.isDirectory ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.None,
+                    file.path,
+                    file.isDirectory,
+                    file.size,
+                    file.modified
+                );
+                // 現在Markdown Editorで編集中のファイルに「editing」表記を追加
+                if (!file.isDirectory && currentFilePath && file.path === currentFilePath) {
+                    item.description = 'editing';
+                }
+                return item;
+            });
+
+            // ルートレベルの場合、最上部にディレクトリ名を表示
+            if (!element) {
+                const directoryListRoot = this.folderTreeProvider.getRootPath();
+                let displayPath: string;
+                if (directoryListRoot) {
+                    const relativePath = path.relative(directoryListRoot, this.rootPath);
+                    displayPath = relativePath === '' ? '.' : relativePath;
+                } else {
+                    displayPath = path.basename(this.rootPath);
+                }
+
+                const headerItem = new FileItem(
+                    displayPath,
+                    vscode.TreeItemCollapsibleState.None,
+                    this.rootPath,
+                    false,
+                    0,
+                    new Date()
+                );
+                headerItem.contextValue = 'directoryHeader';
+                headerItem.command = undefined; // クリックできないようにする
+                fileItems.unshift(headerItem); // 最上部に追加
+            }
 
             // キャッシュに保存
             this.itemCache.set(targetPath, fileItems);
@@ -2839,6 +2859,7 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
     private _currentFilePath?: string;
     private _currentContent?: string;
     private _isDirty: boolean = false;
+    private _detailsProvider?: AiCodingSidebarDetailsProvider;
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
@@ -2924,12 +2945,8 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
             this._currentContent = content;
             this._isDirty = false;
 
-            // プロジェクトルートからの相対パスを計算
-            let displayPath = filePath;
-            const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-            if (workspaceRoot) {
-                displayPath = path.relative(workspaceRoot, filePath);
-            }
+            // ファイル名のみを表示
+            const displayPath = path.basename(filePath);
 
             if (this._view) {
                 this._view.webview.postMessage({
@@ -2940,6 +2957,11 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
                 });
                 this._view.show?.(true);
             }
+
+            // Markdown Listをリフレッシュして「editing」表記を更新
+            if (this._detailsProvider) {
+                this._detailsProvider.refresh();
+            }
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to read file: ${error}`);
         }
@@ -2947,6 +2969,22 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
 
     public getCurrentFilePath(): string | undefined {
         return this._currentFilePath;
+    }
+
+    public setDetailsProvider(provider: AiCodingSidebarDetailsProvider): void {
+        this._detailsProvider = provider;
+    }
+
+    public clearFile(): void {
+        this._currentFilePath = undefined;
+        this._currentContent = undefined;
+        this._isDirty = false;
+
+        if (this._view) {
+            this._view.webview.postMessage({
+                type: 'clearContent'
+            });
+        }
     }
 
     private _getHtmlForWebview(webview: vscode.Webview) {
@@ -3112,6 +3150,17 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
                             saveHint.classList.add('show');
                         }
                     }
+                    break;
+                case 'clearContent':
+                    editor.value = '';
+                    originalContent = '';
+                    currentFilePath = '';
+                    filePathElement.textContent = '';
+                    dirtyIndicator.classList.remove('show');
+                    saveHint.classList.remove('show');
+                    readonlyIndicator.classList.remove('show');
+                    editor.removeAttribute('readonly');
+                    isReadOnly = false;
                     break;
             }
         });

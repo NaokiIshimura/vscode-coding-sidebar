@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.4] - 2025-11-09
+
+### Changed
+- **View Titles Simplification**: Simplified all view titles for cleaner UI
+  - Directory List: Removed relative path from title, now shows only "Directory List"
+  - Markdown List: Removed relative path from title, now shows only "Markdown List"
+  - Provides consistent and simpler interface across all views
+- **Markdown List - Directory Header**: Added directory name display at the top of file list
+  - Shows the current directory path relative to Directory List root
+  - Similar to Markdown Editor's filename display for consistency
+  - Makes it clear which directory you're browsing without cluttering the title
+- **Markdown List - Editing File Indicator**: Added "editing" indicator for files being edited in Markdown Editor
+  - Files currently being edited in Markdown Editor View now show "editing" in their description
+  - Automatically updates when switching files without manual refresh
+  - Makes it easier to identify which file is actively being edited in the sidebar
+- **Markdown Editor - Title Display**: Simplified title to show only the filename
+  - Previously showed the full relative path from project root
+  - Now displays only the filename for cleaner UI
+- **Markdown Editor - Auto-clear on Folder Switch**: Editor now clears when switching folders in Markdown List
+  - Prevents confusion by not showing files from previous folders
+  - Automatically resets editor state when navigating to different directories
+- **Directory List - Add Directory Behavior**: "Add Directory" command now always creates directories in the Directory List root
+  - Previously created directories under the selected directory when invoked from context menu
+  - Now consistently creates directories in the Directory List's root directory regardless of how the command is invoked
+  - Provides more predictable behavior for directory creation
+
 ## [0.4.3] - 2025-11-09
 
 ### Changed
@@ -238,6 +264,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.4.4]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.3...v0.4.4
+[0.4.3]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.2...v0.4.3
+[0.4.2]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.1...v0.4.2
+[0.4.1]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.7...v0.4.0
 [0.3.7]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.6...v0.3.7
 [0.3.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.5...v0.3.6

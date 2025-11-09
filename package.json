@@ -119,6 +119,11 @@
         "icon": "$(new-folder)"
       },
       {
+        "command": "aiCodingSidebar.addDirectoryToSelected",
+        "title": "Add Directory",
+        "icon": "$(new-folder)"
+      },
+      {
         "command": "aiCodingSidebar.renameDirectory",
         "title": "Rename Directory",
         "icon": "$(edit)"
@@ -208,14 +213,19 @@
           "group": "navigation@1"
         },
         {
-          "command": "aiCodingSidebar.refresh",
+          "command": "aiCodingSidebar.addDirectoryToSelected",
           "when": "view == aiCodingSidebarExplorer",
           "group": "navigation@2"
         },
         {
-          "command": "aiCodingSidebar.openFolderTreeSettings",
+          "command": "aiCodingSidebar.refresh",
           "when": "view == aiCodingSidebarExplorer",
           "group": "navigation@3"
+        },
+        {
+          "command": "aiCodingSidebar.openFolderTreeSettings",
+          "when": "view == aiCodingSidebarExplorer",
+          "group": "navigation@4"
         },
         {
           "command": "aiCodingSidebar.createMarkdownFile",

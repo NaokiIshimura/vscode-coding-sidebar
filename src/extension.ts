@@ -1037,6 +1037,105 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    // 選択中のディレクトリにディレクトリを追加コマンドを登録（タイトルメニュー用）
+    const addDirectoryToSelectedCommand = vscode.commands.registerCommand('aiCodingSidebar.addDirectoryToSelected', async (item?: FileItem) => {
+        // Markdown List Viewで表示されているディレクトリ（=選択中のディレクトリ）配下にディレクトリを作成
+        const currentPath = aiCodingSidebarDetailsProvider.getCurrentPath();
+        if (!currentPath) {
+            vscode.window.showErrorMessage('No directory is selected');
+            return;
+        }
+        const targetPath = currentPath;
+
+        // フォルダ名をユーザーに入力してもらう
+        const folderName = await vscode.window.showInputBox({
+            prompt: 'Enter new folder name',
+            placeHolder: 'Folder name',
+            validateInput: (value) => {
+                if (!value || value.trim() === '') {
+                    return 'Please enter a folder name';
+                }
+                // 不正な文字をチェック
+                if (value.match(/[<>:"|?*\/\\]/)) {
+                    return 'Contains invalid characters: < > : " | ? * / \\';
+                }
+                // 既存フォルダとの重複チェック
+                const folderPath = path.join(targetPath, value.trim());
+                if (fs.existsSync(folderPath)) {
+                    return `Folder "${value.trim()}" already exists`;
+                }
+                return null;
+            }
+        });
+
+        if (!folderName || folderName.trim() === '') {
+            return;
+        }
+
+        const trimmedFolderName = folderName.trim();
+        const folderPath = path.join(targetPath, trimmedFolderName);
+
+        try {
+            // フォルダを作成
+            fs.mkdirSync(folderPath, { recursive: true });
+            vscode.window.showInformationMessage(`Created folder "${trimmedFolderName}"`);
+
+            // ビューを更新
+            aiCodingSidebarDetailsProvider.refresh();
+            aiCodingSidebarProvider.refresh();
+
+            // 作成したディレクトリ内にMarkdownファイルを作成
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hour = String(now.getHours()).padStart(2, '0');
+            const minute = String(now.getMinutes()).padStart(2, '0');
+
+            const timestamp = `${year}_${month}${day}_${hour}${minute}`;
+            const fileName = `${timestamp}.md`;
+            const filePath = path.join(folderPath, fileName);
+
+            // テンプレートを使用してファイル内容を生成
+            const variables = {
+                datetime: now.toLocaleString(),
+                filename: fileName,
+                timestamp: timestamp
+            };
+
+            const content = loadTemplate(context, variables);
+
+            // FileOperationServiceを使用してファイル作成
+            const result = await fileOperationService.createFile(filePath, content);
+
+            if (result.success) {
+                // ビューを更新
+                aiCodingSidebarDetailsProvider.refresh();
+                aiCodingSidebarProvider.refresh();
+
+                // 1. 作成したディレクトリをDirectory Listで選択（Markdown List Viewが更新される）
+                await aiCodingSidebarProvider.revealDirectory(folderPath);
+
+                // 2. Markdown List Viewで作成したファイルを選択状態にする
+                await aiCodingSidebarDetailsProvider.revealFile(filePath);
+
+                // 3. 作成したファイルをMarkdown Editor Viewで開く
+                await markdownEditorProvider.showFile(filePath);
+
+                vscode.window.showInformationMessage(`Created markdown file ${fileName} in "${trimmedFolderName}"`);
+            } else {
+                vscode.window.showWarningMessage(`Folder created but failed to create markdown file: ${result.error}`);
+
+                // 失敗時もビューを更新してディレクトリを選択状態にする
+                aiCodingSidebarDetailsProvider.refresh();
+                aiCodingSidebarProvider.refresh();
+                await aiCodingSidebarProvider.revealDirectory(folderPath);
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to create folder: ${error}`);
+        }
+    });
+
     // ディレクトリを追加コマンドを登録（ディレクトリ作成のみ）
     const addDirectoryCommand = vscode.commands.registerCommand('aiCodingSidebar.addDirectory', async (item?: FileItem) => {
         // 常にdirectory listで開いているディレクトリ配下にディレクトリを作成
@@ -1341,7 +1440,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, createTaskCommand, addDirectoryCommand, renameDirectoryCommand, deleteDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand);
+    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, openGitFileCommand, showGitDiffCommand, refreshGitChangesCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, createTaskCommand, addDirectoryToSelectedCommand, addDirectoryCommand, renameDirectoryCommand, deleteDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({

@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.5] - 2025-11-09
+
+### Fixed
+- **Markdown Editor State Persistence**: Fixed issue where Markdown Editor loses file state when extension becomes inactive/active
+  - Previously, when the extension sidebar became inactive and then active again, the Markdown Editor would show empty content
+  - Now, the previously selected file is automatically restored when the extension becomes active
+  - Maintains seamless editing experience across extension lifecycle changes
+
 ## [0.4.4] - 2025-11-09
 
 ### Changed

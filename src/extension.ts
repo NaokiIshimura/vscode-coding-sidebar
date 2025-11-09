@@ -2928,6 +2928,11 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
                     break;
             }
         });
+
+        // Restore previously opened file if exists
+        if (this._currentFilePath) {
+            this.showFile(this._currentFilePath);
+        }
     }
 
     public async showFile(filePath: string) {

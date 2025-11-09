@@ -111,7 +111,7 @@
       {
         "command": "aiCodingSidebar.createTask",
         "title": "Create Task",
-        "icon": "$(new-folder)"
+        "icon": "$(folder-active)"
       },
       {
         "command": "aiCodingSidebar.addDirectoryToSelected",
@@ -213,7 +213,7 @@
           "group": "navigation@1"
         },
         {
-          "command": "aiCodingSidebar.addDirectoryToSelected",
+          "command": "aiCodingSidebar.newDirectory",
           "when": "view == aiCodingSidebarExplorer",
           "group": "navigation@2"
         },

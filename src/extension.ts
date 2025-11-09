@@ -194,6 +194,8 @@ export function activate(context: vscode.ExtensionContext) {
 
     // Markdown EditorプロバイダーをMarkdown Listプロバイダーに設定
     aiCodingSidebarDetailsProvider.setMarkdownEditorProvider(markdownEditorProvider);
+    // Markdown ListプロバイダーをMarkdown Editorプロバイダーに設定
+    markdownEditorProvider.setDetailsProvider(aiCodingSidebarDetailsProvider);
 
     // プロジェクトルートを設定
     const initializeWithWorkspaceRoot = async () => {
@@ -2846,6 +2848,7 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
     private _currentFilePath?: string;
     private _currentContent?: string;
     private _isDirty: boolean = false;
+    private _detailsProvider?: AiCodingSidebarDetailsProvider;
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
@@ -2943,6 +2946,11 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
                 });
                 this._view.show?.(true);
             }
+
+            // Markdown Listをリフレッシュして「editing」表記を更新
+            if (this._detailsProvider) {
+                this._detailsProvider.refresh();
+            }
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to read file: ${error}`);
         }
@@ -2950,6 +2958,10 @@ class MarkdownEditorProvider implements vscode.WebviewViewProvider {
 
     public getCurrentFilePath(): string | undefined {
         return this._currentFilePath;
+    }
+
+    public setDetailsProvider(provider: AiCodingSidebarDetailsProvider): void {
+        this._detailsProvider = provider;
     }
 
     private _getHtmlForWebview(webview: vscode.Webview) {

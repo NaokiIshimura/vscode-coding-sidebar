@@ -124,6 +124,11 @@
         "icon": "$(new-folder)"
       },
       {
+        "command": "aiCodingSidebar.createTask",
+        "title": "Create Task",
+        "icon": "$(new-folder)"
+      },
+      {
         "command": "aiCodingSidebar.renameDirectory",
         "title": "Rename Directory",
         "icon": "$(edit)"

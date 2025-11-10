@@ -2427,6 +2427,12 @@ class GitChangesProvider implements vscode.TreeDataProvider<GitFileItem> {
     private isGitOperationInProgress: boolean = false;
     private readonly listenerId = 'git-changes';
     private fileWatcherService: FileWatcherService | undefined;
+    private gitStatusCache: {
+        result: GitChange[];
+        timestamp: number;
+    } | null = null;
+    private readonly CACHE_DURATION_MS = 5000; // 5 seconds cache
+    private isViewVisible: boolean = false;
 
     constructor(fileWatcherService?: FileWatcherService) {
         this.fileWatcherService = fileWatcherService;
@@ -2447,13 +2453,19 @@ class GitChangesProvider implements vscode.TreeDataProvider<GitFileItem> {
             clearTimeout(this.refreshDebounceTimer);
         }
 
-        // 1500ms後に実行（連続した変更をまとめ、git操作との競合を回避）
+        // 2500ms後に実行（連続した変更をまとめ、git操作との競合を回避）
         this.refreshDebounceTimer = setTimeout(() => {
             this.refresh();
-        }, 1500);  // 1000ms → 1500msに延長
+        }, 2500);  // 1000ms → 1500ms → 2500msに延長
     }
 
     refresh(): void {
+        // ビューが非表示の場合はスキップ
+        if (!this.isViewVisible) {
+            console.log('View is not visible, skipping refresh');
+            return;
+        }
+
         // git操作中の場合はスキップ
         if (this.isGitOperationInProgress) {
             console.log('Git operation in progress, skipping refresh');
@@ -2466,14 +2478,23 @@ class GitChangesProvider implements vscode.TreeDataProvider<GitFileItem> {
      * ビューの可視性に応じてファイルウォッチャーを制御
      */
     handleVisibilityChange(visible: boolean): void {
+        this.isViewVisible = visible;
+
         if (!this.fileWatcherService) {
             return;
         }
 
         if (visible) {
             this.fileWatcherService.enableListener(this.listenerId);
+            // ビューが表示された時に即座にリフレッシュ
+            this.refresh();
         } else {
             this.fileWatcherService.disableListener(this.listenerId);
+            // ビューが非表示の時は保留中のリフレッシュをキャンセル
+            if (this.refreshDebounceTimer) {
+                clearTimeout(this.refreshDebounceTimer);
+                this.refreshDebounceTimer = undefined;
+            }
         }
     }
 
@@ -2672,6 +2693,18 @@ class GitChangesProvider implements vscode.TreeDataProvider<GitFileItem> {
     }
 
     private async getGitChanges(workspaceRoot: string): Promise<GitChange[]> {
+        // Check cache first
+        if (this.gitStatusCache && (Date.now() - this.gitStatusCache.timestamp < this.CACHE_DURATION_MS)) {
+            console.log('Using cached git status result');
+            return this.gitStatusCache.result;
+        }
+
+        // Throttle: Skip if git operation is already in progress
+        if (this.isGitOperationInProgress) {
+            console.log('Git operation already in progress, returning cached or empty result');
+            return this.gitStatusCache?.result || [];
+        }
+
         // Git操作開始をマーク
         this.isGitOperationInProgress = true;
 
@@ -2746,6 +2779,12 @@ class GitChangesProvider implements vscode.TreeDataProvider<GitFileItem> {
                         }
                     }
                 }
+
+                // Update cache
+                this.gitStatusCache = {
+                    result: changes,
+                    timestamp: Date.now()
+                };
 
                 resolve(changes);
             });

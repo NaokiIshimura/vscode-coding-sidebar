@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { IFileWatcherService, FileChangeListener } from '../interfaces/IFileWatcherService';
+import { GitignoreParser } from './GitignoreParser';
 
 /**
  * リスナー情報
@@ -17,6 +18,7 @@ export class FileWatcherService implements IFileWatcherService {
     private fileWatcher: vscode.FileSystemWatcher | undefined;
     private listeners: Map<string, ListenerInfo> = new Map();
     private disposables: vscode.Disposable[] = [];
+    private gitignoreParser: GitignoreParser | undefined;
 
     constructor() {
         this.initializeWatcher();
@@ -25,7 +27,7 @@ export class FileWatcherService implements IFileWatcherService {
     /**
      * ウォッチャーを初期化
      */
-    private initializeWatcher(): void {
+    private async initializeWatcher(): Promise<void> {
         if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
             return;
         }
@@ -34,6 +36,10 @@ export class FileWatcherService implements IFileWatcherService {
         const workspaceFolder = vscode.workspace.workspaceFolders[0];
         const watchPattern = new vscode.RelativePattern(workspaceFolder, '**/*');
         this.fileWatcher = vscode.workspace.createFileSystemWatcher(watchPattern);
+
+        // Initialize gitignore parser
+        this.gitignoreParser = new GitignoreParser(workspaceFolder.uri.fsPath);
+        await this.gitignoreParser.parse();
 
         // ファイル変更イベントをリスナーに通知
         this.disposables.push(
@@ -47,6 +53,11 @@ export class FileWatcherService implements IFileWatcherService {
      * 登録されたリスナーに変更を通知
      */
     private notifyListeners(uri: vscode.Uri): void {
+        // Check if the file should be excluded based on .gitignore patterns
+        if (this.gitignoreParser && this.gitignoreParser.shouldExclude(uri.fsPath)) {
+            return;
+        }
+
         // 有効なリスナーのみに通知
         this.listeners.forEach((info) => {
             if (info.enabled) {

@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2025-11-11
+
+### Changed
+- **View Names**: Renamed all views for better clarity and consistency
+  - "Settings" → "Menu": More accurately reflects the menu-style navigation
+  - "Directory List" → "Tasks": Better represents the task-oriented workflow
+  - "Markdown List" → "Docs": Clearer indication of documentation/file management
+  - "Markdown Editor" → "Editor": Simplified and more concise
+- **Docs View - File Display**: Removed markdown-only filter to display all file types
+  - Previously only showed `.md` files
+  - Now displays all files in the selected directory
+  - Provides more flexibility in managing different file types
+
+### Added
+- **Loading Indicators**: Added loader display for all views during initial content load
+  - Menu view shows loading state on first display
+  - Tasks view shows loading state on first display
+  - Docs view shows loading state on first display
+  - Editor view shows loading state on first display
+  - File Changes view shows loading state on first display
+  - Improves user experience by providing visual feedback during initialization
+
+### Removed
+- **Unused Settings**: Cleaned up configuration properties
+  - Removed `sortBy`, `sortOrder`, `showHidden`, `viewMode`, `autoRefresh`, `showFileIcons`
+  - Kept only actively used settings: `defaultRelativePath`, `markdownList.sortBy`, `markdownList.sortOrder`
+  - Simplifies configuration and reduces maintenance overhead
+
+### Technical
+- Renamed all provider classes and variables for consistency with new view names
+  - `WorkspaceSettingsProvider` → `MenuProvider`
+  - `AiCodingSidebarProvider` → `TasksProvider`
+  - `AiCodingSidebarDetailsProvider` → `DocsProvider`
+  - `MarkdownEditorProvider` → `EditorProvider`
+
 ## [0.4.9] - 2025-11-10
 
 ### Added

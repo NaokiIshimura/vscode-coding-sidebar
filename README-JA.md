@@ -7,11 +7,11 @@ AIコーディングツールとの連携を強化するサイドバー拡張機
 
 | 機能 | 説明 |
 | --- | --- |
-| **Directory List** | 指定したディレクトリ配下を表示できる<br>settingsでデフォルトのパスを設定できる<br>ディレクトリを作成できる |
-| **Markdown List** | マークダウンリストを表示<br>マークダウンファイルを作成できる<br>デフォルトでファイル作成日時の昇順でソート<br>現在のソート順がビュータイトルに表示される（例: "Markdown List (Created ↑)"）<br>ソート順は設定でカスタマイズ可能 |
-| **Markdown Editor** | サイドバー内でMarkdownファイルを直接編集可能<br>タイムスタンプ形式のMarkdownファイル（形式: `YYYY_MMDD_HHMM.md`）を選択すると自動的に表示<br>その他のMarkdownファイルは通常のエディタで開く<br>`Cmd+S` / `Ctrl+S`で保存<br>VSCodeエディタでファイルがアクティブになると自動的に読み取り専用モードに切り替わる |
+| **Tasks** | 指定したディレクトリ配下を表示できる<br>settingsでデフォルトのパスを設定できる<br>ディレクトリを作成できる |
+| **Docs** | マークダウンリストを表示<br>マークダウンファイルを作成できる<br>デフォルトでファイル作成日時の昇順でソート<br>現在のソート順がビュータイトルに表示される（例: "Docs (Created ↑)"）<br>ソート順は設定でカスタマイズ可能 |
+| **Editor** | サイドバー内でMarkdownファイルを直接編集可能<br>タイムスタンプ形式のMarkdownファイル（形式: `YYYY_MMDD_HHMM.md`）を選択すると自動的に表示<br>その他のMarkdownファイルは通常のエディタで開く<br>`Cmd+S` / `Ctrl+S`で保存<br>VSCodeエディタでファイルがアクティブになると自動的に読み取り専用モードに切り替わる |
 | **File Changes** | 変更されたファイルを一覧表示し、差分を確認できる<br>.gitignoreベースの除外、git statusキャッシュ、スマートリフレッシュ戦略でパフォーマンスを最適化<br>CPU使用率を70-90%削減、非表示時はバックグラウンド処理ゼロ |
-| **Settings** | ユーザ設定を開く<br>グローバル設定を開く<br>テンプレートをカスタマイズ<br>ショートカット機能: ターミナルを開く、デフォルトブランチへ切り替え、Git pull |
+| **Menu** | ユーザ設定を開く<br>グローバル設定を開く<br>テンプレートをカスタマイズ<br>ショートカット機能: ターミナルを開く、デフォルトブランチへ切り替え、Git pull |
 
 ## 使用方法
 
@@ -23,21 +23,21 @@ AIコーディングツールとの連携を強化するサイドバー拡張機
 
 ### 基本操作
 1. アクティビティバーの「AI Coding Sidebar」アイコンをクリック（または`Cmd+Shift+A` / `Ctrl+Shift+A`を押す）
-2. Directory ListでAIコーディング用のディレクトリを作成
-3. Markdown Listでmarkdownファイルを作成
-4. Markdown Listでタイムスタンプ形式のMarkdownファイル（例: `2025_1103_1227.md`）をクリックして、下部のMarkdown Editorビューで編集。その他のMarkdownファイルは通常のエディタで開く
-5. Markdown EditorでAIへの指示を記述し、`Cmd+S` / `Ctrl+S`で保存
-6. Markdown Listでファイルを右クリック → 相対パスをコピー
+2. TasksでAIコーディング用のディレクトリを作成
+3. Docsでmarkdownファイルを作成
+4. Docsでタイムスタンプ形式のMarkdownファイル（例: `2025_1103_1227.md`）をクリックして、下部のEditorビューで編集。その他のMarkdownファイルは通常のエディタで開く
+5. EditorでAIへの指示を記述し、`Cmd+S` / `Ctrl+S`で保存
+6. Docsでファイルを右クリック → 相対パスをコピー
 7. AIへ相対パスをペースト
 
 
 ## テンプレート機能
 
-Markdown Listでファイルを作成する際、テンプレートを使用して初期内容を自動設定できます。
+Docsでファイルを作成する際、テンプレートを使用して初期内容を自動設定できます。
 AIコーディングで使用するmarkdownファイルの構造を統一し、作業効率を向上させます。
 
 ### テンプレートの設定方法
-1. Directory Listペインの歯車アイコン（⚙️）をクリック
+1. Tasksペインの歯車アイコン（⚙️）をクリック
 2. 「ワークスペース設定」→「テンプレートをカスタマイズ」を選択
 3. `.vscode/templates/file.md` が作成されます
 4. テンプレートを編集して保存
@@ -93,17 +93,17 @@ file: {{filename}}
 
 | 項目 | 手順 |
 | --- | --- |
-| Start Task | Directory Listのタイトルメニューにあるロケットアイコン（🚀）をクリック<br>デフォルトパス配下に新しいディレクトリを作成し、タイムスタンプ付きのMarkdownファイルを自動生成します<br>作成されたファイルはMarkdown Listで「editing」ラベルとともに選択され、Markdown Editor Viewで開かれます |
-| 新規ディレクトリ | Directory Listのフォルダアイコンをクリック<br>現在選択中のディレクトリ配下に新しいディレクトリを作成します |
-| ファイル作成 | Markdown Listの「+」アイコンをクリック<br>タイムスタンプ付きのMarkdownファイルが作成され、Markdown Editor Viewで開かれます（例: `2025_1103_1227.md`） |
+| Start Task | Tasksのタイトルメニューにあるロケットアイコン（🚀）をクリック<br>デフォルトパス配下に新しいディレクトリを作成し、タイムスタンプ付きのMarkdownファイルを自動生成します<br>作成されたファイルはDocsで「editing」ラベルとともに選択され、Editor Viewで開かれます |
+| 新規ディレクトリ | Tasksのフォルダアイコンをクリック<br>現在選択中のディレクトリ配下に新しいディレクトリを作成します |
+| ファイル作成 | Docsの「+」アイコンをクリック<br>タイムスタンプ付きのMarkdownファイルが作成され、Editor Viewで開かれます（例: `2025_1103_1227.md`） |
 
 ### 相対パスの設定
 
 | 方法 | 手順 |
 | --- | --- |
-| Directory List設定から（推奨） | 1. Directory Listの歯車アイコン（⚙️）をクリック<br>2. 設定画面が開き、`aiCodingSidebar.defaultRelativePath`がフィルタ表示される<br>3. デフォルトの相対パスを編集（例: `src`, `.claude`, `docs/api`） |
-| ワークスペース設定 | 1. Directory Listの歯車アイコン（⚙️）をクリック<br>2. 「ワークスペース設定」を選択<br>3. 設定したい項目を選択：<br>&nbsp;&nbsp;- **settings.jsonを作成/編集**: ワークスペース設定ファイルを自動作成<br>&nbsp;&nbsp;- **.claudeフォルダを設定**: .claudeフォルダを作成し設定を適用<br>&nbsp;&nbsp;- **テンプレートをカスタマイズ**: ファイル作成時のテンプレートを編集 |
-| 拡張機能から設定 | 1. Directory Listの編集アイコン（✏️）をクリック<br>2. 相対パスを入力（例: `src`, `.claude`, `docs/api`）<br>3. 設定に保存するか選択 |
+| Tasks設定から（推奨） | 1. Tasksの歯車アイコン（⚙️）をクリック<br>2. 設定画面が開き、`aiCodingSidebar.defaultRelativePath`がフィルタ表示される<br>3. デフォルトの相対パスを編集（例: `src`, `.claude`, `docs/api`） |
+| ワークスペース設定 | 1. Tasksの歯車アイコン（⚙️）をクリック<br>2. 「ワークスペース設定」を選択<br>3. 設定したい項目を選択：<br>&nbsp;&nbsp;- **settings.jsonを作成/編集**: ワークスペース設定ファイルを自動作成<br>&nbsp;&nbsp;- **.claudeフォルダを設定**: .claudeフォルダを作成し設定を適用<br>&nbsp;&nbsp;- **テンプレートをカスタマイズ**: ファイル作成時のテンプレートを編集 |
+| 拡張機能から設定 | 1. Tasksの編集アイコン（✏️）をクリック<br>2. 相対パスを入力（例: `src`, `.claude`, `docs/api`）<br>3. 設定に保存するか選択 |
 
 #### 相対パスの例
 - `src` → プロジェクト/src
@@ -112,29 +112,23 @@ file: {{filename}}
 - 空文字 → プロジェクトルート
 
 #### 設定したパスが存在しない場合
-デフォルトの相対パスが存在しない場合、Directory Listに「ディレクトリを作成」ボタンが表示されます。ボタンをクリックすると、自動的にディレクトリが作成され、その内容が表示されます。
+デフォルトの相対パスが存在しない場合、Tasksに「ディレクトリを作成」ボタンが表示されます。ボタンをクリックすると、自動的にディレクトリが作成され、その内容が表示されます。
 
 ### その他
 
 | 機能 | 説明 |
 | --- | --- |
 | 相対パスコピー | ワークスペースからの相対パスをクリップボードにコピー |
-| Directory List設定 | Directory Listから設定画面を開き、デフォルトの相対パスを直接編集 |
+| Tasks設定 | Tasksから設定画面を開き、デフォルトの相対パスを直接編集 |
 | 検索機能 | ワークスペース内のファイルを検索 |
 
 ## 設定
 
 | 設定項目 | 説明 | 型 | デフォルト値 | 選択肢/例 |
 | --- | --- | --- | --- | --- |
-| `defaultRelativePath` | Directory Listのデフォルト相対パス | string | `""`（プロジェクトルート） | `"src"`, `".claude"`, `"docs/api"` |
-| `sortBy` | ファイルのソート基準 | string | `"name"` | `"name"`: 名前<br>`"type"`: 種類<br>`"size"`: サイズ<br>`"modified"`: 更新日時 |
-| `sortOrder` | ソート順序 | string | `"ascending"` | `"ascending"`: 昇順<br>`"descending"`: 降順 |
-| `showHidden` | 隠しファイル・フォルダを表示する | boolean | `false` | - |
-| `showFileIcons` | ファイルアイコンを表示する | boolean | `true` | - |
-| `autoRefresh` | ファイルシステム変更時に自動更新する | boolean | `true` | - |
-| `viewMode` | 表示モード | string | `"tree"` | `"tree"`: ツリー表示<br>`"list"`: リスト表示 |
-| `markdownList.sortBy` | マークダウンファイルのソート基準 | string | `"created"` | `"name"`: ファイル名<br>`"created"`: 作成日時<br>`"modified"`: 更新日時 |
-| `markdownList.sortOrder` | マークダウンファイルのソート順序 | string | `"ascending"` | `"ascending"`: 昇順<br>`"descending"`: 降順 |
+| `defaultRelativePath` | Tasksのデフォルト相対パス | string | `""`（プロジェクトルート） | `"src"`, `".claude"`, `"docs/api"` |
+| `markdownList.sortBy` | Docsのファイルのソート基準 | string | `"created"` | `"name"`: ファイル名<br>`"created"`: 作成日時<br>`"modified"`: 更新日時 |
+| `markdownList.sortOrder` | Docsのファイルのソート順序 | string | `"ascending"` | `"ascending"`: 昇順<br>`"descending"`: 降順 |
 
 ### 設定例
 
@@ -143,12 +137,6 @@ file: {{filename}}
 ```json
 {
   "aiCodingSidebar.defaultRelativePath": ".claude",
-  "aiCodingSidebar.sortBy": "modified",
-  "aiCodingSidebar.sortOrder": "descending",
-  "aiCodingSidebar.showHidden": false,
-  "aiCodingSidebar.showFileIcons": true,
-  "aiCodingSidebar.autoRefresh": true,
-  "aiCodingSidebar.viewMode": "tree",
   "aiCodingSidebar.markdownList.sortBy": "created",
   "aiCodingSidebar.markdownList.sortOrder": "ascending"
 }

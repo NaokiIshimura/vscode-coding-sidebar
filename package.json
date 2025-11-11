@@ -2,7 +2,7 @@
   "name": "ai-coding-sidebar",
   "displayName": "AI Coding Sidebar",
   "description": "A sidebar extension that strengthens integration with AI coding tools.Browse and manage files and folders efficiently to keep coding with AI smooth.",
-  "version": "0.4.9",
+  "version": "0.5.0",
   "publisher": "nacn",
   "icon": "images/icon.png",
   "repository": {
@@ -168,20 +168,20 @@
       "aiCodingSidebarView": [
         {
           "id": "workspaceSettings",
-          "name": "Settings",
+          "name": "Menu",
           "visibility": "collapsed"
         },
         {
           "id": "aiCodingSidebarExplorer",
-          "name": "Directory List"
+          "name": "Tasks"
         },
         {
           "id": "aiCodingSidebarDetails",
-          "name": "Markdown List"
+          "name": "Docs"
         },
         {
           "id": "markdownEditor",
-          "name": "Markdown Editor",
+          "name": "Editor",
           "type": "webview",
           "retainContextWhenHidden": true
         },
@@ -318,64 +318,6 @@
           "type": "string",
           "default": ".ai/tasks",
           "description": "Default relative path for the folder tree"
-        },
-        "aiCodingSidebar.sortBy": {
-          "type": "string",
-          "enum": [
-            "name",
-            "type",
-            "size",
-            "modified"
-          ],
-          "default": "name",
-          "description": "Sort files by",
-          "enumDescriptions": [
-            "Sort by name",
-            "Sort by type",
-            "Sort by size",
-            "Sort by modified date"
-          ]
-        },
-        "aiCodingSidebar.sortOrder": {
-          "type": "string",
-          "enum": [
-            "ascending",
-            "descending"
-          ],
-          "default": "ascending",
-          "description": "Sort order",
-          "enumDescriptions": [
-            "Ascending",
-            "Descending"
-          ]
-        },
-        "aiCodingSidebar.showHidden": {
-          "type": "boolean",
-          "default": false,
-          "description": "Show hidden files and folders"
-        },
-        "aiCodingSidebar.viewMode": {
-          "type": "string",
-          "enum": [
-            "tree",
-            "list"
-          ],
-          "default": "tree",
-          "description": "View mode",
-          "enumDescriptions": [
-            "Tree view",
-            "List view"
-          ]
-        },
-        "aiCodingSidebar.autoRefresh": {
-          "type": "boolean",
-          "default": true,
-          "description": "Auto refresh on file system changes"
-        },
-        "aiCodingSidebar.showFileIcons": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show file icons"
         },
         "aiCodingSidebar.markdownList.sortBy": {
           "type": "string",

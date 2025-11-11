@@ -7,11 +7,11 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 
 | Feature | Description |
 | --- | --- |
-| **Directory List** | Display directories under a specified path.<br>Configure a default path in settings.<br>Create new directories. |
-| **Markdown List** | Display Markdown files and create new ones.<br>Files are sorted by creation date (ascending) by default.<br>The current sort order is shown in the view title (e.g., "Markdown List (Created ↑)").<br>Customize sort order in settings. |
-| **Markdown Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a timestamp-named Markdown file (format: `YYYY_MMDD_HHMM.md`).<br>Other Markdown files open in the standard editor.<br>Save with `Cmd+S` / `Ctrl+S`.<br>Automatically switches to read-only mode when the file is active in VSCode editor. |
+| **Tasks** | Display directories under a specified path.<br>Configure a default path in settings.<br>Create new directories. |
+| **Docs** | Display all files and create new ones.<br>Files are sorted by creation date (ascending) by default.<br>The current sort order is shown in the view title (e.g., "Docs (Created ↑)").<br>Customize sort order in settings. |
+| **Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a timestamp-named Markdown file (format: `YYYY_MMDD_HHMM.md`).<br>Other Markdown files open in the standard editor.<br>Save with `Cmd+S` / `Ctrl+S`.<br>Automatically switches to read-only mode when the file is active in VSCode editor. |
 | **File Changes** | List modified files and review diffs.<br>Performance optimized with .gitignore-based exclusion, git status caching, and smart refresh strategies.<br>70-90% CPU usage reduction with zero background activity when hidden. |
-| **Settings** | Open user or global settings.<br>Customize templates.<br>Quick shortcuts: Open terminal, Checkout default branch, Git pull. |
+| **Menu** | Open user or global settings.<br>Customize templates.<br>Quick shortcuts: Open terminal, Checkout default branch, Git pull. |
 
 ## Usage
 
@@ -23,18 +23,18 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 
 ### Basic actions
 1. Click the "AI Coding Sidebar" icon in the activity bar (or press `Cmd+Shift+A` / `Ctrl+Shift+A`).
-2. Use Directory List to create the folder you use for AI coding.
-3. Create Markdown files from Markdown List.
-4. Click a timestamp-named Markdown file (e.g., `2025_1103_1227.md`) in Markdown List to edit it in the Markdown Editor view below. Other Markdown files open in the standard editor.
-5. Write instructions for the AI in the Markdown Editor and save with `Cmd+S` / `Ctrl+S`.
-6. Right-click the Markdown file in Markdown List and choose "Copy Relative Path," then share it with your AI tool.
+2. Use Tasks to create the folder you use for AI coding.
+3. Create Markdown files from Docs.
+4. Click a timestamp-named Markdown file (e.g., `2025_1103_1227.md`) in Docs to edit it in the Editor view below. Other Markdown files open in the standard editor.
+5. Write instructions for the AI in the Editor and save with `Cmd+S` / `Ctrl+S`.
+6. Right-click the Markdown file in Docs and choose "Copy Relative Path," then share it with your AI tool.
 
 ## Template Feature
 
-When you create a file from Markdown List, you can automatically populate it with a template. This keeps Markdown files used for AI coding consistent and saves time.
+When you create a file from Docs, you can automatically populate it with a template. This keeps Markdown files used for AI coding consistent and saves time.
 
 ### Configure the template
-1. Click the gear icon (⚙️) in the Directory List pane.
+1. Click the gear icon (⚙️) in the Tasks pane.
 2. Choose "Workspace Settings" → "Customize template."
 3. `.vscode/templates/file.md` is created.
 4. Edit the template and save it.
@@ -88,17 +88,17 @@ Use the following variables inside a template:
 
 | Item | Steps |
 | --- | --- |
-| Start Task | Click the rocket icon (🚀) in Directory List title menu.<br>Creates a new directory under the default path and automatically generates a timestamped Markdown file.<br>The file is selected in Markdown List with "editing" label and opens in Markdown Editor View. |
-| New Directory | Click the folder icon in Directory List.<br>Creates a new directory under the currently selected directory. |
-| Create a file | Click the "+" icon in Markdown List.<br>A timestamped Markdown file is created (for example, `2025_1103_1227.md`) and opens in Markdown Editor View. |
+| Start Task | Click the rocket icon (🚀) in Tasks title menu.<br>Creates a new directory under the default path and automatically generates a timestamped Markdown file.<br>The file is selected in Docs with "editing" label and opens in Editor View. |
+| New Directory | Click the folder icon in Tasks.<br>Creates a new directory under the currently selected directory. |
+| Create a file | Click the "+" icon in Docs.<br>A timestamped Markdown file is created (for example, `2025_1103_1227.md`) and opens in Editor View. |
 
 ### Configure the Default Relative Path
 
 | Method | Steps |
 | --- | --- |
-| Directory List settings (recommended) | 1. Click the gear icon (⚙️) in Directory List.<br>2. The settings view opens with `aiCodingSidebar.defaultRelativePath` pre-filtered.<br>3. Edit the default relative path (for example, `src`, `.claude`, `docs/api`). |
-| Workspace settings | 1. Click the gear icon (⚙️) in Directory List.<br>2. Select "Workspace Settings."<br>3. Choose one of the following:<br>&nbsp;&nbsp;- **Create/Edit settings.json**: Generate or edit the workspace settings file.<br>&nbsp;&nbsp;- **Configure .claude folder**: Create a `.claude` folder and apply settings.<br>&nbsp;&nbsp;- **Customize template**: Edit the template used when creating files. |
-| Inline from the extension | 1. Click the edit icon (✏️) in Directory List.<br>2. Enter a relative path (for example, `src`, `.claude`, `docs/api`).<br>3. Choose whether to save it to settings. |
+| Tasks settings (recommended) | 1. Click the gear icon (⚙️) in Tasks.<br>2. The settings view opens with `aiCodingSidebar.defaultRelativePath` pre-filtered.<br>3. Edit the default relative path (for example, `src`, `.claude`, `docs/api`). |
+| Workspace settings | 1. Click the gear icon (⚙️) in Tasks.<br>2. Select "Workspace Settings."<br>3. Choose one of the following:<br>&nbsp;&nbsp;- **Create/Edit settings.json**: Generate or edit the workspace settings file.<br>&nbsp;&nbsp;- **Configure .claude folder**: Create a `.claude` folder and apply settings.<br>&nbsp;&nbsp;- **Customize template**: Edit the template used when creating files. |
+| Inline from the extension | 1. Click the edit icon (✏️) in Tasks.<br>2. Enter a relative path (for example, `src`, `.claude`, `docs/api`).<br>3. Choose whether to save it to settings. |
 
 #### Relative path examples
 - `src` → `<project>/src`
@@ -107,29 +107,23 @@ Use the following variables inside a template:
 - empty string → workspace root
 
 #### When the configured path doesn't exist
-If the default relative path doesn't exist, Directory List displays a "Create directory" button. Click it to automatically create the directory and display its contents.
+If the default relative path doesn't exist, Tasks displays a "Create directory" button. Click it to automatically create the directory and display its contents.
 
 ### Other
 
 | Feature | Description |
 | --- | --- |
 | Copy relative path | Copy the workspace-relative path to the clipboard. |
-| Directory List settings | Open the settings view from Directory List to edit the default relative path directly. |
+| Tasks settings | Open the settings view from Tasks to edit the default relative path directly. |
 | Search | Search files across the workspace. |
 
 ## Settings
 
 | Setting | Description | Type | Default | Options / Examples |
 | --- | --- | --- | --- | --- |
-| `defaultRelativePath` | Default relative path for Directory List | string | `""` (workspace root) | `"src"`, `.claude`, `"docs/api"` |
-| `sortBy` | File sort key | string | `"name"` | `"name"` (name)<br>`"type"` (type)<br>`"size"` (size)<br>`"modified"` (modified time) |
-| `sortOrder` | Sort order | string | `"ascending"` | `"ascending"` (ascending)<br>`"descending"` (descending) |
-| `showHidden` | Show hidden files and folders | boolean | `false` | - |
-| `showFileIcons` | Show file icons | boolean | `true` | - |
-| `autoRefresh` | Refresh automatically on filesystem changes | boolean | `true` | - |
-| `viewMode` | Display mode | string | `"tree"` | `"tree"` (tree view)<br>`"list"` (list view) |
-| `markdownList.sortBy` | Sort markdown files by | string | `"created"` | `"name"` (file name)<br>`"created"` (creation date)<br>`"modified"` (modified date) |
-| `markdownList.sortOrder` | Sort order for markdown files | string | `"ascending"` | `"ascending"` (ascending)<br>`"descending"` (descending) |
+| `defaultRelativePath` | Default relative path for Tasks | string | `""` (workspace root) | `"src"`, `.claude`, `"docs/api"` |
+| `markdownList.sortBy` | Sort files in Docs by | string | `"created"` | `"name"` (file name)<br>`"created"` (creation date)<br>`"modified"` (modified date) |
+| `markdownList.sortOrder` | Sort order for files in Docs | string | `"ascending"` | `"ascending"` (ascending)<br>`"descending"` (descending) |
 
 ### Example configuration
 
@@ -138,12 +132,6 @@ Add the following to `.vscode/settings.json`:
 ```json
 {
   "aiCodingSidebar.defaultRelativePath": ".claude",
-  "aiCodingSidebar.sortBy": "modified",
-  "aiCodingSidebar.sortOrder": "descending",
-  "aiCodingSidebar.showHidden": false,
-  "aiCodingSidebar.showFileIcons": true,
-  "aiCodingSidebar.autoRefresh": true,
-  "aiCodingSidebar.viewMode": "tree",
   "aiCodingSidebar.markdownList.sortBy": "created",
   "aiCodingSidebar.markdownList.sortOrder": "ascending"
 }

@@ -7,7 +7,6 @@ x.x.x
 
 # 基本ルール
 - `v{バージョン}`のブランチを作成して
-  - ブランチ名では`.`を`_`に置き換えて
 - バージョンを`{バージョン}`にあげて
 
 # 実装完了後
@@ -31,16 +30,16 @@ x.x.x
 
 # タスク
 
-## settings
+## menu
 
 
-## directory list
+## tasks
 
 
-## markdown list
+## docs
 
 
-## markdown editor
+## editor
 
 ## file changes
 

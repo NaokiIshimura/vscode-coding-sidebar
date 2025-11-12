@@ -9,7 +9,7 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 | --- | --- |
 | **Tasks** | Display directories under a specified path.<br>Configure a default path in settings.<br>Create new directories. |
 | **Docs** | Display all files and create new ones.<br>Files are sorted by creation date (ascending) by default.<br>The current sort order is shown in the view title (e.g., "Docs (Created ↑)").<br>Customize sort order in settings. |
-| **Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a timestamp-named Markdown file (format: `YYYY_MMDD_HHMM.md`).<br>Other Markdown files open in the standard editor.<br>Save with `Cmd+S` / `Ctrl+S`.<br>Automatically switches to read-only mode when the file is active in VSCode editor. |
+| **Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a timestamp-named Markdown file (format: `YYYY_MMDD_HHMM.md`).<br>Other Markdown files open in the standard editor.<br>Save with `Cmd+S` / `Ctrl+S`.<br>Run task with `Cmd+R` / `Ctrl+R` to send `claude "read <file>"` to terminal (auto-saves before running).<br>Automatically switches to read-only mode when the file is active in VSCode editor. |
 | **File Changes** | List modified files and review diffs.<br>Performance optimized with .gitignore-based exclusion, git status caching, and smart refresh strategies.<br>70-90% CPU usage reduction with zero background activity when hidden. |
 | **Menu** | Open user or global settings.<br>Customize templates.<br>Quick shortcuts: Open terminal, Checkout default branch, Git pull. |
 
@@ -20,6 +20,7 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 | Shortcut | Action |
 | --- | --- |
 | `Cmd+Shift+A` (macOS)<br>`Ctrl+Shift+A` (Windows/Linux) | Focus AI Coding Sidebar |
+| `Cmd+R` (macOS)<br>`Ctrl+R` (Windows/Linux) | Run task in Editor (auto-saves and sends command to terminal) |
 
 ### Basic actions
 1. Click the "AI Coding Sidebar" icon in the activity bar (or press `Cmd+Shift+A` / `Ctrl+Shift+A`).

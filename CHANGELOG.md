@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2025-11-13
+
+### Added
+- **Editor View - Run Button**: Added Run button to execute tasks directly from the Editor
+  - Click the Run button to send `claude "read <file>"` command to the "AI Coding Sidebar" terminal
+  - Automatically saves the file before running if there are unsaved changes
+  - Commands are always sent to the dedicated "AI Coding Sidebar" terminal (creates it if it doesn't exist)
+  - Button is positioned on the right side of the Editor header
+  - Displays tooltip "Run task (Cmd+R / Ctrl+R)" on hover
+- **Editor View - Keyboard Shortcut**: Added `Cmd+R` / `Ctrl+R` keyboard shortcut to run tasks
+  - Same functionality as clicking the Run button
+  - Auto-saves before running to ensure the latest content is used
+  - Provides a quick way to send files to Claude without leaving the keyboard
+
+### Changed
+- **Editor View - UI Simplification**: Removed "Cmd+S / Ctrl+S to save" hint text
+  - Cleaned up the Editor header for a simpler interface
+  - Save functionality still works with the keyboard shortcut
+
 ## [0.5.0] - 2025-11-11
 
 ### Changed

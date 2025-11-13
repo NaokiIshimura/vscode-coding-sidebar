@@ -2,7 +2,7 @@
   "name": "ai-coding-sidebar",
   "displayName": "AI Coding Sidebar",
   "description": "A sidebar extension that strengthens integration with AI coding tools.Browse and manage files and folders efficiently to keep coding with AI smooth.",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "publisher": "nacn",
   "icon": "images/icon.png",
   "repository": {
@@ -69,19 +69,6 @@
         "command": "aiCodingSidebar.setupTemplate",
         "title": "Customize Template",
         "icon": "$(file-text)"
-      },
-      {
-        "command": "aiCodingSidebar.openGitFile",
-        "title": "Open Git File"
-      },
-      {
-        "command": "aiCodingSidebar.showGitDiff",
-        "title": "Show Git Diff"
-      },
-      {
-        "command": "aiCodingSidebar.refreshGitChanges",
-        "title": "Refresh File Changes",
-        "icon": "$(refresh)"
       },
       {
         "command": "aiCodingSidebar.createMarkdownFile",
@@ -184,11 +171,6 @@
           "name": "Editor",
           "type": "webview",
           "retainContextWhenHidden": true
-        },
-        {
-          "id": "gitChanges",
-          "name": "File Changes",
-          "visibility": "collapsed"
         }
       ]
     },
@@ -227,11 +209,6 @@
           "command": "aiCodingSidebar.refresh",
           "when": "view == aiCodingSidebarDetails",
           "group": "navigation@3"
-        },
-        {
-          "command": "aiCodingSidebar.refreshGitChanges",
-          "when": "view == gitChanges",
-          "group": "navigation"
         }
       ],
       "view/item/context": [

@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.3] - 2025-11-13
+
+### Removed
+- **File Changes View**: Removed the File Changes view from the sidebar
+  - Removed `gitChanges` view definition from package.json
+  - Removed `openGitFile`, `showGitDiff`, and `refreshGitChanges` commands
+  - Removed Git-related menu items and view refresh button
+  - Removed GitChangesProvider, GitFileItem, GitChange, and GitHeadContentProvider classes from extension.ts
+  - Simplified the extension by removing ~520 lines of code
+  - Users can still use VS Code's built-in Source Control view for Git operations
+
 ## [0.5.2] - 2025-11-13
 
 ### Added

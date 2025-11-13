@@ -3109,6 +3109,7 @@ class EditorProvider implements vscode.WebviewViewProvider {
     private _view?: vscode.WebviewView;
     private _currentFilePath?: string;
     private _currentContent?: string;
+    private _pendingContent?: string;
     private _isDirty: boolean = false;
     private _detailsProvider?: DocsProvider;
     private _pendingFileToRestore?: string;
@@ -3167,6 +3168,7 @@ class EditorProvider implements vscode.WebviewViewProvider {
                             await fs.promises.writeFile(this._currentFilePath, data.content, 'utf8');
                             vscode.window.showInformationMessage('File saved successfully');
                             this._currentContent = data.content;
+                            this._pendingContent = undefined;
                             this._isDirty = false;
                             // 保存後に未保存状態をクリア
                             this._view?.webview.postMessage({
@@ -3180,6 +3182,7 @@ class EditorProvider implements vscode.WebviewViewProvider {
                     break;
                 case 'contentChanged':
                     // エディタの内容が変更された
+                    this._pendingContent = data.content;
                     const isDirty = data.content !== this._currentContent;
                     if (this._isDirty !== isDirty) {
                         this._isDirty = isDirty;
@@ -3193,6 +3196,7 @@ class EditorProvider implements vscode.WebviewViewProvider {
                             try {
                                 await fs.promises.writeFile(this._currentFilePath, data.content, 'utf8');
                                 this._currentContent = data.content;
+                                this._pendingContent = undefined;
                                 this._isDirty = false;
                                 // Update dirty state in webview
                                 this._view?.webview.postMessage({
@@ -3235,16 +3239,54 @@ class EditorProvider implements vscode.WebviewViewProvider {
             this._pendingFileToRestore = this._currentFilePath;
         }
 
-        // Listen to visibility changes to restore file when view becomes visible
-        webviewView.onDidChangeVisibility(() => {
+        // Listen to visibility changes
+        webviewView.onDidChangeVisibility(async () => {
             if (webviewView.visible && this._currentFilePath) {
-                // Re-send the file content when view becomes visible
-                this.showFile(this._currentFilePath);
+                // Restore current file when view becomes visible
+                try {
+                    // Re-read the file content to ensure we have the latest version
+                    const content = await fs.promises.readFile(this._currentFilePath, 'utf8');
+                    this._currentContent = content;
+                    this._pendingContent = undefined;
+                    this._isDirty = false;
+
+                    const displayPath = path.basename(this._currentFilePath);
+                    const isActiveInEditor = vscode.window.activeTextEditor?.document.uri.fsPath === this._currentFilePath;
+
+                    this._view?.webview.postMessage({
+                        type: 'showContent',
+                        filePath: displayPath,
+                        content: content,
+                        isReadOnly: isActiveInEditor
+                    });
+                } catch (error) {
+                    console.error(`Failed to restore file: ${error}`);
+                }
+            } else if (!webviewView.visible && this._currentFilePath && this._isDirty && this._pendingContent) {
+                // Save changes when view becomes hidden
+                try {
+                    await fs.promises.writeFile(this._currentFilePath, this._pendingContent, 'utf8');
+                    this._currentContent = this._pendingContent;
+                    this._isDirty = false;
+                } catch (error) {
+                    console.error(`Failed to auto-save file: ${error}`);
+                }
             }
         });
     }
 
     public async showFile(filePath: string) {
+        // Save current file if it has unsaved changes before switching
+        if (this._currentFilePath && this._isDirty && this._pendingContent && this._currentFilePath !== filePath) {
+            try {
+                await fs.promises.writeFile(this._currentFilePath, this._pendingContent, 'utf8');
+                this._currentContent = this._pendingContent;
+                this._isDirty = false;
+            } catch (error) {
+                console.error(`Failed to auto-save file before switching: ${error}`);
+            }
+        }
+
         this._currentFilePath = filePath;
 
         // アクティブなエディタがこのファイルかチェック
@@ -3257,6 +3299,7 @@ class EditorProvider implements vscode.WebviewViewProvider {
         try {
             const content = await fs.promises.readFile(filePath, 'utf8');
             this._currentContent = content;
+            this._pendingContent = undefined;
             this._isDirty = false;
 
             // ファイル名のみを表示
@@ -3292,6 +3335,7 @@ class EditorProvider implements vscode.WebviewViewProvider {
     public clearFile(): void {
         this._currentFilePath = undefined;
         this._currentContent = undefined;
+        this._pendingContent = undefined;
         this._isDirty = false;
 
         if (this._view) {

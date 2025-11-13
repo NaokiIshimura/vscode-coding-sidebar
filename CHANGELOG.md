@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.2] - 2025-11-13
+
+### Added
+- **Editor View - Auto-save**: Implemented automatic saving of edited content
+  - Auto-saves when switching to another extension or sidebar view
+  - Auto-saves before switching to a different file in Docs view
+  - Restores the editing file when returning from another extension
+  - Prevents data loss when navigating away from the Editor view
+  - Maintains a seamless editing experience across extension switches
+
 ## [0.5.1] - 2025-11-13
 
 ### Added

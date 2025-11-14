@@ -3227,7 +3227,9 @@ class EditorProvider implements vscode.WebviewViewProvider {
                             terminal = vscode.window.createTerminal(terminalName);
                         }
                         terminal.show();
-                        terminal.sendText(`claude "read ${relativeFilePath}"`);
+                        // Trim the file path to remove any whitespace/newlines and send command
+                        const command = `claude "read ${relativeFilePath.trim()}"`;
+                        terminal.sendText(command, true);
                     }
                     break;
             }

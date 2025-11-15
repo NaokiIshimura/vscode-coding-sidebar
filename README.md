@@ -8,8 +8,8 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 | Feature | Description |
 | --- | --- |
 | **Tasks** | Display directories under a specified path.<br>Configure a default path in settings.<br>Create new directories. |
-| **Docs** | Display all files and create new ones.<br>Files are sorted by creation date (ascending) by default.<br>The current sort order is shown in the view title (e.g., "Docs (Created ↑)").<br>Customize sort order in settings. |
-| **Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a timestamp-named Markdown file (format: `YYYY_MMDD_HHMM.md`).<br>Other Markdown files open in the standard editor.<br>Save with `Cmd+S` / `Ctrl+S`.<br>Run task with `Cmd+R` / `Ctrl+R` to send `claude "read <file>"` to terminal (auto-saves before running).<br>Automatically switches to read-only mode when the file is active in VSCode editor.<br>Auto-saves when switching to another extension or file.<br>Restores the editing file when returning from another extension. |
+| **Docs** | Display all files and create new ones.<br>Files are sorted by creation date (ascending) by default.<br>The current sort order is shown in the view title (e.g., "Docs (Created ↑)").<br>Customize sort order in settings.<br>**Auto-refresh**: Automatically updates the file list when files are created, modified, or deleted in the current directory. |
+| **Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a timestamp-named Markdown file (format: `YYYY_MMDD_HHMM.md`).<br>Other Markdown files open in the standard editor.<br>Save with `Cmd+S` / `Ctrl+S`.<br>Run task with `Cmd+R` / `Ctrl+R` to send a customizable command to terminal (auto-saves before running).<br>**Customizable run command**: Configure the command executed by the Run button in settings.<br>Automatically switches to read-only mode when the file is active in VSCode editor.<br>Auto-saves when switching to another extension or file.<br>Restores the editing file when returning from another extension. |
 | **Menu** | Open user or global settings.<br>Customize templates.<br>Quick shortcuts: Open terminal, Checkout default branch, Git pull. |
 
 ## Usage
@@ -124,6 +124,7 @@ If the default relative path doesn't exist, Tasks displays a "Create directory" 
 | `defaultRelativePath` | Default relative path for Tasks | string | `""` (workspace root) | `"src"`, `.claude`, `"docs/api"` |
 | `markdownList.sortBy` | Sort files in Docs by | string | `"created"` | `"name"` (file name)<br>`"created"` (creation date)<br>`"modified"` (modified date) |
 | `markdownList.sortOrder` | Sort order for files in Docs | string | `"ascending"` | `"ascending"` (ascending)<br>`"descending"` (descending) |
+| `editor.runCommand` | Command template to execute when clicking the Run button in the Editor view | string | `claude "read ${filePath} and save your report to the same directory as ${filePath}"` | Use `${filePath}` as placeholder for the file path |
 
 ### Example configuration
 
@@ -133,7 +134,8 @@ Add the following to `.vscode/settings.json`:
 {
   "aiCodingSidebar.defaultRelativePath": ".claude",
   "aiCodingSidebar.markdownList.sortBy": "created",
-  "aiCodingSidebar.markdownList.sortOrder": "ascending"
+  "aiCodingSidebar.markdownList.sortOrder": "ascending",
+  "aiCodingSidebar.editor.runCommand": "claude \"read ${filePath} and save your report to the same directory as ${filePath}\""
 }
 ```
 

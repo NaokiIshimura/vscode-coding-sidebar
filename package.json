@@ -2,7 +2,7 @@
   "name": "ai-coding-sidebar",
   "displayName": "AI Coding Sidebar",
   "description": "A sidebar extension that strengthens integration with AI coding tools.Browse and manage files and folders efficiently to keep coding with AI smooth.",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "publisher": "nacn",
   "icon": "images/icon.png",
   "repository": {
@@ -323,6 +323,11 @@
             "Ascending order",
             "Descending order"
           ]
+        },
+        "aiCodingSidebar.editor.runCommand": {
+          "type": "string",
+          "default": "claude \"read ${filePath} and save your report to the same directory as ${filePath}\"",
+          "description": "Command template to execute when clicking the Run button in the Editor view. Use ${filePath} as placeholder for the file path."
         }
       }
     }

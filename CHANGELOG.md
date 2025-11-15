@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.5] - 2025-11-15
+
+### Added
+- **Editor View - Customizable Run Command**: Configure the command executed by the Run button
+  - Added `aiCodingSidebar.editor.runCommand` setting
+  - Use `${filePath}` as placeholder for the file path
+  - Default command: `claude "read ${filePath} and save your report to the same directory as ${filePath}"`
+  - Allows customization of the Run button behavior to fit your AI coding workflow
+
+### Improved
+- **Docs View - Auto-refresh**: Improved file change detection
+  - Removed .gitignore-based file exclusion to ensure all files are monitored
+  - Files in `.claude`, `.ai`, `.cline`, `.roo`, `.cursor`, `.copilot` directories are now properly detected
+  - Automatically updates the file list when files are created, modified, or deleted in the current directory
+  - No need to manually click the Refresh button anymore
+
 ## [0.5.4] - 2025-11-15
 
 ### Fixed

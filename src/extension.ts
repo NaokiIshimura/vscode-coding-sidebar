@@ -1880,7 +1880,10 @@ class DocsProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDrag
         // リスナーを事前に登録
         if (this.fileWatcherService) {
             this.fileWatcherService.registerListener(this.listenerId, (uri) => {
-                this.debouncedRefresh(uri.fsPath);
+                // Only refresh if the changed file is within the current rootPath
+                if (this.rootPath && uri.fsPath.startsWith(this.rootPath)) {
+                    this.debouncedRefresh(uri.fsPath);
+                }
             });
         }
         // 設定変更を監視してタイトルと表示を更新
@@ -2673,8 +2676,13 @@ class EditorProvider implements vscode.WebviewViewProvider {
                             terminal = vscode.window.createTerminal(terminalName);
                         }
                         terminal.show();
-                        // Trim the file path to remove any whitespace/newlines and send command
-                        const command = `claude "read ${relativeFilePath.trim()}"`;
+
+                        // Get the run command template from settings
+                        const config = vscode.workspace.getConfiguration('aiCodingSidebar');
+                        const commandTemplate = config.get<string>('editor.runCommand', 'claude "read ${filePath} and save your report to the same directory as ${filePath}"');
+
+                        // Replace ${filePath} placeholder with actual file path
+                        const command = commandTemplate.replace(/\$\{filePath\}/g, relativeFilePath.trim());
                         terminal.sendText(command, true);
                     }
                     break;

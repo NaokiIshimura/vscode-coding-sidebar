@@ -71,19 +71,6 @@
         "icon": "$(file-text)"
       },
       {
-        "command": "aiCodingSidebar.openGitFile",
-        "title": "Open Git File"
-      },
-      {
-        "command": "aiCodingSidebar.showGitDiff",
-        "title": "Show Git Diff"
-      },
-      {
-        "command": "aiCodingSidebar.refreshGitChanges",
-        "title": "Refresh File Changes",
-        "icon": "$(refresh)"
-      },
-      {
         "command": "aiCodingSidebar.createMarkdownFile",
         "title": "Create Markdown File",
         "icon": "$(new-file)"
@@ -184,11 +171,6 @@
           "name": "Editor",
           "type": "webview",
           "retainContextWhenHidden": true
-        },
-        {
-          "id": "gitChanges",
-          "name": "File Changes",
-          "visibility": "collapsed"
         }
       ]
     },
@@ -227,11 +209,6 @@
           "command": "aiCodingSidebar.refresh",
           "when": "view == aiCodingSidebarDetails",
           "group": "navigation@3"
-        },
-        {
-          "command": "aiCodingSidebar.refreshGitChanges",
-          "when": "view == gitChanges",
-          "group": "navigation"
         }
       ],
       "view/item/context": [

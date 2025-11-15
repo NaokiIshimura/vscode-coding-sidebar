@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.4] - 2025-11-15
+
+### Fixed
+- **Editor View - Run Button**: Fixed extra newline issue when sending commands to terminal
+  - Commands are now trimmed to remove any whitespace or newline characters
+  - Added explicit command execution parameter to ensure immediate execution
+  - Prevents unintended newlines in terminal when running tasks with Claude Code
+
 ## [0.5.3] - 2025-11-13
 
 ### Removed

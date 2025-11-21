@@ -1106,6 +1106,87 @@ export function activate(context: vscode.ExtensionContext) {
         await vscode.commands.executeCommand('aiCodingSidebar.delete', item);
     });
 
+    // アーカイブコマンドを登録
+    const archiveDirectoryCommand = vscode.commands.registerCommand('aiCodingSidebar.archiveDirectory', async (item?: FileItem) => {
+        // 2.2 入力検証ロジック
+        if (!item || !item.isDirectory) {
+            vscode.window.showErrorMessage('選択されたアイテムはディレクトリではありません');
+            return;
+        }
+
+        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+        if (!workspaceRoot) {
+            vscode.window.showErrorMessage('ワークスペースが開かれていません');
+            return;
+        }
+
+        const defaultRelativePath = configProvider.getDefaultRelativePath();
+        if (!defaultRelativePath) {
+            vscode.window.showErrorMessage('デフォルトタスクパスが設定されていません');
+            return;
+        }
+
+        // 2.3 archivedディレクトリの作成ロジック
+        const defaultTasksPath = path.join(workspaceRoot, defaultRelativePath);
+        const archivedDirPath = path.join(defaultTasksPath, 'archived');
+        const originalName = path.basename(item.filePath);
+
+        try {
+            if (!fs.existsSync(archivedDirPath)) {
+                const result = await fileOperationService.createDirectory(archivedDirPath);
+                if (!result.success) {
+                    throw result.error || new Error('Failed to create archived directory');
+                }
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`archivedディレクトリの作成に失敗しました: ${error}`);
+            return;
+        }
+
+        // 2.4 名前競合チェックと移動先パス決定ロジック
+        let destPath = path.join(archivedDirPath, originalName);
+        let finalName = originalName;
+        let hasConflict = false;
+
+        if (fs.existsSync(destPath)) {
+            hasConflict = true;
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hour = String(now.getHours()).padStart(2, '0');
+            const minute = String(now.getMinutes()).padStart(2, '0');
+            const second = String(now.getSeconds()).padStart(2, '0');
+            const timestamp = `${year}${month}${day}_${hour}${minute}${second}`;
+            finalName = `${originalName}_${timestamp}`;
+            destPath = path.join(archivedDirPath, finalName);
+        }
+
+        // 2.5 ディレクトリ移動とビュー更新
+        try {
+            const result = await fileOperationService.moveFile(item.filePath, destPath);
+            if (!result.success) {
+                throw result.error || new Error('Failed to move directory');
+            }
+
+            // ビューを更新
+            tasksProvider.refresh();
+
+            // 2.6 ユーザーフィードバック
+            if (hasConflict) {
+                vscode.window.showInformationMessage(
+                    `ディレクトリをアーカイブしました（名前の競合により "${finalName}" に変更）`
+                );
+            } else {
+                vscode.window.showInformationMessage(
+                    `ディレクトリ "${originalName}" をアーカイブしました`
+                );
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`ディレクトリのアーカイブに失敗しました: ${error}`);
+        }
+    });
+
     // ブランチチェックアウトコマンドを登録
     const checkoutBranchCommand = vscode.commands.registerCommand('aiCodingSidebar.checkoutBranch', async (item?: FileItem) => {
         if (!item || !item.isDirectory) {
@@ -1336,7 +1417,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, newDirectoryCommand, renameDirectoryCommand, deleteDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand);
+    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, newDirectoryCommand, renameDirectoryCommand, deleteDirectoryCommand, archiveDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({

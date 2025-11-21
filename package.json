@@ -2,7 +2,7 @@
   "name": "ai-coding-sidebar",
   "displayName": "AI Coding Sidebar",
   "description": "A sidebar extension that strengthens integration with AI coding tools.Browse and manage files and folders efficiently to keep coding with AI smooth.",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "publisher": "nacn",
   "icon": "images/icon.png",
   "repository": {
@@ -149,6 +149,11 @@
         "command": "aiCodingSidebar.gitPull",
         "title": "Git Pull",
         "icon": "$(arrow-down)"
+      },
+      {
+        "command": "aiCodingSidebar.archiveDirectory",
+        "title": "Archive",
+        "icon": "$(archive)"
       }
     ],
     "views": {
@@ -231,6 +236,11 @@
           "command": "aiCodingSidebar.deleteDirectory",
           "when": "view == aiCodingSidebarExplorer && viewItem == directory",
           "group": "2_workspace@4"
+        },
+        {
+          "command": "aiCodingSidebar.archiveDirectory",
+          "when": "view == aiCodingSidebarExplorer && viewItem == directory",
+          "group": "3_archive@1"
         },
         {
           "command": "aiCodingSidebar.copyRelativePath",

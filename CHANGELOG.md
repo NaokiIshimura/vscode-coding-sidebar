@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.7] - 2025-11-22
+
+### Changed
+- **Default Relative Path**: Changed default value from `.ai/tasks` to `.claude/tasks`
+  - New installations will now use `.claude/tasks` as the default directory
+  - Aligns with common AI coding tool conventions
+  - Existing installations are not affected unless settings are reset
+
 ## [0.5.6] - 2025-11-21
 
 ### Added
@@ -452,6 +460,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.5.7]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.6...v0.5.7
 [0.5.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.5...v0.5.6
 [0.5.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.4...v0.5.5
 [0.5.4]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.3...v0.5.4

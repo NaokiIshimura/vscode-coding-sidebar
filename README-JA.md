@@ -127,7 +127,7 @@ file: {{filename}}
 
 | 設定項目 | 説明 | 型 | デフォルト値 | 選択肢/例 |
 | --- | --- | --- | --- | --- |
-| `defaultRelativePath` | Tasksのデフォルト相対パス | string | `""`（プロジェクトルート） | `"src"`, `".claude"`, `"docs/api"` |
+| `defaultRelativePath` | Tasksのデフォルト相対パス | string | `".claude/tasks"` | `"src"`, `".claude"`, `"docs/api"` |
 | `markdownList.sortBy` | Docsのファイルのソート基準 | string | `"created"` | `"name"`: ファイル名<br>`"created"`: 作成日時<br>`"modified"`: 更新日時 |
 | `markdownList.sortOrder` | Docsのファイルのソート順序 | string | `"ascending"` | `"ascending"`: 昇順<br>`"descending"`: 降順 |
 | `editor.runCommand` | Editorビューのrunボタンで実行されるコマンドテンプレート | string | `claude "read ${filePath} and save your report to the same directory as ${filePath}"` | `${filePath}`をファイルパスのプレースホルダーとして使用 |

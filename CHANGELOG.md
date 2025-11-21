@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.6] - 2025-11-21
+
+### Added
+- **Tasks View - Archive Feature**: Archive task directories to keep your workspace organized
+  - Right-click a directory in Tasks view and select "Archive" to move it to the `archived` folder
+  - The `archived` folder is automatically created in the default tasks path root if it doesn't exist
+  - If a directory with the same name already exists in the archived folder, a timestamp is automatically added to avoid conflicts (format: `directoryname_YYYYMMDD_HHMMSS`)
+  - Success messages inform you when directories are archived, including when names are modified due to conflicts
+  - Helps maintain a clean workspace by moving completed or inactive tasks out of the main view while preserving history
+
 ## [0.5.5] - 2025-11-15
 
 ### Added
@@ -442,6 +452,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.5.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.5...v0.5.6
+[0.5.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.4...v0.5.5
+[0.5.4]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.3...v0.5.4
+[0.5.3]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.2...v0.5.3
+[0.5.2]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.1...v0.5.2
+[0.5.1]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.0...v0.5.1
+[0.5.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.9...v0.5.0
+[0.4.9]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.8...v0.4.9
+[0.4.8]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.6...v0.4.8
+[0.4.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.5...v0.4.6
+[0.4.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.4...v0.4.5
 [0.4.4]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.3...v0.4.4
 [0.4.3]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.4.1...v0.4.2

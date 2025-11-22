@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.8] - 2025-11-22
+
+### Added
+- **Docs View - Settings Icon**: Added settings icon to Docs view title for quick access to sort configuration
+  - Click the settings icon to open `Ai Coding Sidebar › Markdown List: Sort By` and `Ai Coding Sidebar › Markdown List: Sort Order` settings
+  - Provides convenient access to customize file sorting preferences
+- **Editor View - Settings Icon**: Added settings icon to Editor view title for quick access to run command configuration
+  - Click the settings icon to open `Ai Coding Sidebar › Editor: Run Command` setting
+  - Allows easy customization of the command executed by the Run button
+
 ## [0.5.7] - 2025-11-22
 
 ### Changed

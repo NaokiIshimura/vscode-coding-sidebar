@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2025-11-30
+
+### Added
+- **Keyboard Shortcuts - Start Task**: Added `Cmd+S` / `Ctrl+S` keyboard shortcut to start a new task
+  - Works when AI Coding Sidebar views (Tasks, Docs, Editor) are focused
+  - Creates a new directory and timestamped markdown file for immediate task creation
+  - Does not conflict with VSCode's save shortcut when sidebar is not focused
+- **Keyboard Shortcuts - Create Markdown File**: Added `Cmd+M` / `Ctrl+M` keyboard shortcut to create new markdown file
+  - Works when AI Coding Sidebar views (Tasks, Docs, Editor) are focused
+  - Quickly creates a timestamped markdown file in the current directory
+- **Menu - Keyboard Shortcut Notes**: Added shortcut descriptions to Menu > Note section
+  - Shows "Start Task" shortcut (`Cmd+S` / `Ctrl+S`)
+  - Shows "Create Markdown File" shortcut (`Cmd+M` / `Ctrl+M`)
+  - Indicates shortcuts only work when sidebar is focused
+
 ## [0.5.9] - 2025-11-29
 
 ### Added
@@ -488,6 +503,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.6.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.9...v0.6.0
 [0.5.9]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.8...v0.5.9
 [0.5.8]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.7...v0.5.8
 [0.5.7]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.6...v0.5.7

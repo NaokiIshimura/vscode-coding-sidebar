@@ -2634,6 +2634,18 @@ class MenuProvider implements vscode.TreeDataProvider<MenuItem> {
                             'Cmd+Shift+A (macOS) / Ctrl+Shift+A (Windows/Linux)',
                             undefined,
                             new vscode.ThemeIcon('keyboard')
+                        ),
+                        new MenuItem(
+                            'Start Task',
+                            'Cmd+S (macOS) / Ctrl+S (Windows/Linux) - When sidebar is focused',
+                            undefined,
+                            new vscode.ThemeIcon('keyboard')
+                        ),
+                        new MenuItem(
+                            'Create Markdown File',
+                            'Cmd+M (macOS) / Ctrl+M (Windows/Linux) - When sidebar is focused',
+                            undefined,
+                            new vscode.ThemeIcon('keyboard')
                         )
                     ],
                     vscode.TreeItemCollapsibleState.Collapsed

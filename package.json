@@ -2,7 +2,7 @@
   "name": "ai-coding-sidebar",
   "displayName": "AI Coding Sidebar",
   "description": "A sidebar extension that strengthens integration with AI coding tools.Browse and manage files and folders efficiently to keep coding with AI smooth.",
-  "version": "0.5.9",
+  "version": "0.6.0",
   "publisher": "nacn",
   "icon": "images/icon.png",
   "repository": {
@@ -321,6 +321,18 @@
         "command": "workbench.view.extension.aiCodingSidebarView",
         "key": "ctrl+shift+a",
         "mac": "cmd+shift+a"
+      },
+      {
+        "command": "aiCodingSidebar.createMarkdownFile",
+        "key": "ctrl+m",
+        "mac": "cmd+m",
+        "when": "focusedView =~ /^aiCodingSidebar/ || activeWebviewPanelId == 'markdownEditor'"
+      },
+      {
+        "command": "aiCodingSidebar.newDirectory",
+        "key": "ctrl+s",
+        "mac": "cmd+s",
+        "when": "focusedView =~ /^aiCodingSidebar/ || activeWebviewPanelId == 'markdownEditor'"
       }
     ],
     "configuration": {

@@ -19,8 +19,9 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 | Shortcut | Action |
 | --- | --- |
 | `Cmd+Shift+A` (macOS)<br>`Ctrl+Shift+A` (Windows/Linux) | Focus AI Coding Sidebar |
+| `Cmd+S` (macOS)<br>`Ctrl+S` (Windows/Linux) | Start Task (when sidebar is focused) |
+| `Cmd+M` (macOS)<br>`Ctrl+M` (Windows/Linux) | Create new Markdown file (when sidebar is focused) |
 | `Cmd+R` (macOS)<br>`Ctrl+R` (Windows/Linux) | Run task in Editor (auto-saves and sends command to terminal) |
-| `Cmd+M` (macOS)<br>`Ctrl+M` (Windows/Linux) | Create new Markdown file in Editor view |
 
 ### Basic actions
 1. Click the "AI Coding Sidebar" icon in the activity bar (or press `Cmd+Shift+A` / `Ctrl+Shift+A`).

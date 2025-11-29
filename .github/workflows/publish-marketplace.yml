@@ -1,0 +1,41 @@
+name: Publish to VS Code Marketplace
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  push:
+    branches:
+      - main
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: ./.github/workflows/build-vsix.yml
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download VSIX artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vsix-package-${{ github.run_id }}-${{ github.run_attempt }}
+          path: releases
+
+      - name: Install vsce
+        run: npm install -g @vscode/vsce
+
+      - name: Publish to VS Code Marketplace
+        continue-on-error: true
+        run: |
+          if [ -z "$VSCE_PAT" ]; then
+            echo "VSCE_PAT is not set. Skipping VS Code Marketplace publishing."
+            exit 0
+          fi
+          vsce publish --pat $VSCE_PAT --packagePath releases/${{ needs.build.outputs.vsix-filename }}
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}

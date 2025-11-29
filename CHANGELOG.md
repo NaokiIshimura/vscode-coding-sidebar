@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.9] - 2025-11-29
+
+### Added
+- **Editor View - Create Markdown File Button**: Added Create Markdown File button to Editor view title bar
+  - Click the button to quickly create a new timestamped markdown file
+  - Editor view is automatically focused after file creation for seamless workflow
+- **Editor View - Keyboard Shortcut**: Added `Cmd+M` / `Ctrl+M` keyboard shortcut to create new markdown file
+  - Works when Editor view is focused
+  - Provides quick access to file creation without leaving the keyboard
+  - Shortcut key descriptions added to placeholder text for discoverability
+
+### Changed
+- **GitHub Actions**: Refactored workflows into modular files
+  - Split single release.yml into three separate workflows
+  - `build-vsix.yml`: Reusable workflow for building VSIX package
+  - `release-vsix.yml`: Upload VSIX to GitHub Release
+  - `publish-marketplace.yml`: Publish to VS Code Marketplace
+
 ## [0.5.8] - 2025-11-22
 
 ### Added
@@ -470,6 +488,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.5.9]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.8...v0.5.9
+[0.5.8]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.7...v0.5.8
 [0.5.7]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.6...v0.5.7
 [0.5.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.5...v0.5.6
 [0.5.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.4...v0.5.5

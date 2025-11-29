@@ -9,7 +9,7 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 | --- | --- |
 | **Tasks** | Display directories under a specified path.<br>Configure a default path in settings.<br>Create new directories.<br>**Settings icon**: Quick access to default path configuration. |
 | **Docs** | Display all files and create new ones.<br>Files are sorted by creation date (ascending) by default.<br>The current sort order is shown in the view title (e.g., "Docs (Created ↑)").<br>Customize sort order in settings.<br>**Auto-refresh**: Automatically updates the file list when files are created, modified, or deleted in the current directory.<br>**Settings icon**: Quick access to sort configuration. |
-| **Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a timestamp-named Markdown file (format: `YYYY_MMDD_HHMM.md`).<br>Other Markdown files open in the standard editor.<br>Save with `Cmd+S` / `Ctrl+S`.<br>Run task with `Cmd+R` / `Ctrl+R` to send a customizable command to terminal (auto-saves before running).<br>**Customizable run command**: Configure the command executed by the Run button in settings.<br>Automatically switches to read-only mode when the file is active in VSCode editor.<br>Auto-saves when switching to another extension or file.<br>Restores the editing file when returning from another extension.<br>**Settings icon**: Quick access to run command configuration. |
+| **Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a timestamp-named Markdown file (format: `YYYY_MMDD_HHMM.md`).<br>Other Markdown files open in the standard editor.<br>Save with `Cmd+S` / `Ctrl+S`.<br>Run task with `Cmd+R` / `Ctrl+R` to send a customizable command to terminal (auto-saves before running).<br>Create new markdown file with `Cmd+M` / `Ctrl+M`.<br>**Customizable run command**: Configure the command executed by the Run button in settings.<br>Automatically switches to read-only mode when the file is active in VSCode editor.<br>Auto-saves when switching to another extension or file.<br>Restores the editing file when returning from another extension.<br>**Settings icon**: Quick access to run command configuration. |
 | **Menu** | Open user or global settings.<br>Customize templates.<br>Quick shortcuts: Open terminal, Checkout default branch, Git pull. |
 
 ## Usage
@@ -20,6 +20,7 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 | --- | --- |
 | `Cmd+Shift+A` (macOS)<br>`Ctrl+Shift+A` (Windows/Linux) | Focus AI Coding Sidebar |
 | `Cmd+R` (macOS)<br>`Ctrl+R` (Windows/Linux) | Run task in Editor (auto-saves and sends command to terminal) |
+| `Cmd+M` (macOS)<br>`Ctrl+M` (Windows/Linux) | Create new Markdown file in Editor view |
 
 ### Basic actions
 1. Click the "AI Coding Sidebar" icon in the activity bar (or press `Cmd+Shift+A` / `Ctrl+Shift+A`).

@@ -1,0 +1,47 @@
+name: Release VSIX
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  push:
+    branches:
+      - main
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: ./.github/workflows/build-vsix.yml
+
+  upload-release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download VSIX artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vsix-package-${{ github.run_id }}-${{ github.run_attempt }}
+          path: releases
+
+      - name: Upload VSIX artifact (for non-release events)
+        if: github.event_name != 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-coding-sidebar-${{ needs.build.outputs.version }}
+          path: releases/${{ needs.build.outputs.vsix-filename }}
+
+      - name: Upload VSIX to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.build.outputs.version }}
+          name: v${{ needs.build.outputs.version }}
+          draft: false
+          prerelease: false
+          files: releases/${{ needs.build.outputs.vsix-filename }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

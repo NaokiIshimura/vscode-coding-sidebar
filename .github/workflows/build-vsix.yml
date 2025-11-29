@@ -1,0 +1,58 @@
+name: Build VSIX
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  workflow_call:
+    outputs:
+      version:
+        description: "Extension version"
+        value: ${{ jobs.build.outputs.version }}
+      vsix-filename:
+        description: "VSIX filename"
+        value: ${{ jobs.build.outputs.vsix-filename }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.VERSION }}
+      vsix-filename: ai-coding-sidebar-${{ steps.version.outputs.VERSION }}.vsix
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build extension
+        run: npm run compile
+
+      - name: Install vsce
+        run: npm install -g @vscode/vsce
+
+      - name: Determine version
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Package VSIX
+        run: |
+          mkdir -p releases
+          vsce package --allow-missing-repository --no-dependencies --out releases/ai-coding-sidebar-${{ steps.version.outputs.VERSION }}.vsix
+
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix-package-${{ github.run_id }}-${{ github.run_attempt }}
+          path: releases/*.vsix
+          retention-days: 1

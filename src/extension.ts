@@ -636,6 +636,9 @@ export function activate(context: vscode.ExtensionContext) {
                 // 作成したファイルをMarkdown Editor Viewで開く
                 await editorProvider.showFile(filePath);
 
+                // Editor Viewにフォーカスを移動
+                await vscode.commands.executeCommand('markdownEditor.focus');
+
                 vscode.window.showInformationMessage(`Created markdown file ${fileName}`);
             } else {
                 throw result.error || new Error('Failed to create file');
@@ -2728,6 +2731,10 @@ class EditorProvider implements vscode.WebviewViewProvider {
                         this._isDirty = isDirty;
                     }
                     break;
+                case 'createMarkdownFile':
+                    // Cmd+M / Ctrl+M pressed - execute create markdown file command
+                    vscode.commands.executeCommand('aiCodingSidebar.createMarkdownFile');
+                    break;
                 case 'runTask':
                     // Run button clicked - save file if needed, then send command to terminal
                     if (this._currentFilePath) {
@@ -3006,7 +3013,12 @@ class EditorProvider implements vscode.WebviewViewProvider {
         </div>
     </div>
     <div id="editor-container">
-        <textarea id="editor" placeholder="Select a markdown file to edit..."></textarea>
+        <textarea id="editor" placeholder="Select a markdown file to edit...
+
+Shortcuts:
+  Cmd+M / Ctrl+M - Create new markdown file
+  Cmd+S / Ctrl+S - Save file
+  Cmd+R / Ctrl+R - Run task"></textarea>
     </div>
     <script>
         const vscode = acquireVsCodeApi();
@@ -3131,6 +3143,14 @@ class EditorProvider implements vscode.WebviewViewProvider {
                 e.preventDefault();
                 runTask();
             }
+
+            // Cmd+M / Ctrl+MでCreate Markdown File
+            if ((e.metaKey || e.ctrlKey) && e.key === 'm') {
+                e.preventDefault();
+                vscode.postMessage({
+                    type: 'createMarkdownFile'
+                });
+            }
         });
 
         // Run button click handler
@@ -3141,6 +3161,16 @@ class EditorProvider implements vscode.WebviewViewProvider {
         // Notify extension that webview is ready
         window.addEventListener('load', () => {
             vscode.postMessage({ type: 'webviewReady' });
+        });
+
+        // Global key handler for Cmd+M / Ctrl+M (works when webview has focus)
+        document.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'm') {
+                e.preventDefault();
+                vscode.postMessage({
+                    type: 'createMarkdownFile'
+                });
+            }
         });
     </script>
 </body>

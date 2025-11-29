@@ -19,8 +19,9 @@ AIコーディングツールとの連携を強化するサイドバー拡張機
 | ショートカット | 動作 |
 | --- | --- |
 | `Cmd+Shift+A` (macOS)<br>`Ctrl+Shift+A` (Windows/Linux) | AI Coding Sidebarにフォーカス |
+| `Cmd+S` (macOS)<br>`Ctrl+S` (Windows/Linux) | タスクを開始（サイドバーにフォーカス時） |
+| `Cmd+M` (macOS)<br>`Ctrl+M` (Windows/Linux) | Markdownファイルを新規作成（サイドバーにフォーカス時） |
 | `Cmd+R` (macOS)<br>`Ctrl+R` (Windows/Linux) | Editorでタスクを実行（自動保存してターミナルにコマンドを送信） |
-| `Cmd+M` (macOS)<br>`Ctrl+M` (Windows/Linux) | EditorビューでMarkdownファイルを新規作成 |
 
 ### 基本操作
 1. アクティビティバーの「AI Coding Sidebar」アイコンをクリック（または`Cmd+Shift+A` / `Ctrl+Shift+A`を押す）

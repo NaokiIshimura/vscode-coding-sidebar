@@ -2728,6 +2728,10 @@ class EditorProvider implements vscode.WebviewViewProvider {
                         this._isDirty = isDirty;
                     }
                     break;
+                case 'createMarkdownFile':
+                    // Cmd+M / Ctrl+M pressed - execute create markdown file command
+                    vscode.commands.executeCommand('aiCodingSidebar.createMarkdownFile');
+                    break;
                 case 'runTask':
                     // Run button clicked - save file if needed, then send command to terminal
                     if (this._currentFilePath) {
@@ -3131,6 +3135,14 @@ class EditorProvider implements vscode.WebviewViewProvider {
                 e.preventDefault();
                 runTask();
             }
+
+            // Cmd+M / Ctrl+MでCreate Markdown File
+            if ((e.metaKey || e.ctrlKey) && e.key === 'm') {
+                e.preventDefault();
+                vscode.postMessage({
+                    type: 'createMarkdownFile'
+                });
+            }
         });
 
         // Run button click handler
@@ -3141,6 +3153,16 @@ class EditorProvider implements vscode.WebviewViewProvider {
         // Notify extension that webview is ready
         window.addEventListener('load', () => {
             vscode.postMessage({ type: 'webviewReady' });
+        });
+
+        // Global key handler for Cmd+M / Ctrl+M (works when webview has focus)
+        document.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'm') {
+                e.preventDefault();
+                vscode.postMessage({
+                    type: 'createMarkdownFile'
+                });
+            }
         });
     </script>
 </body>

@@ -636,6 +636,9 @@ export function activate(context: vscode.ExtensionContext) {
                 // 作成したファイルをMarkdown Editor Viewで開く
                 await editorProvider.showFile(filePath);
 
+                // Editor Viewにフォーカスを移動
+                await vscode.commands.executeCommand('markdownEditor.focus');
+
                 vscode.window.showInformationMessage(`Created markdown file ${fileName}`);
             } else {
                 throw result.error || new Error('Failed to create file');
@@ -3010,7 +3013,12 @@ class EditorProvider implements vscode.WebviewViewProvider {
         </div>
     </div>
     <div id="editor-container">
-        <textarea id="editor" placeholder="Select a markdown file to edit..."></textarea>
+        <textarea id="editor" placeholder="Select a markdown file to edit...
+
+Shortcuts:
+  Cmd+M / Ctrl+M - Create new markdown file
+  Cmd+S / Ctrl+S - Save file
+  Cmd+R / Ctrl+R - Run task"></textarea>
     </div>
     <script>
         const vscode = acquireVsCodeApi();

@@ -231,9 +231,14 @@
           "group": "navigation@3"
         },
         {
-          "command": "aiCodingSidebar.openEditorSettings",
+          "command": "aiCodingSidebar.createMarkdownFile",
           "when": "view == markdownEditor",
           "group": "navigation@1"
+        },
+        {
+          "command": "aiCodingSidebar.openEditorSettings",
+          "when": "view == markdownEditor",
+          "group": "navigation@2"
         }
       ],
       "view/item/context": [

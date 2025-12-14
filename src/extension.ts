@@ -2779,8 +2779,8 @@ class EditorProvider implements vscode.WebviewViewProvider {
                             relativeFilePath = this._currentFilePath;
                         }
 
-                        // Find or create the "AI Coding Sidebar" terminal
-                        const terminalName = 'AI Coding Sidebar';
+                        // Use parent directory name as terminal name
+                        const terminalName = path.basename(path.dirname(this._currentFilePath));
                         let terminal = vscode.window.terminals.find(t => t.name === terminalName);
                         if (!terminal) {
                             terminal = vscode.window.createTerminal(terminalName);

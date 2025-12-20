@@ -2187,6 +2187,30 @@ class DocsProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDrag
     }
 
     handleDrop(target: FileItem | undefined, dataTransfer: vscode.DataTransfer, token: vscode.CancellationToken): void | Thenable<void> {
+        // ターゲットディレクトリの決定
+        let targetDir: string;
+        if (!target) {
+            // ビューのルートにドロップされた場合
+            targetDir = this.rootPath!;
+        } else if (target.isDirectory) {
+            // フォルダにドロップされた場合
+            targetDir = target.filePath;
+        } else {
+            // ファイルにドロップされた場合は、その親ディレクトリにコピー
+            targetDir = path.dirname(target.filePath);
+        }
+
+        // 外部からのファイルドロップをチェック（text/uri-list）
+        const uriListItem = dataTransfer.get('text/uri-list');
+        if (uriListItem) {
+            uriListItem.asString().then(uriList => {
+                const uris = uriList.split('\n').filter(uri => uri.trim() !== '');
+                this.copyExternalFiles(uris, targetDir);
+            });
+            return;
+        }
+
+        // ツリービュー内からのドラッグ&ドロップ
         const transferItem = dataTransfer.get('application/vnd.code.tree.aiCodingSidebarDetails');
         if (!transferItem) {
             return;
@@ -2197,31 +2221,77 @@ class DocsProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDrag
             return;
         }
 
-        // ターゲットディレクトリの決定
-        let targetDir: string;
-        if (!target) {
-            // ビューのルートにドロップされた場合
-            targetDir = this.rootPath!;
-        } else if (target.isDirectory) {
-            // フォルダにドロップされた場合
-            targetDir = target.filePath;
-        } else {
-            // ファイルにドロップされた場合は、その親ディレクトリに移動
-            targetDir = path.dirname(target.filePath);
-        }
-
-        // ファイルの移動処理
-        this.moveFiles(sourceItems, targetDir);
+        // ファイルのコピー処理
+        this.copyFiles(sourceItems, targetDir);
     }
 
-    private async moveFiles(sourceItems: readonly FileItem[], targetDir: string): Promise<void> {
+    /**
+     * 外部からドロップされたファイルをコピー
+     */
+    private async copyExternalFiles(uris: string[], targetDir: string): Promise<void> {
+        const copiedFiles: string[] = [];
+
+        for (const uriStr of uris) {
+            try {
+                const uri = vscode.Uri.parse(uriStr);
+                if (uri.scheme !== 'file') {
+                    continue;
+                }
+
+                const sourcePath = uri.fsPath;
+                const fileName = path.basename(sourcePath);
+                const targetPath = path.join(targetDir, fileName);
+
+                // 同じパスへのコピーは無視
+                if (sourcePath === targetPath) {
+                    continue;
+                }
+
+                // ファイルが既に存在するかチェック
+                if (fs.existsSync(targetPath)) {
+                    const answer = await vscode.window.showWarningMessage(
+                        `${fileName} already exists. Overwrite?`,
+                        'Overwrite',
+                        'Skip'
+                    );
+                    if (answer !== 'Overwrite') {
+                        continue;
+                    }
+                }
+
+                // ファイルをコピー
+                fs.copyFileSync(sourcePath, targetPath);
+                copiedFiles.push(fileName);
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to copy file: ${error}`);
+            }
+        }
+
+        // コピー成功メッセージを表示
+        if (copiedFiles.length > 0) {
+            const message = copiedFiles.length === 1
+                ? `Copied: ${copiedFiles[0]}`
+                : `Copied ${copiedFiles.length} files`;
+            vscode.window.showInformationMessage(message);
+        }
+
+        // ビューを更新
+        this.refresh();
+    }
+
+    /**
+     * ツリービュー内のファイルをコピー
+     */
+    private async copyFiles(sourceItems: readonly FileItem[], targetDir: string): Promise<void> {
+        const copiedFiles: string[] = [];
+
         for (const item of sourceItems) {
             const sourcePath = item.filePath;
             const fileName = path.basename(sourcePath);
             const targetPath = path.join(targetDir, fileName);
 
-            // 同じディレクトリへの移動は無視
-            if (path.dirname(sourcePath) === targetDir) {
+            // 同じパスへのコピーは無視
+            if (sourcePath === targetPath) {
                 continue;
             }
 
@@ -2238,11 +2308,20 @@ class DocsProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDrag
                     }
                 }
 
-                // ファイル/フォルダを移動
-                fs.renameSync(sourcePath, targetPath);
+                // ファイルをコピー
+                fs.copyFileSync(sourcePath, targetPath);
+                copiedFiles.push(fileName);
             } catch (error) {
-                vscode.window.showErrorMessage(`Failed to move ${fileName}: ${error}`);
+                vscode.window.showErrorMessage(`Failed to copy ${fileName}: ${error}`);
             }
+        }
+
+        // コピー成功メッセージを表示
+        if (copiedFiles.length > 0) {
+            const message = copiedFiles.length === 1
+                ? `Copied: ${copiedFiles[0]}`
+                : `Copied ${copiedFiles.length} files`;
+            vscode.window.showInformationMessage(message);
         }
 
         // ビューを更新

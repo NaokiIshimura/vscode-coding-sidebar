@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.2] - 2025-12-20
+
+### Changed
+- **Docs View - Drag & Drop**: Changed file operation from move to copy
+  - Files dragged within the Docs view are now copied instead of moved
+  - External files dropped into the Docs view are also copied to the target directory
+  - Displays a success message after copying (single file: "Copied: filename", multiple files: "Copied N files")
+  - Provides better file management workflow with non-destructive copy operations
+
 ## [0.6.0] - 2025-11-30
 
 ### Added
@@ -503,6 +512,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.6.2]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.6.0...v0.6.2
 [0.6.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.9...v0.6.0
 [0.5.9]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.8...v0.5.9
 [0.5.8]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.7...v0.5.8

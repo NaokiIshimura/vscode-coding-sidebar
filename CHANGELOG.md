@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.3] - 2025-12-21
+
+### Changed
+- **Docs View - Markdown Filename Format**: Changed timestamp-named markdown filename format
+  - Previous format: `YYYY_MMDD_HHMM.md` (e.g., `2025_1103_1227.md`)
+  - New format: `YYYY_MMDD_HHMM_TASK.md` (e.g., `2025_1103_1227_TASK.md`)
+  - Files created via "Create Markdown File" button, `Cmd+M` / `Ctrl+M` shortcut, or "Start Task" now use the new naming convention
+  - Editor view now recognizes and opens files with the new `_TASK.md` suffix
+  - File icons in Docs view are updated to reflect the new pattern recognition
+
 ## [0.6.2] - 2025-12-20
 
 ### Changed
@@ -512,6 +522,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.6.3]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.6.0...v0.6.2
 [0.6.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.9...v0.6.0
 [0.5.9]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.8...v0.5.9

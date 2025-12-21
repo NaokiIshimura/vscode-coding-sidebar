@@ -9,7 +9,7 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 | --- | --- |
 | **Tasks** | Display directories under a specified path.<br>Configure a default path in settings.<br>Create new directories.<br>**Settings icon**: Quick access to default path configuration. |
 | **Docs** | Display all files and create new ones.<br>Files are sorted by creation date (ascending) by default.<br>The current sort order is shown in the view title (e.g., "Docs (Created ↑)").<br>Customize sort order in settings.<br>**Auto-refresh**: Automatically updates the file list when files are created, modified, or deleted in the current directory.<br>**Settings icon**: Quick access to sort configuration. |
-| **Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a timestamp-named Markdown file (format: `YYYY_MMDD_HHMM.md`).<br>Other Markdown files open in the standard editor.<br>Save with `Cmd+S` / `Ctrl+S`.<br>Run task with `Cmd+R` / `Ctrl+R` to send a customizable command to terminal (auto-saves before running).<br>Create new markdown file with `Cmd+M` / `Ctrl+M`.<br>**Customizable run command**: Configure the command executed by the Run button in settings.<br>Automatically switches to read-only mode when the file is active in VSCode editor.<br>Auto-saves when switching to another extension or file.<br>Restores the editing file when returning from another extension.<br>**Settings icon**: Quick access to run command configuration. |
+| **Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a timestamp-named Markdown file (format: `YYYY_MMDD_HHMM_TASK.md`).<br>Other Markdown files open in the standard editor.<br>Save with `Cmd+S` / `Ctrl+S`.<br>Run task with `Cmd+R` / `Ctrl+R` to send a customizable command to terminal (auto-saves before running).<br>Create new markdown file with `Cmd+M` / `Ctrl+M`.<br>**Customizable run command**: Configure the command executed by the Run button in settings.<br>Automatically switches to read-only mode when the file is active in VSCode editor.<br>Auto-saves when switching to another extension or file.<br>Restores the editing file when returning from another extension.<br>**Settings icon**: Quick access to run command configuration. |
 | **Menu** | Open user or global settings.<br>Customize templates.<br>Quick shortcuts: Open terminal, Checkout default branch, Git pull. |
 
 ## Usage
@@ -27,7 +27,7 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 1. Click the "AI Coding Sidebar" icon in the activity bar (or press `Cmd+Shift+A` / `Ctrl+Shift+A`).
 2. Use Tasks to create the folder you use for AI coding.
 3. Create Markdown files from Docs.
-4. Click a timestamp-named Markdown file (e.g., `2025_1103_1227.md`) in Docs to edit it in the Editor view below. Other Markdown files open in the standard editor.
+4. Click a timestamp-named Markdown file (e.g., `2025_1103_1227_TASK.md`) in Docs to edit it in the Editor view below. Other Markdown files open in the standard editor.
 5. Write instructions for the AI in the Editor and save with `Cmd+S` / `Ctrl+S`.
 6. Right-click the Markdown file in Docs and choose "Copy Relative Path," then share it with your AI tool.
 
@@ -61,7 +61,7 @@ file: {{filename}}
 Use the following variables inside a template:
 
 - `{{datetime}}`: Creation date and time (for example, 2025/11/3 12:27:13)
-- `{{filename}}`: Filename including extension (for example, 2025_1103_1227.md)
+- `{{filename}}`: Filename including extension (for example, 2025_1103_1227_TASK.md)
 - `{{timestamp}}`: Timestamp (for example, 2025_1103_1227)
 
 ### Template priority
@@ -93,7 +93,7 @@ Use the following variables inside a template:
 | --- | --- |
 | Start Task | Click the rocket icon (🚀) in Tasks title menu.<br>Creates a new directory under the default path and automatically generates a timestamped Markdown file.<br>The file is selected in Docs with "editing" label and opens in Editor View. |
 | New Directory | Click the folder icon in Tasks.<br>Creates a new directory under the currently selected directory. |
-| Create a file | Click the "+" icon in Docs.<br>A timestamped Markdown file is created (for example, `2025_1103_1227.md`) and opens in Editor View. |
+| Create a file | Click the "+" icon in Docs.<br>A timestamped Markdown file is created (for example, `2025_1103_1227_TASK.md`) and opens in Editor View. |
 
 ### Configure the Default Relative Path
 

@@ -3106,9 +3106,7 @@ class EditorProvider implements vscode.WebviewViewProvider {
         </div>
     </div>
     <div id="editor-container">
-        <textarea id="editor" placeholder="Select a markdown file to edit...
-
-Shortcuts:
+        <textarea id="editor" placeholder="Shortcuts:
   Cmd+M / Ctrl+M - Create new markdown file
   Cmd+S / Ctrl+S - Save file
   Cmd+R / Ctrl+R - Run task"></textarea>

@@ -41,23 +41,19 @@ AIコーディングで使用するmarkdownファイルの構造を統一し、�
 ### テンプレートの設定方法
 1. Tasksペインの歯車アイコン（⚙️）をクリック
 2. 「ワークスペース設定」→「テンプレートをカスタマイズ」を選択
-3. `.vscode/templates/file.md` が作成されます
+3. `.vscode/ai-coding-sidebar/templates/task.md` が作成されます
 4. テンプレートを編集して保存
 
 ### デフォルトテンプレート
 初回作成時には以下のテンプレートが設定されます：
 
 ```markdown
-created: {{datetime}}
 file: {{filename}}
+created: {{datetime}}
 
 ---
 
-## overview
-
-
-## tasks
-
+# task
 
 ```
 
@@ -69,7 +65,7 @@ file: {{filename}}
 - `{{timestamp}}`: タイムスタンプ（例: 2025_1103_1227）
 
 ### テンプレートの優先順位
-1. ワークスペースの `.vscode/templates/file.md`（存在する場合）
+1. ワークスペースの `.vscode/ai-coding-sidebar/templates/task.md`（存在する場合）
 2. 拡張機能内のデフォルトテンプレート
 
 ### テンプレートの活用例

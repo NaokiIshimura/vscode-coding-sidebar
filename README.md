@@ -38,22 +38,19 @@ When you create a file from Docs, you can automatically populate it with a templ
 ### Configure the template
 1. Click the gear icon (⚙️) in the Tasks pane.
 2. Choose "Workspace Settings" → "Customize template."
-3. `.vscode/templates/file.md` is created.
+3. `.vscode/ai-coding-sidebar/templates/task.md` is created.
 4. Edit the template and save it.
 
 ### Default template
 The first template contains the following:
 
 ```markdown
-created: {{datetime}}
 file: {{filename}}
+created: {{datetime}}
 
 ---
 
-## overview
-
-
-## tasks
+# task
 
 ```
 
@@ -65,7 +62,7 @@ Use the following variables inside a template:
 - `{{timestamp}}`: Timestamp (for example, 2025_1103_1227)
 
 ### Template priority
-1. Workspace template `.vscode/templates/file.md` (if present)
+1. Workspace template `.vscode/ai-coding-sidebar/templates/task.md` (if present)
 2. Built-in extension template
 
 ### Template examples

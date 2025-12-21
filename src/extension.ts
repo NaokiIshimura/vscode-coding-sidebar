@@ -15,60 +15,36 @@ import { SearchService } from './services/SearchService';
 import { ConfigurationProvider } from './services/ConfigurationProvider';
 import { FileWatcherService } from './services/FileWatcherService';
 
-// デフォルトテンプレート内容
-const DEFAULT_TEMPLATE = `created: {{datetime}}
-file: {{filename}}
-
----
-
-## overview
-
-
-## tasks
-
-
-`;
-
 // テンプレートを読み込んで変数を置換する関数
 function loadTemplate(context: vscode.ExtensionContext, variables: { [key: string]: string }): string {
-    try {
-        let templatePath: string;
+    let templatePath: string;
 
-        // 1. ワークスペースの.vscode/templates/file.mdを優先
-        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-        if (workspaceRoot) {
-            const vscodeTemplatePath = path.join(workspaceRoot, '.vscode', 'templates', 'file.md');
-            if (fs.existsSync(vscodeTemplatePath)) {
-                templatePath = vscodeTemplatePath;
-            } else {
-                // 2. 拡張機能内のfile.mdをフォールバック
-                templatePath = path.join(context.extensionPath, 'templates', 'file.md');
-            }
+    // 1. ワークスペースの.vscode/ai-coding-sidebar/templates/task.mdを優先
+    const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    if (workspaceRoot) {
+        const vscodeTemplatePath = path.join(workspaceRoot, '.vscode', 'ai-coding-sidebar', 'templates', 'task.md');
+        if (fs.existsSync(vscodeTemplatePath)) {
+            templatePath = vscodeTemplatePath;
         } else {
-            templatePath = path.join(context.extensionPath, 'templates', 'file.md');
+            // 2. 拡張機能内のtask.mdをフォールバック
+            templatePath = path.join(context.extensionPath, 'templates', 'task.md');
         }
-
-        if (fs.existsSync(templatePath)) {
-            let content = fs.readFileSync(templatePath, 'utf8');
-
-            // 変数を置換
-            for (const [key, value] of Object.entries(variables)) {
-                const regex = new RegExp(`{{${key}}}`, 'g');
-                content = content.replace(regex, value);
-            }
-
-            return content;
-        }
-    } catch (error) {
-        console.error(`Failed to load template: ${error}`);
+    } else {
+        templatePath = path.join(context.extensionPath, 'templates', 'task.md');
     }
 
-    // テンプレートが見つからない場合のデフォルト
-    let content = DEFAULT_TEMPLATE;
+    if (!fs.existsSync(templatePath)) {
+        throw new Error(`Template file not found: ${templatePath}`);
+    }
+
+    let content = fs.readFileSync(templatePath, 'utf8');
+
+    // 変数を置換
     for (const [key, value] of Object.entries(variables)) {
         const regex = new RegExp(`{{${key}}}`, 'g');
         content = content.replace(regex, value);
     }
+
     return content;
 }
 
@@ -115,19 +91,25 @@ async function setupSettingsJson(workspaceRoot: string): Promise<void> {
 }
 
 // テンプレートを設定するヘルパー関数
-async function setupTemplate(workspaceRoot: string): Promise<void> {
-    const templatesDir = path.join(workspaceRoot, '.vscode', 'templates');
-    const templatePath = path.join(templatesDir, 'file.md');
+async function setupTemplate(context: vscode.ExtensionContext, workspaceRoot: string): Promise<void> {
+    const templatesDir = path.join(workspaceRoot, '.vscode', 'ai-coding-sidebar', 'templates');
+    const templatePath = path.join(templatesDir, 'task.md');
 
     try {
-        // .vscode/templatesディレクトリを作成（存在しない場合）
+        // .vscode/ai-coding-sidebar/templatesディレクトリを作成（存在しない場合）
         if (!fs.existsSync(templatesDir)) {
             fs.mkdirSync(templatesDir, { recursive: true });
         }
 
         // テンプレートファイルが存在しない場合のみ作成
         if (!fs.existsSync(templatePath)) {
-            fs.writeFileSync(templatePath, DEFAULT_TEMPLATE, 'utf8');
+            // 拡張機能内のtemplates/task.mdから読み込む
+            const extensionTemplatePath = path.join(context.extensionPath, 'templates', 'task.md');
+            if (!fs.existsSync(extensionTemplatePath)) {
+                throw new Error(`Template file not found: ${extensionTemplatePath}`);
+            }
+            const templateContent = fs.readFileSync(extensionTemplatePath, 'utf8');
+            fs.writeFileSync(templatePath, templateContent, 'utf8');
         }
 
         // ファイルを開く
@@ -538,7 +520,7 @@ export function activate(context: vscode.ExtensionContext) {
                 await setupSettingsJson(workspaceRoot);
                 break;
             case 'template':
-                await setupTemplate(workspaceRoot);
+                await setupTemplate(context, workspaceRoot);
                 break;
             case 'claude':
                 await setupClaudeFolder(workspaceRoot);
@@ -577,7 +559,7 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
         const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
-        await setupTemplate(workspaceRoot);
+        await setupTemplate(context, workspaceRoot);
     });
 
     // markdownファイルを作成するコマンドを登録

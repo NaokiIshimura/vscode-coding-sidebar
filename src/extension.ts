@@ -177,6 +177,7 @@ export function activate(context: vscode.ExtensionContext) {
     docsProvider.setEditorProvider(editorProvider);
     // Markdown ListプロバイダーをMarkdown Editorプロバイダーに設定
     editorProvider.setDetailsProvider(docsProvider);
+    editorProvider.setTasksProvider(tasksProvider);
 
     // プロジェクトルートを設定
     const initializeWithWorkspaceRoot = async () => {
@@ -2728,6 +2729,7 @@ class EditorProvider implements vscode.WebviewViewProvider {
     private _pendingContent?: string;
     private _isDirty: boolean = false;
     private _detailsProvider?: DocsProvider;
+    private _tasksProvider?: TasksProvider;
     private _pendingFileToRestore?: string;
 
     constructor(
@@ -2780,6 +2782,7 @@ class EditorProvider implements vscode.WebviewViewProvider {
                     break;
                 case 'save':
                     if (this._currentFilePath) {
+                        // 優先度1: 既存ファイルへの上書き保存
                         try {
                             await fs.promises.writeFile(this._currentFilePath, data.content, 'utf8');
                             vscode.window.showInformationMessage('File saved successfully');
@@ -2794,6 +2797,92 @@ class EditorProvider implements vscode.WebviewViewProvider {
                         } catch (error) {
                             vscode.window.showErrorMessage(`Failed to save file: ${error}`);
                         }
+                    } else if (data.content && data.content.trim()) {
+                        // ファイル未開時 - 新規ファイルとして保存
+                        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+                        if (!workspaceRoot) {
+                            vscode.window.showErrorMessage('No workspace folder is open');
+                            break;
+                        }
+
+                        let savePath: string;
+
+                        // 優先度2: Docs viewで開いているディレクトリ
+                        const docsCurrentPath = this._detailsProvider?.getCurrentPath();
+                        // 優先度3: Tasks viewで選択しているディレクトリ
+                        const tasksRootPath = this._tasksProvider?.getRootPath();
+
+                        if (docsCurrentPath) {
+                            savePath = docsCurrentPath;
+                        } else if (tasksRootPath) {
+                            savePath = tasksRootPath;
+                        } else {
+                            // 優先度4: デフォルトパス
+                            const config = vscode.workspace.getConfiguration('aiCodingSidebar');
+                            const defaultRelativePath = config.get<string>('defaultRelativePath', '.claude/tasks');
+                            savePath = path.join(workspaceRoot, defaultRelativePath);
+                        }
+
+                        // ディレクトリが存在しない場合は作成
+                        await fs.promises.mkdir(savePath, { recursive: true });
+
+                        // タイムスタンプ付きファイル名を生成
+                        const now = new Date();
+                        const year = now.getFullYear();
+                        const month = String(now.getMonth() + 1).padStart(2, '0');
+                        const day = String(now.getDate()).padStart(2, '0');
+                        const hour = String(now.getHours()).padStart(2, '0');
+                        const minute = String(now.getMinutes()).padStart(2, '0');
+                        const timestamp = `${year}_${month}${day}_${hour}${minute}`;
+
+                        const fileName = `${timestamp}_TASK.md`;
+                        const filePath = path.join(savePath, fileName);
+
+                        try {
+                            await fs.promises.writeFile(filePath, data.content, 'utf8');
+                            vscode.window.showInformationMessage(`File saved: ${fileName}`);
+
+                            // 保存したファイルをエディタで開く
+                            this._currentFilePath = filePath;
+                            this._currentContent = data.content;
+                            this._pendingContent = undefined;
+                            this._isDirty = false;
+
+                            // ファイルパスをWebviewに反映（ファイル名のみ表示）
+                            const displayPath = path.basename(filePath);
+                            this._view?.webview.postMessage({
+                                type: 'showContent',
+                                content: data.content,
+                                filePath: displayPath,
+                                isReadOnly: false
+                            });
+
+                            // ツリービューを更新
+                            this._tasksProvider?.refresh();
+                            this._detailsProvider?.refresh();
+
+                            // 保存したディレクトリに移動してファイルを選択
+                            setTimeout(async () => {
+                                // Tasks viewでディレクトリを表示
+                                await this._tasksProvider?.revealDirectory(savePath);
+                                // Docs viewでファイルを選択（setRootPathを使わずに直接revealFile）
+                                // Docs viewのルートパスが異なる場合は更新が必要
+                                const currentDocsPath = this._detailsProvider?.getCurrentPath();
+                                if (currentDocsPath !== savePath) {
+                                    // ルートパスを変更する前にファイルパスを保持
+                                    const savedFilePath = filePath;
+                                    // ルートパスを変更（clearFileが呼ばれる）
+                                    this._detailsProvider?.setRootPath(savePath);
+                                    // ファイルを再度開く
+                                    await this.showFile(savedFilePath);
+                                }
+                                await this._detailsProvider?.revealFile(filePath);
+                            }, 100);
+                        } catch (error) {
+                            vscode.window.showErrorMessage(`Failed to save file: ${error}`);
+                        }
+                    } else {
+                        vscode.window.showWarningMessage('Please enter some text before saving.');
                     }
                     break;
                 case 'contentChanged':
@@ -2977,6 +3066,10 @@ class EditorProvider implements vscode.WebviewViewProvider {
 
     public setDetailsProvider(provider: DocsProvider): void {
         this._detailsProvider = provider;
+    }
+
+    public setTasksProvider(provider: TasksProvider): void {
+        this._tasksProvider = provider;
     }
 
     public clearFile(): void {

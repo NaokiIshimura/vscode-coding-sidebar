@@ -313,12 +313,12 @@ export function activate(context: vscode.ExtensionContext) {
             const selectedItem = e.selection[0];
             // Markdownファイルの場合
             if (!selectedItem.isDirectory && selectedItem.filePath.endsWith('.md')) {
-                // ファイル名がYYYY_MMDD_HHMM.md形式の場合はMarkdown Editorで開く
+                // ファイル名がYYYY_MMDD_HHMM_TASK.md形式の場合はMarkdown Editorで開く
                 const fileName = path.basename(selectedItem.filePath);
-                const timestampPattern = /^\d{4}_\d{4}_\d{4}\.md$/;
+                const timestampPattern = /^\d{4}_\d{4}_\d{4}_TASK\.md$/;
 
                 if (timestampPattern.test(fileName)) {
-                    // YYYY_MMDD_HHMM.md形式の場合はMarkdown Editorで開く
+                    // YYYY_MMDD_HHMM_TASK.md形式の場合はMarkdown Editorで開く
                     await editorProvider.showFile(selectedItem.filePath);
                 } else {
                     // それ以外は通常のエディタで開く
@@ -612,7 +612,7 @@ export function activate(context: vscode.ExtensionContext) {
         const minute = String(now.getMinutes()).padStart(2, '0');
 
         const timestamp = `${year}_${month}${day}_${hour}${minute}`;
-        const fileName = `${timestamp}.md`;
+        const fileName = `${timestamp}_TASK.md`;
         const filePath = path.join(targetPath, fileName);
 
         try {
@@ -1050,7 +1050,7 @@ export function activate(context: vscode.ExtensionContext) {
             const minute = String(now.getMinutes()).padStart(2, '0');
 
             const timestamp = `${year}_${month}${day}_${hour}${minute}`;
-            const fileName = `${timestamp}.md`;
+            const fileName = `${timestamp}_TASK.md`;
             const filePath = path.join(folderPath, fileName);
 
             // テンプレートを使用してファイル内容を生成
@@ -2525,7 +2525,7 @@ class FileItem extends vscode.TreeItem {
 
         // Markdownファイルの場合、タイムスタンプ形式かどうかで分ける
         if (ext === '.md') {
-            const timestampPattern = /^\d{4}_\d{4}_\d{4}\.md$/;
+            const timestampPattern = /^\d{4}_\d{4}_\d{4}_TASK\.md$/;
             // タイムスタンプ形式の場合はeditアイコン（Markdown Editorで開く）
             if (timestampPattern.test(fileName)) {
                 return new vscode.ThemeIcon('edit');

@@ -2855,6 +2855,26 @@ class EditorProvider implements vscode.WebviewViewProvider {
                         // Replace ${filePath} placeholder with actual file path
                         const command = commandTemplate.replace(/\$\{filePath\}/g, relativeFilePath.trim());
                         terminal.sendText(command, true);
+                    } else if (data.editorContent && data.editorContent.trim()) {
+                        // No file open - use the editor content directly
+                        const config = vscode.workspace.getConfiguration('aiCodingSidebar');
+                        const commandTemplate = config.get<string>('editor.runCommandWithoutFile', 'claude "${editorContent}"');
+
+                        // Replace ${editorContent} placeholder with actual editor content
+                        // Escape double quotes in editor content to prevent command injection
+                        const escapedContent = data.editorContent.trim().replace(/"/g, '\\"');
+                        const command = commandTemplate.replace(/\$\{editorContent\}/g, escapedContent);
+
+                        // Use default terminal name when no file is open
+                        const terminalName = 'AI Coding Sidebar';
+                        let terminal = vscode.window.terminals.find(t => t.name === terminalName);
+                        if (!terminal) {
+                            terminal = vscode.window.createTerminal(terminalName);
+                        }
+                        terminal.show();
+                        terminal.sendText(command, true);
+                    } else {
+                        vscode.window.showWarningMessage('Please enter some text in the editor to run a task.');
                     }
                     break;
             }
@@ -3082,7 +3102,7 @@ class EditorProvider implements vscode.WebviewViewProvider {
         </div>
         <div class="header-actions">
             <span class="readonly-indicator" id="readonly-indicator">Read-only</span>
-            <button class="run-button" id="run-button" style="display: none;" title="Run task (Cmd+R / Ctrl+R)">Run</button>
+            <button class="run-button" id="run-button" title="Run task (Cmd+R / Ctrl+R)">Run</button>
         </div>
     </div>
     <div id="editor-container">
@@ -3114,9 +3134,6 @@ Shortcuts:
                     currentFilePath = message.filePath;
                     filePathElement.textContent = message.filePath;
                     dirtyIndicator.classList.remove('show');
-
-                    // Show run button when file is loaded
-                    runButton.style.display = 'inline-block';
 
                     // Handle read-only mode
                     isReadOnly = message.isReadOnly || false;
@@ -3161,7 +3178,6 @@ Shortcuts:
                     readonlyIndicator.classList.remove('show');
                     editor.removeAttribute('readonly');
                     isReadOnly = false;
-                    runButton.style.display = 'none';
                     break;
             }
         });
@@ -3185,17 +3201,21 @@ Shortcuts:
 
         // Run task function
         const runTask = () => {
-            if (!currentFilePath) {
-                return;
+            if (currentFilePath) {
+                // File is open - use the file-based run task
+                const isDirty = editor.value !== originalContent;
+                vscode.postMessage({
+                    type: 'runTask',
+                    filePath: currentFilePath,
+                    content: isDirty && !isReadOnly ? editor.value : null
+                });
+            } else {
+                // No file open - use editor content directly
+                vscode.postMessage({
+                    type: 'runTask',
+                    editorContent: editor.value
+                });
             }
-
-            // Send run task message with content to save if needed
-            const isDirty = editor.value !== originalContent;
-            vscode.postMessage({
-                type: 'runTask',
-                filePath: currentFilePath,
-                content: isDirty && !isReadOnly ? editor.value : null
-            });
         };
 
         // Cmd+S / Ctrl+Sで保存

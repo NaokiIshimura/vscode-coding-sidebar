@@ -375,6 +375,11 @@
           "type": "string",
           "default": "claude \"read ${filePath} and save your report to the same directory as ${filePath}\"",
           "description": "Command template to execute when clicking the Run button in the Editor view. Use ${filePath} as placeholder for the file path."
+        },
+        "aiCodingSidebar.editor.runCommandWithoutFile": {
+          "type": "string",
+          "default": "claude \"${editorContent}\"",
+          "description": "Command template to execute when clicking the Run button without a file open. Use ${editorContent} as placeholder for the editor content."
         }
       }
     }

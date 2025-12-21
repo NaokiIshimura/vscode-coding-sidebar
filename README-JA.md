@@ -9,7 +9,7 @@ AIコーディングツールとの連携を強化するサイドバー拡張機
 | --- | --- |
 | **Tasks** | 指定したディレクトリ配下を表示できる<br>settingsでデフォルトのパスを設定できる<br>ディレクトリを作成できる<br>**設定アイコン**: デフォルトパス設定へのクイックアクセス |
 | **Docs** | マークダウンリストを表示<br>マークダウンファイルを作成できる<br>デフォルトでファイル作成日時の昇順でソート<br>現在のソート順がビュータイトルに表示される（例: "Docs (Created ↑)"）<br>ソート順は設定でカスタマイズ可能<br>**自動更新**: 現在のディレクトリ内でファイルが作成、変更、削除されたときに自動的にファイルリストを更新<br>**設定アイコン**: ソート設定へのクイックアクセス |
-| **Editor** | サイドバー内でMarkdownファイルを直接編集可能<br>タイムスタンプ形式のMarkdownファイル（形式: `YYYY_MMDD_HHMM_TASK.md`）を選択すると自動的に表示<br>その他のMarkdownファイルは通常のエディタで開く<br>`Cmd+S` / `Ctrl+S`で保存<br>`Cmd+R` / `Ctrl+R`でカスタマイズ可能なコマンドをターミナルに送信（実行前に自動保存）<br>`Cmd+M` / `Ctrl+M`で新しいMarkdownファイルを作成<br>**カスタマイズ可能な実行コマンド**: Runボタンで実行されるコマンドを設定でカスタマイズ可能<br>VSCodeエディタでファイルがアクティブになると自動的に読み取り専用モードに切り替わる<br>別の拡張機能やファイルに切り替える際に自動保存<br>別の拡張機能から戻ってきたときに編集中のファイルを復元<br>**設定アイコン**: 実行コマンド設定へのクイックアクセス |
+| **Editor** | サイドバー内でMarkdownファイルを直接編集可能<br>タイムスタンプ形式のMarkdownファイル（形式: `YYYY_MMDD_HHMM_TASK.md`）を選択すると自動的に表示<br>その他のMarkdownファイルは通常のエディタで開く<br>`Cmd+S` / `Ctrl+S`で保存（ファイル未開時は現在のDocsディレクトリまたはTasksディレクトリに新規作成）<br>`Cmd+R` / `Ctrl+R`でカスタマイズ可能なコマンドをターミナルに送信（実行前に自動保存、ファイル未開でも実行可能）<br>`Cmd+M` / `Ctrl+M`で新しいMarkdownファイルを作成<br>**カスタマイズ可能な実行コマンド**: Runボタンで実行されるコマンドを設定でカスタマイズ可能<br>**ファイル未開でも実行可能**: ファイルを開いていない状態でもエディタの内容を使用してコマンドを実行<br>VSCodeエディタでファイルがアクティブになると自動的に読み取り専用モードに切り替わる<br>別の拡張機能やファイルに切り替える際に自動保存<br>別の拡張機能から戻ってきたときに編集中のファイルを復元<br>**設定アイコン**: 実行コマンド設定へのクイックアクセス |
 | **Menu** | ユーザ設定を開く<br>グローバル設定を開く<br>テンプレートをカスタマイズ<br>ショートカット機能: ターミナルを開く、デフォルトブランチへ切り替え、Git pull |
 
 ## 使用方法
@@ -129,6 +129,7 @@ created: {{datetime}}
 | `markdownList.sortBy` | Docsのファイルのソート基準 | string | `"created"` | `"name"`: ファイル名<br>`"created"`: 作成日時<br>`"modified"`: 更新日時 |
 | `markdownList.sortOrder` | Docsのファイルのソート順序 | string | `"ascending"` | `"ascending"`: 昇順<br>`"descending"`: 降順 |
 | `editor.runCommand` | Editorビューのrunボタンで実行されるコマンドテンプレート | string | `claude "read ${filePath} and save your report to the same directory as ${filePath}"` | `${filePath}`をファイルパスのプレースホルダーとして使用 |
+| `editor.runCommandWithoutFile` | ファイル未開時にrunボタンで実行されるコマンドテンプレート | string | `claude "${editorContent}"` | `${editorContent}`をエディタ内容のプレースホルダーとして使用 |
 
 ### 設定例
 
@@ -139,7 +140,8 @@ created: {{datetime}}
   "aiCodingSidebar.defaultRelativePath": ".claude",
   "aiCodingSidebar.markdownList.sortBy": "created",
   "aiCodingSidebar.markdownList.sortOrder": "ascending",
-  "aiCodingSidebar.editor.runCommand": "claude \"read ${filePath} and save your report to the same directory as ${filePath}\""
+  "aiCodingSidebar.editor.runCommand": "claude \"read ${filePath} and save your report to the same directory as ${filePath}\"",
+  "aiCodingSidebar.editor.runCommandWithoutFile": "claude \"${editorContent}\""
 }
 ```
 

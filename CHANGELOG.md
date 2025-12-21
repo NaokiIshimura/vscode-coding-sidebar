@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.6] - 2025-12-21
+
+### Added
+- **Editor View - Run Without File**: Execute tasks even when no markdown file is open
+  - Added `aiCodingSidebar.editor.runCommandWithoutFile` setting
+  - Use `${editorContent}` as placeholder for the editor content
+  - Default command: `claude "${editorContent}"`
+  - Allows running AI coding tasks directly from editor content without saving a file first
+- **Editor View - Save Without File**: Create new files when saving without a file open
+  - `Cmd+S` / `Ctrl+S` creates a new timestamped markdown file when no file is open
+  - Saves to current Docs directory, or Tasks directory if no directory is selected
+  - Provides seamless workflow for quick note-taking and task creation
+
+### Fixed
+- **Template Feature**: Fixed workspace template initialization issue
+
+### Changed
+- **Editor View - Placeholder**: Simplified editor placeholder text for cleaner UI
+
 ## [0.6.5] - 2025-12-21
 
 ### Changed
@@ -534,6 +553,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.6.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.6.5...v0.6.6
+[0.6.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.6.3...v0.6.5
 [0.6.3]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.6.0...v0.6.2
 [0.6.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.5.9...v0.6.0

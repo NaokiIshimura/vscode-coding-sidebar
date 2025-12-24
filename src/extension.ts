@@ -3821,7 +3821,7 @@ class CombinedPanelManager {
 
         const files = this.getFilesInDirectory(state.currentPath);
         state.panel.title = `task: ${path.basename(state.currentPath)}`;
-        state.panel.webview.html = this.getHtmlForWebview(files);
+        state.panel.webview.html = this.getHtmlForWebview(files, state.currentPath);
     }
 
     private static getFilesInDirectory(dirPath: string): FileInfo[] {
@@ -3867,12 +3867,13 @@ class CombinedPanelManager {
         return files;
     }
 
-    private static getHtmlForWebview(files: FileInfo[]): string {
+    private static getHtmlForWebview(files: FileInfo[], currentPath: string): string {
         const config = vscode.workspace.getConfiguration('aiCodingSidebar.markdownList');
         const sortBy = config.get<string>('sortBy', 'created');
         const sortOrder = config.get<string>('sortOrder', 'ascending');
         const sortByLabel = sortBy === 'name' ? 'Name' : sortBy === 'created' ? 'Created' : 'Modified';
         const sortOrderLabel = sortOrder === 'ascending' ? '↑' : '↓';
+        const directoryName = path.basename(currentPath);
 
         const fileListHtml = files.map(file => {
             const isMarkdown = file.name.endsWith('.md');
@@ -3896,9 +3897,36 @@ class CombinedPanelManager {
         body {
             height: 100vh;
             display: flex;
+            flex-direction: column;
             font-family: var(--vscode-font-family);
             background-color: var(--vscode-editor-background);
             color: var(--vscode-foreground);
+        }
+
+        /* Directory Header */
+        #directory-header {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--vscode-panel-border);
+            background-color: var(--vscode-sideBar-background);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #directory-header .directory-label {
+            font-size: 14px;
+            color: var(--vscode-descriptionForeground);
+        }
+        #directory-header .directory-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--vscode-foreground);
+        }
+
+        /* Main Content Area */
+        #main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
         }
 
         /* Left Panel - File List */
@@ -4090,24 +4118,29 @@ class CombinedPanelManager {
     </style>
 </head>
 <body>
-    <div id="file-panel">
-        <div id="file-header">
-            <div>
-                <span class="title">Docs</span>
-                <span class="sort-info">(${sortByLabel} ${sortOrderLabel})</span>
-            </div>
-            <div class="header-buttons">
-                <button class="icon-button" id="new-btn" title="New File">+</button>
-                <button class="icon-button" id="refresh-btn" title="Refresh">↻</button>
-                <button class="icon-button" id="docs-settings-btn" title="Docs Settings">⚙</button>
-            </div>
-        </div>
-        <div id="file-list">
-            ${files.length === 0 ? '<div class="empty-state">No files</div>' : fileListHtml}
-        </div>
+    <div id="directory-header">
+        <span class="directory-label">task:</span>
+        <span class="directory-name">${directoryName}</span>
     </div>
-    <div id="resizer"></div>
-    <div id="editor-panel">
+    <div id="main-content">
+        <div id="file-panel">
+            <div id="file-header">
+                <div>
+                    <span class="title">Docs</span>
+                    <span class="sort-info">(${sortByLabel} ${sortOrderLabel})</span>
+                </div>
+                <div class="header-buttons">
+                    <button class="icon-button" id="new-btn" title="New File">+</button>
+                    <button class="icon-button" id="refresh-btn" title="Refresh">↻</button>
+                    <button class="icon-button" id="docs-settings-btn" title="Docs Settings">⚙</button>
+                </div>
+            </div>
+            <div id="file-list">
+                ${files.length === 0 ? '<div class="empty-state">No files</div>' : fileListHtml}
+            </div>
+        </div>
+        <div id="resizer"></div>
+        <div id="editor-panel">
         <div id="editor-header">
             <div class="editor-file-info">
                 <span id="current-file">Select a file to edit</span>
@@ -4126,6 +4159,7 @@ Shortcuts:
   Cmd+R / Ctrl+R - Run
   Cmd+M / Ctrl+M - New file"></textarea>
         </div>
+    </div>
     </div>
     <div id="context-menu">
         <div class="context-menu-item" data-action="copyPath">Copy Relative Path</div>

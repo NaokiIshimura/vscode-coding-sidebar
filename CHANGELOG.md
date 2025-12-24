@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2025-12-25
+
+### Added
+- **Combined Panel (Beta)**: Open Docs & Editor in the editor area
+  - Added `aiCodingSidebar.combinedPanel.enabled` setting (default: false)
+  - When enabled, selecting a directory in Tasks view opens the Combined Panel in the editor area
+  - Combined Panel displays both Docs section (file list) and Editor section (markdown editor) side by side
+  - Directory header shows relative path from Tasks view root
+  - Navigate directories within the Combined Panel using the Docs section
+  - Parent directory navigation with ".." entry (cannot navigate above Tasks view root)
+  - Access via Menu > Beta Features > Open Combined Panel
+  - Quick access to Combined Panel settings via Menu > Beta Features > Combined Panel Settings
+
+### Changed
+- **Menu View**: Added "Beta Features" section after "Note"
+  - "Open Combined Panel" menu item
+  - "Combined Panel Settings" menu item for quick access to Combined Panel configuration
+- **Docs View**: Changed default visibility from "collapsed" to "visible"
+- **Editor View**: Changed default visibility from "collapsed" to "visible"
+
 ## [0.6.6] - 2025-12-21
 
 ### Added
@@ -553,6 +573,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.7.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.6.6...v0.7.0
 [0.6.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.6.5...v0.6.6
 [0.6.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.6.3...v0.6.5
 [0.6.3]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.6.2...v0.6.3

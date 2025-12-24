@@ -2,7 +2,7 @@
   "name": "ai-coding-sidebar",
   "displayName": "AI Coding Sidebar",
   "description": "A sidebar extension that strengthens integration with AI coding tools.Browse and manage files and folders efficiently to keep coding with AI smooth.",
-  "version": "0.6.6",
+  "version": "0.7.0",
   "publisher": "nacn",
   "icon": "images/icon.png",
   "repository": {
@@ -63,6 +63,11 @@
       {
         "command": "aiCodingSidebar.openEditorSettings",
         "title": "Editor Settings",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "aiCodingSidebar.openCombinedPanelSettings",
+        "title": "Combined Panel Settings",
         "icon": "$(settings-gear)"
       },
       {
@@ -164,6 +169,11 @@
         "command": "aiCodingSidebar.archiveDirectory",
         "title": "Archive",
         "icon": "$(archive)"
+      },
+      {
+        "command": "aiCodingSidebar.openCombinedPanel",
+        "title": "Open Combined Panel",
+        "icon": "$(split-horizontal)"
       }
     ],
     "views": {
@@ -171,7 +181,7 @@
         {
           "id": "workspaceSettings",
           "name": "Menu",
-          "visibility": "collapsed"
+          "visibility": "visible"
         },
         {
           "id": "aiCodingSidebarExplorer",
@@ -179,13 +189,15 @@
         },
         {
           "id": "aiCodingSidebarDetails",
-          "name": "Docs"
+          "name": "Docs",
+          "visibility": "visible"
         },
         {
           "id": "markdownEditor",
           "name": "Editor",
           "type": "webview",
-          "retainContextWhenHidden": true
+          "retainContextWhenHidden": true,
+          "visibility": "visible"
         }
       ]
     },
@@ -380,6 +392,11 @@
           "type": "string",
           "default": "claude \"${editorContent}\"",
           "description": "Command template to execute when clicking the Run button without a file open. Use ${editorContent} as placeholder for the editor content."
+        },
+        "aiCodingSidebar.combinedPanel.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable Combined Panel. When enabled, selecting a directory in Tasks view will open the Combined Panel in the editor area."
         }
       }
     }

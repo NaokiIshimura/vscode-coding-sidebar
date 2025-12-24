@@ -179,6 +179,10 @@ export function activate(context: vscode.ExtensionContext) {
     editorProvider.setDetailsProvider(docsProvider);
     editorProvider.setTasksProvider(tasksProvider);
 
+    // Combined Panel Managerの初期化
+    CombinedPanelManager.initialize(context.extensionUri);
+    CombinedPanelManager.setProviders(docsProvider, tasksProvider);
+
     // プロジェクトルートを設定
     const initializeWithWorkspaceRoot = async () => {
         if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
@@ -279,13 +283,14 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }, 500);
 
-    // フォルダ選択時に下ペインにファイル一覧を表示
+    // フォルダ選択時の処理
     treeView.onDidChangeSelection(async (e) => {
         if (e.selection.length > 0) {
             const selectedItem = e.selection[0];
             tasksProvider.setSelectedItem(selectedItem);
             if (selectedItem.isDirectory) {
                 docsProvider.setRootPath(selectedItem.filePath);
+                // Combined Panelはディレクトリのcommandで開く（設定による制御）
             }
         }
     });
@@ -478,6 +483,11 @@ export function activate(context: vscode.ExtensionContext) {
     // Editor設定を開くコマンドを登録
     const openEditorSettingsCommand = vscode.commands.registerCommand('aiCodingSidebar.openEditorSettings', async () => {
         await vscode.commands.executeCommand('workbench.action.openSettings', 'aiCodingSidebar.editor.runCommand');
+    });
+
+    // Combined Panel設定を開くコマンドを登録
+    const openCombinedPanelSettingsCommand = vscode.commands.registerCommand('aiCodingSidebar.openCombinedPanelSettings', async () => {
+        await vscode.commands.executeCommand('workbench.action.openSettings', 'aiCodingSidebar.combinedPanel');
     });
 
     // ワークスペース設定コマンドを登録
@@ -1413,7 +1423,25 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, openDocsSettingsCommand, openEditorSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, newDirectoryCommand, renameDirectoryCommand, deleteDirectoryCommand, archiveDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand);
+    // Open Combined Panel コマンドを登録
+    const openCombinedPanelCommand = vscode.commands.registerCommand('aiCodingSidebar.openCombinedPanel', async () => {
+        await CombinedPanelManager.open();
+    });
+
+    // Open Combined Panel with path コマンドを登録（ディレクトリクリック用）
+    const openCombinedPanelWithPathCommand = vscode.commands.registerCommand('aiCodingSidebar.openCombinedPanelWithPath', async (targetPath: string) => {
+        if (targetPath) {
+            docsProvider.setRootPath(targetPath);
+            // 設定でCombined Panelが有効な場合のみ開く
+            const config = vscode.workspace.getConfiguration('aiCodingSidebar.combinedPanel');
+            const enabled = config.get<boolean>('enabled', false);
+            if (enabled) {
+                await CombinedPanelManager.open(targetPath);
+            }
+        }
+    });
+
+    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, openDocsSettingsCommand, openEditorSettingsCommand, openCombinedPanelSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, newDirectoryCommand, renameDirectoryCommand, deleteDirectoryCommand, archiveDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand, openCombinedPanelCommand, openCombinedPanelWithPathCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({
@@ -1711,6 +1739,12 @@ class TasksProvider implements vscode.TreeDataProvider<FileItem> {
                 new Date()
             );
             rootItem.contextValue = 'directory';
+            // ルートディレクトリもクリックでCombined Panelを開く
+            rootItem.command = {
+                command: 'aiCodingSidebar.openCombinedPanelWithPath',
+                title: 'Open Combined Panel',
+                arguments: [this.rootPath]
+            };
 
             return [rootItem];
         }
@@ -1737,6 +1771,15 @@ class TasksProvider implements vscode.TreeDataProvider<FileItem> {
                     file.size,
                     file.modified
                 );
+
+                // ディレクトリの場合はクリックでCombined Panelを開く
+                if (isDirectory) {
+                    item.command = {
+                        command: 'aiCodingSidebar.openCombinedPanelWithPath',
+                        title: 'Open Combined Panel',
+                        arguments: [file.path]
+                    };
+                }
 
                 if (isDirectory && this.activeFolderPath === file.path) {
                     item.description = 'Selected';
@@ -2598,7 +2641,7 @@ class MenuProvider implements vscode.TreeDataProvider<MenuItem> {
         }
 
         if (!element) {
-            // ルートレベル: グローバルとワークスペースの2つの親項目を返す
+            // ルートレベル: メニュー項目を返す
             return [
                 // グローバル（親項目）
                 new MenuItem(
@@ -2708,6 +2751,34 @@ class MenuProvider implements vscode.TreeDataProvider<MenuItem> {
                             'Cmd+M (macOS) / Ctrl+M (Windows/Linux) - When sidebar is focused',
                             undefined,
                             new vscode.ThemeIcon('keyboard')
+                        )
+                    ],
+                    vscode.TreeItemCollapsibleState.Collapsed
+                ),
+                // Beta Features（親項目）
+                new MenuItem(
+                    'Beta Features',
+                    'Experimental features',
+                    undefined,
+                    new vscode.ThemeIcon('beaker'),
+                    [
+                        new MenuItem(
+                            'Open Combined Panel',
+                            'Open Docs & Editor in the editor area',
+                            {
+                                command: 'aiCodingSidebar.openCombinedPanel',
+                                title: 'Open Combined Panel'
+                            },
+                            new vscode.ThemeIcon('split-horizontal')
+                        ),
+                        new MenuItem(
+                            'Combined Panel Settings',
+                            'Open Combined Panel settings',
+                            {
+                                command: 'aiCodingSidebar.openCombinedPanelSettings',
+                                title: 'Combined Panel Settings'
+                            },
+                            new vscode.ThemeIcon('settings-gear')
                         )
                     ],
                     vscode.TreeItemCollapsibleState.Collapsed
@@ -3354,6 +3425,1069 @@ class EditorProvider implements vscode.WebviewViewProvider {
                 vscode.postMessage({
                     type: 'createMarkdownFile'
                 });
+            }
+        });
+    </script>
+</body>
+</html>`;
+    }
+}
+
+// Panel state for each directory
+interface PanelState {
+    panel: vscode.WebviewPanel;
+    rootPath: string;  // 初期ディレクトリ（これより上には移動できない）
+    currentPath: string;
+    currentFilePath?: string;
+    currentContent?: string;
+    isDirty: boolean;
+    fileWatcher?: vscode.FileSystemWatcher;
+}
+
+// Combined Panel Manager - DocsとEditorを1つのエディター領域に統合表示
+class CombinedPanelManager {
+    private static panels: Map<string, PanelState> = new Map();
+    private static extensionUri: vscode.Uri;
+    private static docsProvider?: DocsProvider;
+    private static tasksProvider?: TasksProvider;
+
+    public static initialize(extensionUri: vscode.Uri): void {
+        this.extensionUri = extensionUri;
+    }
+
+    public static setProviders(docsProvider: DocsProvider, tasksProvider: TasksProvider): void {
+        this.docsProvider = docsProvider;
+        this.tasksProvider = tasksProvider;
+    }
+
+    public static async open(rootPath?: string): Promise<void> {
+        const targetPath = rootPath || this.docsProvider?.getCurrentPath();
+        if (!targetPath) {
+            vscode.window.showWarningMessage('No folder selected');
+            return;
+        }
+
+        // 既存のパネルがあれば再利用
+        const existingState = this.panels.get(targetPath);
+        if (existingState) {
+            existingState.panel.reveal();
+            await this.updateFileList(targetPath);
+            return;
+        }
+
+        // 新規パネルを作成
+        const panel = vscode.window.createWebviewPanel(
+            'aiCodingSidebarCombinedPanel',
+            `task: ${path.basename(targetPath)}`,
+            vscode.ViewColumn.One,
+            {
+                enableScripts: true,
+                retainContextWhenHidden: true,
+                localResourceRoots: [this.extensionUri]
+            }
+        );
+
+        // パネル状態を作成
+        const panelState: PanelState = {
+            panel,
+            rootPath: targetPath,  // 初期ディレクトリを保存
+            currentPath: targetPath,
+            currentFilePath: undefined,
+            currentContent: undefined,
+            isDirty: false,
+            fileWatcher: undefined
+        };
+
+        this.panels.set(targetPath, panelState);
+
+        // パネルが閉じられたときの処理
+        panel.onDidDispose(() => {
+            const state = this.panels.get(targetPath);
+            if (state?.fileWatcher) {
+                state.fileWatcher.dispose();
+            }
+            this.panels.delete(targetPath);
+        });
+
+        // ファイル監視を設定
+        this.setupFileWatcher(targetPath);
+
+        // HTMLを設定
+        await this.updatePanel(targetPath);
+
+        // メッセージハンドリング
+        this.setupMessageHandling(targetPath);
+    }
+
+    private static setupMessageHandling(targetPath: string): void {
+        const state = this.panels.get(targetPath);
+        if (!state) return;
+
+        state.panel.webview.onDidReceiveMessage(async (data) => {
+            const currentState = this.panels.get(targetPath);
+            if (!currentState) return;
+
+            switch (data.type) {
+                case 'selectFile':
+                    if (data.filePath) {
+                        await this.openFile(targetPath, data.filePath);
+                    }
+                    break;
+
+                case 'save':
+                    await this.saveCurrentFile(targetPath, data.content);
+                    break;
+
+                case 'contentChanged':
+                    currentState.isDirty = true;
+                    currentState.currentContent = data.content;
+                    break;
+
+                case 'runTask':
+                    await this.runTask(targetPath, data);
+                    break;
+
+                case 'createMarkdownFile':
+                    await this.createNewMarkdownFile(targetPath);
+                    break;
+
+                case 'refresh':
+                    await this.updateFileList(targetPath);
+                    break;
+
+                case 'openInVSCode':
+                    if (data.filePath) {
+                        const fileUri = vscode.Uri.file(data.filePath);
+                        // Combined Panelとは別のペイン（右側）で開く
+                        await vscode.commands.executeCommand('vscode.open', fileUri, vscode.ViewColumn.Two);
+                    }
+                    break;
+
+                case 'openDocsSettings':
+                    await vscode.commands.executeCommand('aiCodingSidebar.openDocsSettings');
+                    break;
+
+                case 'openEditorSettings':
+                    await vscode.commands.executeCommand('aiCodingSidebar.openEditorSettings');
+                    break;
+
+                case 'copyRelativePath':
+                    if (data.filePath) {
+                        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+                        if (workspaceRoot) {
+                            const relativePath = path.relative(workspaceRoot, data.filePath);
+                            await vscode.env.clipboard.writeText(relativePath);
+                            vscode.window.showInformationMessage(`Copied: ${relativePath}`);
+                        }
+                    }
+                    break;
+
+                case 'renameFile':
+                    if (data.filePath) {
+                        const oldName = path.basename(data.filePath);
+                        const newName = await vscode.window.showInputBox({
+                            prompt: 'Enter new name',
+                            value: oldName,
+                            validateInput: (value) => {
+                                if (!value || !value.trim()) {
+                                    return 'Name cannot be empty';
+                                }
+                                return null;
+                            }
+                        });
+                        if (newName && newName !== oldName) {
+                            const newPath = path.join(path.dirname(data.filePath), newName);
+                            try {
+                                await fs.promises.rename(data.filePath, newPath);
+                                vscode.window.showInformationMessage(`Renamed to ${newName}`);
+                                // Update current file path if it was renamed
+                                if (currentState.currentFilePath === data.filePath) {
+                                    currentState.currentFilePath = newPath;
+                                }
+                                await this.updateFileList(targetPath);
+                                this.tasksProvider?.refresh();
+                                this.docsProvider?.refresh();
+                            } catch (error) {
+                                vscode.window.showErrorMessage(`Failed to rename: ${error}`);
+                            }
+                        }
+                    }
+                    break;
+
+                case 'deleteFile':
+                    if (data.filePath) {
+                        const fileName = path.basename(data.filePath);
+                        const confirm = await vscode.window.showWarningMessage(
+                            `Are you sure you want to delete "${fileName}"?`,
+                            { modal: true },
+                            'Delete'
+                        );
+                        if (confirm === 'Delete') {
+                            try {
+                                await fs.promises.unlink(data.filePath);
+                                vscode.window.showInformationMessage(`Deleted ${fileName}`);
+                                // Clear editor if deleted file was open
+                                if (currentState.currentFilePath === data.filePath) {
+                                    currentState.currentFilePath = undefined;
+                                    currentState.currentContent = undefined;
+                                    currentState.isDirty = false;
+                                    currentState.panel.webview.postMessage({
+                                        type: 'showFile',
+                                        filePath: '',
+                                        fullPath: '',
+                                        content: ''
+                                    });
+                                }
+                                await this.updateFileList(targetPath);
+                                this.tasksProvider?.refresh();
+                                this.docsProvider?.refresh();
+                            } catch (error) {
+                                vscode.window.showErrorMessage(`Failed to delete: ${error}`);
+                            }
+                        }
+                    }
+                    break;
+
+                case 'openDirectory':
+                    if (data.dirPath) {
+                        // 現在のパネルの内容を新しいディレクトリに更新
+                        currentState.currentPath = data.dirPath;
+                        currentState.currentFilePath = undefined;
+                        currentState.currentContent = undefined;
+                        currentState.isDirty = false;
+                        // ファイル監視を新しいディレクトリに更新
+                        this.setupFileWatcher(targetPath);
+                        // パネルを更新
+                        await this.updatePanel(targetPath);
+                    }
+                    break;
+            }
+        });
+    }
+
+    private static async openFile(targetPath: string, filePath: string): Promise<void> {
+        const state = this.panels.get(targetPath);
+        if (!state) return;
+
+        // 未保存の変更がある場合は保存確認
+        if (state.isDirty && state.currentFilePath && state.currentContent) {
+            const result = await vscode.window.showWarningMessage(
+                'Do you want to save changes before switching files?',
+                'Save', 'Don\'t Save', 'Cancel'
+            );
+            if (result === 'Save') {
+                await this.saveCurrentFile(targetPath, state.currentContent);
+            } else if (result === 'Cancel') {
+                return;
+            }
+        }
+
+        try {
+            const content = await fs.promises.readFile(filePath, 'utf8');
+            state.currentFilePath = filePath;
+            state.currentContent = content;
+            state.isDirty = false;
+
+            state.panel.webview.postMessage({
+                type: 'showFile',
+                filePath: path.basename(filePath),
+                fullPath: filePath,
+                content: content
+            });
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to read file: ${error}`);
+        }
+    }
+
+    private static async saveCurrentFile(targetPath: string, content: string): Promise<void> {
+        const state = this.panels.get(targetPath);
+        if (!state) return;
+
+        if (state.currentFilePath) {
+            try {
+                await fs.promises.writeFile(state.currentFilePath, content, 'utf8');
+                vscode.window.showInformationMessage('File saved successfully');
+                state.currentContent = content;
+                state.isDirty = false;
+                state.panel.webview.postMessage({
+                    type: 'updateDirtyState',
+                    isDirty: false
+                });
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to save file: ${error}`);
+            }
+        } else if (content && content.trim()) {
+            // 新規ファイルとして保存
+            const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+            if (!workspaceRoot) {
+                vscode.window.showErrorMessage('No workspace folder is open');
+                return;
+            }
+
+            const savePath = state.currentPath || path.join(workspaceRoot, '.claude/tasks');
+            await fs.promises.mkdir(savePath, { recursive: true });
+
+            const now = new Date();
+            const timestamp = `${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+            const fileName = `${timestamp}_TASK.md`;
+            const filePath = path.join(savePath, fileName);
+
+            try {
+                await fs.promises.writeFile(filePath, content, 'utf8');
+                vscode.window.showInformationMessage(`File saved: ${fileName}`);
+                state.currentFilePath = filePath;
+                state.currentContent = content;
+                state.isDirty = false;
+
+                // ファイル一覧を更新
+                await this.updateFileList(targetPath);
+
+                state.panel.webview.postMessage({
+                    type: 'showFile',
+                    filePath: fileName,
+                    fullPath: filePath,
+                    content: content
+                });
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to save file: ${error}`);
+            }
+        }
+    }
+
+    private static async createNewMarkdownFile(targetPath: string): Promise<void> {
+        const state = this.panels.get(targetPath);
+        if (!state) {
+            vscode.window.showErrorMessage('No folder selected');
+            return;
+        }
+
+        // 未保存の変更がある場合は保存確認
+        if (state.isDirty && state.currentFilePath && state.currentContent) {
+            const result = await vscode.window.showWarningMessage(
+                'Do you want to save changes before creating a new file?',
+                'Save', 'Don\'t Save', 'Cancel'
+            );
+            if (result === 'Save') {
+                await this.saveCurrentFile(targetPath, state.currentContent);
+            } else if (result === 'Cancel') {
+                return;
+            }
+        }
+
+        const now = new Date();
+        const timestamp = `${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+        const fileName = `${timestamp}_TASK.md`;
+        const filePath = path.join(state.currentPath, fileName);
+
+        // Create file with template content
+        const content = `作成日時: ${now.toLocaleString()}
+
+---
+
+`;
+
+        try {
+            await fs.promises.writeFile(filePath, content, 'utf8');
+            vscode.window.showInformationMessage(`Created markdown file ${fileName}`);
+
+            state.currentFilePath = filePath;
+            state.currentContent = content;
+            state.isDirty = false;
+
+            // Update file list
+            await this.updateFileList(targetPath);
+
+            // Show the file in editor
+            state.panel.webview.postMessage({
+                type: 'showFile',
+                filePath: fileName,
+                fullPath: filePath,
+                content: content
+            });
+
+            // Refresh sidebar views
+            this.tasksProvider?.refresh();
+            this.docsProvider?.refresh();
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to create file: ${error}`);
+        }
+    }
+
+    private static async runTask(targetPath: string, data: any): Promise<void> {
+        const state = this.panels.get(targetPath);
+        if (!state) return;
+
+        if (data.filePath && state.currentFilePath) {
+            if (data.content) {
+                await this.saveCurrentFile(targetPath, data.content);
+            }
+
+            const config = vscode.workspace.getConfiguration('aiCodingSidebar');
+            const runCommand = config.get<string>('editor.runCommand', 'claude "read ${filePath} and save your report to the same directory as ${filePath}"');
+            const command = runCommand.replace(/\$\{filePath\}/g, state.currentFilePath);
+
+            const terminal = vscode.window.createTerminal({
+                name: path.dirname(state.currentFilePath).split(path.sep).pop() || 'Task',
+                cwd: path.dirname(state.currentFilePath)
+            });
+            terminal.show();
+            terminal.sendText(command);
+        } else if (data.editorContent) {
+            const config = vscode.workspace.getConfiguration('aiCodingSidebar');
+            const runCommandWithoutFile = config.get<string>('editor.runCommandWithoutFile', 'claude "${editorContent}"');
+            const escapedContent = data.editorContent.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+            const command = runCommandWithoutFile.replace(/\$\{editorContent\}/g, escapedContent);
+
+            const terminal = vscode.window.createTerminal({ name: 'Task' });
+            terminal.show();
+            terminal.sendText(command);
+        }
+    }
+
+    private static setupFileWatcher(targetPath: string): void {
+        const state = this.panels.get(targetPath);
+        if (!state) return;
+
+        if (state.fileWatcher) {
+            state.fileWatcher.dispose();
+        }
+
+        const pattern = new vscode.RelativePattern(state.currentPath, '**/*');
+        state.fileWatcher = vscode.workspace.createFileSystemWatcher(pattern);
+
+        const refresh = () => {
+            setTimeout(() => this.updateFileList(targetPath), 100);
+        };
+
+        state.fileWatcher.onDidCreate(refresh);
+        state.fileWatcher.onDidDelete(refresh);
+    }
+
+    private static async updateFileList(targetPath: string): Promise<void> {
+        const state = this.panels.get(targetPath);
+        if (!state) return;
+
+        const files = this.getFilesInDirectory(state.currentPath);
+        const parentPath = path.dirname(state.currentPath);
+        // ルートディレクトリより上には移動できない
+        const hasParent = state.currentPath !== state.rootPath && parentPath !== state.currentPath;
+
+        state.panel.webview.postMessage({
+            type: 'updateFileList',
+            files: files.map(f => ({
+                name: f.name,
+                path: f.path,
+                isDirectory: f.isDirectory,
+                size: f.size,
+                created: f.created.toISOString(),
+                modified: f.modified.toISOString()
+            })),
+            currentFilePath: state.currentFilePath,
+            parentPath: hasParent ? parentPath : null
+        });
+    }
+
+    private static async updatePanel(targetPath: string): Promise<void> {
+        const state = this.panels.get(targetPath);
+        if (!state) return;
+
+        const files = this.getFilesInDirectory(state.currentPath);
+        state.panel.title = `task: ${path.basename(state.currentPath)}`;
+        state.panel.webview.html = this.getHtmlForWebview(files, state.currentPath, state.rootPath);
+    }
+
+    private static getFilesInDirectory(dirPath: string): FileInfo[] {
+        const directories: FileInfo[] = [];
+        const files: FileInfo[] = [];
+
+        try {
+            const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+
+            for (const entry of entries) {
+                const fullPath = path.join(dirPath, entry.name);
+                const stat = fs.statSync(fullPath);
+
+                if (entry.isDirectory()) {
+                    directories.push({
+                        name: entry.name,
+                        path: fullPath,
+                        isDirectory: true,
+                        size: 0,
+                        modified: stat.mtime,
+                        created: stat.birthtime
+                    });
+                } else {
+                    files.push({
+                        name: entry.name,
+                        path: fullPath,
+                        isDirectory: false,
+                        size: stat.size,
+                        modified: stat.mtime,
+                        created: stat.birthtime
+                    });
+                }
+            }
+
+            // ディレクトリは名前順でソート
+            directories.sort((a, b) => a.name.localeCompare(b.name));
+
+            const config = vscode.workspace.getConfiguration('aiCodingSidebar.markdownList');
+            const sortBy = config.get<string>('sortBy', 'created');
+            const sortOrder = config.get<string>('sortOrder', 'ascending');
+
+            files.sort((a, b) => {
+                let comparison = 0;
+                switch (sortBy) {
+                    case 'name': comparison = a.name.localeCompare(b.name); break;
+                    case 'created': comparison = a.created.getTime() - b.created.getTime(); break;
+                    case 'modified': comparison = a.modified.getTime() - b.modified.getTime(); break;
+                }
+                return sortOrder === 'descending' ? -comparison : comparison;
+            });
+        } catch (error) {
+            console.error(`Failed to read directory: ${error}`);
+        }
+
+        // ディレクトリを先に、その後ファイルを返す
+        return [...directories, ...files];
+    }
+
+    private static getHtmlForWebview(files: FileInfo[], currentPath: string, rootPath: string): string {
+        const config = vscode.workspace.getConfiguration('aiCodingSidebar.markdownList');
+        const sortBy = config.get<string>('sortBy', 'created');
+        const sortOrder = config.get<string>('sortOrder', 'ascending');
+        const sortByLabel = sortBy === 'name' ? 'Name' : sortBy === 'created' ? 'Created' : 'Modified';
+        const sortOrderLabel = sortOrder === 'ascending' ? '↑' : '↓';
+        // tasks viewのルートディレクトリからの相対パスを表示
+        const tasksViewRoot = this.tasksProvider?.getRootPath();
+        const directoryName = tasksViewRoot
+            ? path.relative(tasksViewRoot, currentPath) || path.basename(currentPath)
+            : path.basename(currentPath);
+        const parentPath = path.dirname(currentPath);
+        // ルートディレクトリより上には移動できない
+        const hasParent = currentPath !== rootPath && parentPath !== currentPath;
+
+        // 親ディレクトリへのリンク
+        const parentDirHtml = hasParent ? `
+            <div class="file-item directory-item parent-dir" data-path="${parentPath.replace(/"/g, '&quot;')}" data-is-directory="true">
+                <span class="file-name">📁 ..</span>
+            </div>
+        ` : '';
+
+        const fileListHtml = files.map(file => {
+            if (file.isDirectory) {
+                return `
+                <div class="file-item directory-item" data-path="${file.path.replace(/"/g, '&quot;')}" data-is-directory="true">
+                    <span class="file-name">📁 ${file.name}</span>
+                </div>
+                `;
+            }
+            const isMarkdown = file.name.endsWith('.md');
+            const dateStr = file.created.toLocaleString();
+            return `
+                <div class="file-item" data-path="${file.path.replace(/"/g, '&quot;')}" data-is-markdown="${isMarkdown}">
+                    <span class="file-name">${file.name}</span>
+                    <span class="file-date">${dateStr}</span>
+                </div>
+            `;
+        }).join('');
+
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Coding Sidebar</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: var(--vscode-font-family);
+            background-color: var(--vscode-editor-background);
+            color: var(--vscode-foreground);
+        }
+
+        /* Directory Header */
+        #directory-header {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--vscode-panel-border);
+            background-color: var(--vscode-sideBar-background);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #directory-header .directory-label {
+            font-size: 14px;
+            color: var(--vscode-descriptionForeground);
+        }
+        #directory-header .directory-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--vscode-foreground);
+        }
+
+        /* Main Content Area */
+        #main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Left Panel - File List */
+        #file-panel {
+            width: 250px;
+            min-width: 200px;
+            max-width: 400px;
+            border-right: 1px solid var(--vscode-panel-border);
+            display: flex;
+            flex-direction: column;
+            background-color: var(--vscode-sideBar-background);
+        }
+        #file-header {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--vscode-panel-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        #file-header .title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--vscode-sideBarSectionHeader-foreground);
+        }
+        #file-header .sort-info {
+            font-size: 10px;
+            color: var(--vscode-descriptionForeground);
+        }
+        .header-buttons {
+            display: flex;
+            gap: 4px;
+        }
+        .icon-button {
+            background: none;
+            border: none;
+            color: var(--vscode-icon-foreground);
+            cursor: pointer;
+            padding: 2px 4px;
+            font-size: 12px;
+            border-radius: 3px;
+        }
+        .icon-button:hover {
+            background-color: var(--vscode-toolbar-hoverBackground);
+        }
+        #file-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 4px 0;
+        }
+        .file-item {
+            padding: 4px 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .file-item:hover {
+            background-color: var(--vscode-list-hoverBackground);
+        }
+        .file-item.selected {
+            background-color: var(--vscode-list-activeSelectionBackground);
+            color: var(--vscode-list-activeSelectionForeground);
+        }
+        .file-name {
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .file-date {
+            font-size: 10px;
+            color: var(--vscode-descriptionForeground);
+        }
+        .file-item.selected .file-date {
+            color: var(--vscode-list-activeSelectionForeground);
+            opacity: 0.8;
+        }
+        .directory-item {
+            color: var(--vscode-symbolIcon-folderForeground, var(--vscode-foreground));
+        }
+        .directory-item:hover {
+            background-color: var(--vscode-list-hoverBackground);
+        }
+        .parent-dir {
+            opacity: 0.8;
+        }
+
+        /* Resizer */
+        #resizer {
+            width: 4px;
+            cursor: col-resize;
+            background-color: transparent;
+        }
+        #resizer:hover {
+            background-color: var(--vscode-sash-hoverBorder);
+        }
+
+        /* Right Panel - Editor */
+        #editor-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 300px;
+        }
+        #editor-header {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--vscode-panel-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .editor-file-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #current-file {
+            font-size: 12px;
+        }
+        .dirty-indicator {
+            color: var(--vscode-gitDecoration-modifiedResourceForeground);
+            display: none;
+        }
+        .dirty-indicator.show { display: inline; }
+        .editor-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .action-button {
+            padding: 2px 8px;
+            font-size: 11px;
+            background-color: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        .action-button:hover {
+            background-color: var(--vscode-button-hoverBackground);
+        }
+        #editor-container {
+            flex: 1;
+            display: flex;
+        }
+        #editor {
+            flex: 1;
+            width: 100%;
+            border: none;
+            background-color: var(--vscode-editor-background);
+            color: var(--vscode-editor-foreground);
+            font-family: var(--vscode-editor-font-family);
+            font-size: var(--vscode-editor-font-size);
+            resize: none;
+            padding: 10px;
+        }
+        #editor:focus { outline: none; }
+        .empty-state {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--vscode-descriptionForeground);
+            font-size: 14px;
+        }
+
+        /* Context Menu */
+        #context-menu {
+            position: fixed;
+            display: none;
+            background-color: var(--vscode-menu-background);
+            border: 1px solid var(--vscode-menu-border);
+            border-radius: 4px;
+            padding: 4px 0;
+            min-width: 150px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+        #context-menu.show {
+            display: block;
+        }
+        .context-menu-item {
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--vscode-menu-foreground);
+        }
+        .context-menu-item:hover {
+            background-color: var(--vscode-menu-selectionBackground);
+            color: var(--vscode-menu-selectionForeground);
+        }
+        .context-menu-separator {
+            height: 1px;
+            background-color: var(--vscode-menu-separatorBackground);
+            margin: 4px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="directory-header">
+        <span class="directory-label">task:</span>
+        <span class="directory-name">${directoryName}</span>
+    </div>
+    <div id="main-content">
+        <div id="file-panel">
+            <div id="file-header">
+                <div>
+                    <span class="title">Docs</span>
+                    <span class="sort-info">(${sortByLabel} ${sortOrderLabel})</span>
+                </div>
+                <div class="header-buttons">
+                    <button class="icon-button" id="new-btn" title="New File">+</button>
+                    <button class="icon-button" id="refresh-btn" title="Refresh">↻</button>
+                    <button class="icon-button" id="docs-settings-btn" title="Docs Settings">⚙</button>
+                </div>
+            </div>
+            <div id="file-list">
+                ${files.length === 0 && !hasParent ? '<div class="empty-state">No files</div>' : parentDirHtml + fileListHtml}
+            </div>
+        </div>
+        <div id="resizer"></div>
+        <div id="editor-panel">
+        <div id="editor-header">
+            <div class="editor-file-info">
+                <span id="current-file">Select a file to edit</span>
+                <span class="dirty-indicator" id="dirty-indicator">●</span>
+            </div>
+            <div class="editor-actions">
+                <button class="icon-button" id="editor-settings-btn" title="Editor Settings">⚙</button>
+                <button class="action-button" id="run-btn" title="Run (Cmd+R)">Run</button>
+            </div>
+        </div>
+        <div id="editor-container">
+            <textarea id="editor" placeholder="Select a file from the list or start typing to create a new file...
+
+Shortcuts:
+  Cmd+S / Ctrl+S - Save
+  Cmd+R / Ctrl+R - Run
+  Cmd+M / Ctrl+M - New file"></textarea>
+        </div>
+    </div>
+    </div>
+    <div id="context-menu">
+        <div class="context-menu-item" data-action="copyPath">Copy Relative Path</div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" data-action="rename">Rename...</div>
+        <div class="context-menu-item" data-action="delete">Delete</div>
+    </div>
+    <script>
+        const vscode = acquireVsCodeApi();
+        const fileList = document.getElementById('file-list');
+        const editor = document.getElementById('editor');
+        const currentFileEl = document.getElementById('current-file');
+        const dirtyIndicator = document.getElementById('dirty-indicator');
+
+        let currentFilePath = '';
+        let originalContent = '';
+
+        // File selection
+        fileList.addEventListener('click', (e) => {
+            const item = e.target.closest('.file-item');
+            if (!item) return;
+
+            const filePath = item.getAttribute('data-path');
+            const isDirectory = item.getAttribute('data-is-directory') === 'true';
+
+            // ディレクトリの場合は開く
+            if (isDirectory) {
+                vscode.postMessage({ type: 'openDirectory', dirPath: filePath });
+                return;
+            }
+
+            const fileName = filePath.split('/').pop() || filePath.split('\\\\').pop() || '';
+            const isTaskFile = /^\\d{4}_\\d{4}_\\d{4}_TASK\\.md$/.test(fileName);
+
+            if (e.metaKey || e.ctrlKey) {
+                // Cmd/Ctrl+クリックは常に別ペインで開く
+                vscode.postMessage({ type: 'openInVSCode', filePath });
+            } else if (isTaskFile) {
+                // YYYY_MMDD_HHMM_TASK.md形式は右ペインのエディターで開く
+                vscode.postMessage({ type: 'selectFile', filePath });
+            } else {
+                // それ以外は別ペインで開く
+                vscode.postMessage({ type: 'openInVSCode', filePath });
+            }
+        });
+
+        // Update selected state
+        function updateSelectedFile(filePath) {
+            document.querySelectorAll('.file-item').forEach(item => {
+                item.classList.toggle('selected', item.getAttribute('data-path') === filePath);
+            });
+        }
+
+        // Editor input
+        editor.addEventListener('input', () => {
+            const isDirty = editor.value !== originalContent;
+            dirtyIndicator.classList.toggle('show', isDirty);
+            vscode.postMessage({ type: 'contentChanged', content: editor.value });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+                e.preventDefault();
+                vscode.postMessage({ type: 'save', content: editor.value });
+            }
+            if ((e.metaKey || e.ctrlKey) && e.key === 'r') {
+                e.preventDefault();
+                if (currentFilePath) {
+                    vscode.postMessage({ type: 'runTask', filePath: currentFilePath, content: editor.value });
+                } else {
+                    vscode.postMessage({ type: 'runTask', editorContent: editor.value });
+                }
+            }
+            if ((e.metaKey || e.ctrlKey) && e.key === 'm') {
+                e.preventDefault();
+                vscode.postMessage({ type: 'createMarkdownFile' });
+            }
+        });
+
+        // Context Menu
+        const contextMenu = document.getElementById('context-menu');
+        let contextMenuTargetPath = '';
+
+        fileList.addEventListener('contextmenu', (e) => {
+            const item = e.target.closest('.file-item');
+            if (!item) return;
+
+            e.preventDefault();
+            contextMenuTargetPath = item.getAttribute('data-path');
+
+            contextMenu.style.left = e.clientX + 'px';
+            contextMenu.style.top = e.clientY + 'px';
+            contextMenu.classList.add('show');
+        });
+
+        document.addEventListener('click', () => {
+            contextMenu.classList.remove('show');
+        });
+
+        contextMenu.addEventListener('click', (e) => {
+            const menuItem = e.target.closest('.context-menu-item');
+            if (!menuItem) return;
+
+            const action = menuItem.getAttribute('data-action');
+            if (!contextMenuTargetPath) return;
+
+            switch (action) {
+                case 'copyPath':
+                    vscode.postMessage({ type: 'copyRelativePath', filePath: contextMenuTargetPath });
+                    break;
+                case 'rename':
+                    vscode.postMessage({ type: 'renameFile', filePath: contextMenuTargetPath });
+                    break;
+                case 'delete':
+                    vscode.postMessage({ type: 'deleteFile', filePath: contextMenuTargetPath });
+                    break;
+            }
+
+            contextMenu.classList.remove('show');
+        });
+
+        // Buttons
+        document.getElementById('new-btn').addEventListener('click', () => {
+            vscode.postMessage({ type: 'createMarkdownFile' });
+        });
+        document.getElementById('refresh-btn').addEventListener('click', () => {
+            vscode.postMessage({ type: 'refresh' });
+        });
+        document.getElementById('run-btn').addEventListener('click', () => {
+            if (currentFilePath) {
+                vscode.postMessage({ type: 'runTask', filePath: currentFilePath, content: editor.value });
+            } else {
+                vscode.postMessage({ type: 'runTask', editorContent: editor.value });
+            }
+        });
+        document.getElementById('docs-settings-btn').addEventListener('click', () => {
+            vscode.postMessage({ type: 'openDocsSettings' });
+        });
+        document.getElementById('editor-settings-btn').addEventListener('click', () => {
+            vscode.postMessage({ type: 'openEditorSettings' });
+        });
+
+        // Resizer
+        const resizer = document.getElementById('resizer');
+        const filePanel = document.getElementById('file-panel');
+        let isResizing = false;
+
+        resizer.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            document.addEventListener('mousemove', resize);
+            document.addEventListener('mouseup', stopResize);
+        });
+
+        function resize(e) {
+            if (!isResizing) return;
+            const newWidth = e.clientX;
+            if (newWidth >= 150 && newWidth <= 500) {
+                filePanel.style.width = newWidth + 'px';
+            }
+        }
+
+        function stopResize() {
+            isResizing = false;
+            document.removeEventListener('mousemove', resize);
+            document.removeEventListener('mouseup', stopResize);
+        }
+
+        // Messages from extension
+        window.addEventListener('message', (e) => {
+            const msg = e.data;
+            switch (msg.type) {
+                case 'showFile':
+                    editor.value = msg.content;
+                    originalContent = msg.content;
+                    currentFilePath = msg.fullPath;
+                    currentFileEl.textContent = msg.filePath;
+                    dirtyIndicator.classList.remove('show');
+                    updateSelectedFile(msg.fullPath);
+                    break;
+                case 'updateDirtyState':
+                    dirtyIndicator.classList.toggle('show', msg.isDirty);
+                    if (!msg.isDirty) originalContent = editor.value;
+                    break;
+                case 'updateFileList':
+                    const listEl = document.getElementById('file-list');
+                    if (msg.files.length === 0 && !msg.parentPath) {
+                        listEl.innerHTML = '<div class="empty-state">No files</div>';
+                    } else {
+                        let html = '';
+                        // 親ディレクトリへのリンク
+                        if (msg.parentPath) {
+                            html += '<div class="file-item directory-item parent-dir" data-path="' + msg.parentPath.replace(/"/g, '&quot;') + '" data-is-directory="true">' +
+                                '<span class="file-name">📁 ..</span>' +
+                                '</div>';
+                        }
+                        html += msg.files.map(f => {
+                            if (f.isDirectory) {
+                                return '<div class="file-item directory-item" data-path="' + f.path.replace(/"/g, '&quot;') + '" data-is-directory="true">' +
+                                    '<span class="file-name">📁 ' + f.name + '</span>' +
+                                    '</div>';
+                            }
+                            const isMarkdown = f.name.endsWith('.md');
+                            const dateStr = new Date(f.created).toLocaleString();
+                            const selected = f.path === msg.currentFilePath ? ' selected' : '';
+                            return '<div class="file-item' + selected + '" data-path="' + f.path.replace(/"/g, '&quot;') + '" data-is-markdown="' + isMarkdown + '">' +
+                                '<span class="file-name">' + f.name + '</span>' +
+                                '<span class="file-date">' + dateStr + '</span>' +
+                                '</div>';
+                        }).join('');
+                        listEl.innerHTML = html;
+                    }
+                    break;
             }
         });
     </script>

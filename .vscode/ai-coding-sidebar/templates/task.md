@@ -34,16 +34,15 @@
 
 ### menu
 
-
 ### tasks
-
 
 ### docs
 
-
 ### editor
 
+## combine panel
 
-### file changes
+### docs section
 
+### editor section
 

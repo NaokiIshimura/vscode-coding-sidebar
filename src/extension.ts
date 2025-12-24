@@ -3383,17 +3383,22 @@ class EditorProvider implements vscode.WebviewViewProvider {
     }
 }
 
+// Panel state for each directory
+interface PanelState {
+    panel: vscode.WebviewPanel;
+    currentPath: string;
+    currentFilePath?: string;
+    currentContent?: string;
+    isDirty: boolean;
+    fileWatcher?: vscode.FileSystemWatcher;
+}
+
 // Combined Panel Manager - DocsとEditorを1つのエディター領域に統合表示
 class CombinedPanelManager {
-    private static panel: vscode.WebviewPanel | undefined;
+    private static panels: Map<string, PanelState> = new Map();
     private static extensionUri: vscode.Uri;
     private static docsProvider?: DocsProvider;
     private static tasksProvider?: TasksProvider;
-    private static currentPath?: string;
-    private static currentFilePath?: string;
-    private static currentContent?: string;
-    private static isDirty: boolean = false;
-    private static fileWatcher?: vscode.FileSystemWatcher;
 
     public static initialize(extensionUri: vscode.Uri): void {
         this.extensionUri = extensionUri;
@@ -3411,19 +3416,18 @@ class CombinedPanelManager {
             return;
         }
 
-        this.currentPath = targetPath;
-
         // 既存のパネルがあれば再利用
-        if (this.panel) {
-            this.panel.reveal();
-            await this.updateFileList();
+        const existingState = this.panels.get(targetPath);
+        if (existingState) {
+            existingState.panel.reveal();
+            await this.updateFileList(targetPath);
             return;
         }
 
         // 新規パネルを作成
-        this.panel = vscode.window.createWebviewPanel(
+        const panel = vscode.window.createWebviewPanel(
             'aiCodingSidebarCombinedPanel',
-            `AI Coding: ${path.basename(targetPath)}`,
+            `task: ${path.basename(targetPath)}`,
             vscode.ViewColumn.One,
             {
                 enableScripts: true,
@@ -3432,58 +3436,71 @@ class CombinedPanelManager {
             }
         );
 
+        // パネル状態を作成
+        const panelState: PanelState = {
+            panel,
+            currentPath: targetPath,
+            currentFilePath: undefined,
+            currentContent: undefined,
+            isDirty: false,
+            fileWatcher: undefined
+        };
+
+        this.panels.set(targetPath, panelState);
+
         // パネルが閉じられたときの処理
-        this.panel.onDidDispose(() => {
-            this.panel = undefined;
-            this.currentFilePath = undefined;
-            this.currentContent = undefined;
-            this.isDirty = false;
-            if (this.fileWatcher) {
-                this.fileWatcher.dispose();
-                this.fileWatcher = undefined;
+        panel.onDidDispose(() => {
+            const state = this.panels.get(targetPath);
+            if (state?.fileWatcher) {
+                state.fileWatcher.dispose();
             }
+            this.panels.delete(targetPath);
         });
 
         // ファイル監視を設定
-        this.setupFileWatcher();
+        this.setupFileWatcher(targetPath);
 
         // HTMLを設定
-        await this.updatePanel();
+        await this.updatePanel(targetPath);
 
         // メッセージハンドリング
-        this.setupMessageHandling();
+        this.setupMessageHandling(targetPath);
     }
 
-    private static setupMessageHandling(): void {
-        if (!this.panel) return;
+    private static setupMessageHandling(targetPath: string): void {
+        const state = this.panels.get(targetPath);
+        if (!state) return;
 
-        this.panel.webview.onDidReceiveMessage(async (data) => {
+        state.panel.webview.onDidReceiveMessage(async (data) => {
+            const currentState = this.panels.get(targetPath);
+            if (!currentState) return;
+
             switch (data.type) {
                 case 'selectFile':
                     if (data.filePath) {
-                        await this.openFile(data.filePath);
+                        await this.openFile(targetPath, data.filePath);
                     }
                     break;
 
                 case 'save':
-                    await this.saveCurrentFile(data.content);
+                    await this.saveCurrentFile(targetPath, data.content);
                     break;
 
                 case 'contentChanged':
-                    this.isDirty = true;
-                    this.currentContent = data.content;
+                    currentState.isDirty = true;
+                    currentState.currentContent = data.content;
                     break;
 
                 case 'runTask':
-                    await this.runTask(data);
+                    await this.runTask(targetPath, data);
                     break;
 
                 case 'createMarkdownFile':
-                    await this.createNewMarkdownFile();
+                    await this.createNewMarkdownFile(targetPath);
                     break;
 
                 case 'refresh':
-                    await this.updateFileList();
+                    await this.updateFileList(targetPath);
                     break;
 
                 case 'openInVSCode':
@@ -3532,10 +3549,10 @@ class CombinedPanelManager {
                                 await fs.promises.rename(data.filePath, newPath);
                                 vscode.window.showInformationMessage(`Renamed to ${newName}`);
                                 // Update current file path if it was renamed
-                                if (this.currentFilePath === data.filePath) {
-                                    this.currentFilePath = newPath;
+                                if (currentState.currentFilePath === data.filePath) {
+                                    currentState.currentFilePath = newPath;
                                 }
-                                await this.updateFileList();
+                                await this.updateFileList(targetPath);
                                 this.tasksProvider?.refresh();
                                 this.docsProvider?.refresh();
                             } catch (error) {
@@ -3558,18 +3575,18 @@ class CombinedPanelManager {
                                 await fs.promises.unlink(data.filePath);
                                 vscode.window.showInformationMessage(`Deleted ${fileName}`);
                                 // Clear editor if deleted file was open
-                                if (this.currentFilePath === data.filePath) {
-                                    this.currentFilePath = undefined;
-                                    this.currentContent = undefined;
-                                    this.isDirty = false;
-                                    this.panel?.webview.postMessage({
+                                if (currentState.currentFilePath === data.filePath) {
+                                    currentState.currentFilePath = undefined;
+                                    currentState.currentContent = undefined;
+                                    currentState.isDirty = false;
+                                    currentState.panel.webview.postMessage({
                                         type: 'showFile',
                                         filePath: '',
                                         fullPath: '',
                                         content: ''
                                     });
                                 }
-                                await this.updateFileList();
+                                await this.updateFileList(targetPath);
                                 this.tasksProvider?.refresh();
                                 this.docsProvider?.refresh();
                             } catch (error) {
@@ -3582,15 +3599,18 @@ class CombinedPanelManager {
         });
     }
 
-    private static async openFile(filePath: string): Promise<void> {
+    private static async openFile(targetPath: string, filePath: string): Promise<void> {
+        const state = this.panels.get(targetPath);
+        if (!state) return;
+
         // 未保存の変更がある場合は保存確認
-        if (this.isDirty && this.currentFilePath && this.currentContent) {
+        if (state.isDirty && state.currentFilePath && state.currentContent) {
             const result = await vscode.window.showWarningMessage(
                 'Do you want to save changes before switching files?',
                 'Save', 'Don\'t Save', 'Cancel'
             );
             if (result === 'Save') {
-                await this.saveCurrentFile(this.currentContent);
+                await this.saveCurrentFile(targetPath, state.currentContent);
             } else if (result === 'Cancel') {
                 return;
             }
@@ -3598,11 +3618,11 @@ class CombinedPanelManager {
 
         try {
             const content = await fs.promises.readFile(filePath, 'utf8');
-            this.currentFilePath = filePath;
-            this.currentContent = content;
-            this.isDirty = false;
+            state.currentFilePath = filePath;
+            state.currentContent = content;
+            state.isDirty = false;
 
-            this.panel?.webview.postMessage({
+            state.panel.webview.postMessage({
                 type: 'showFile',
                 filePath: path.basename(filePath),
                 fullPath: filePath,
@@ -3613,14 +3633,17 @@ class CombinedPanelManager {
         }
     }
 
-    private static async saveCurrentFile(content: string): Promise<void> {
-        if (this.currentFilePath) {
+    private static async saveCurrentFile(targetPath: string, content: string): Promise<void> {
+        const state = this.panels.get(targetPath);
+        if (!state) return;
+
+        if (state.currentFilePath) {
             try {
-                await fs.promises.writeFile(this.currentFilePath, content, 'utf8');
+                await fs.promises.writeFile(state.currentFilePath, content, 'utf8');
                 vscode.window.showInformationMessage('File saved successfully');
-                this.currentContent = content;
-                this.isDirty = false;
-                this.panel?.webview.postMessage({
+                state.currentContent = content;
+                state.isDirty = false;
+                state.panel.webview.postMessage({
                     type: 'updateDirtyState',
                     isDirty: false
                 });
@@ -3635,7 +3658,7 @@ class CombinedPanelManager {
                 return;
             }
 
-            const savePath = this.currentPath || path.join(workspaceRoot, '.claude/tasks');
+            const savePath = state.currentPath || path.join(workspaceRoot, '.claude/tasks');
             await fs.promises.mkdir(savePath, { recursive: true });
 
             const now = new Date();
@@ -3646,14 +3669,14 @@ class CombinedPanelManager {
             try {
                 await fs.promises.writeFile(filePath, content, 'utf8');
                 vscode.window.showInformationMessage(`File saved: ${fileName}`);
-                this.currentFilePath = filePath;
-                this.currentContent = content;
-                this.isDirty = false;
+                state.currentFilePath = filePath;
+                state.currentContent = content;
+                state.isDirty = false;
 
                 // ファイル一覧を更新
-                await this.updateFileList();
+                await this.updateFileList(targetPath);
 
-                this.panel?.webview.postMessage({
+                state.panel.webview.postMessage({
                     type: 'showFile',
                     filePath: fileName,
                     fullPath: filePath,
@@ -3665,20 +3688,21 @@ class CombinedPanelManager {
         }
     }
 
-    private static async createNewMarkdownFile(): Promise<void> {
-        if (!this.currentPath) {
+    private static async createNewMarkdownFile(targetPath: string): Promise<void> {
+        const state = this.panels.get(targetPath);
+        if (!state) {
             vscode.window.showErrorMessage('No folder selected');
             return;
         }
 
         // 未保存の変更がある場合は保存確認
-        if (this.isDirty && this.currentFilePath && this.currentContent) {
+        if (state.isDirty && state.currentFilePath && state.currentContent) {
             const result = await vscode.window.showWarningMessage(
                 'Do you want to save changes before creating a new file?',
                 'Save', 'Don\'t Save', 'Cancel'
             );
             if (result === 'Save') {
-                await this.saveCurrentFile(this.currentContent);
+                await this.saveCurrentFile(targetPath, state.currentContent);
             } else if (result === 'Cancel') {
                 return;
             }
@@ -3687,7 +3711,7 @@ class CombinedPanelManager {
         const now = new Date();
         const timestamp = `${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
         const fileName = `${timestamp}_TASK.md`;
-        const filePath = path.join(this.currentPath, fileName);
+        const filePath = path.join(state.currentPath, fileName);
 
         // Create file with template content
         const content = `作成日時: ${now.toLocaleString()}
@@ -3700,15 +3724,15 @@ class CombinedPanelManager {
             await fs.promises.writeFile(filePath, content, 'utf8');
             vscode.window.showInformationMessage(`Created markdown file ${fileName}`);
 
-            this.currentFilePath = filePath;
-            this.currentContent = content;
-            this.isDirty = false;
+            state.currentFilePath = filePath;
+            state.currentContent = content;
+            state.isDirty = false;
 
             // Update file list
-            await this.updateFileList();
+            await this.updateFileList(targetPath);
 
             // Show the file in editor
-            this.panel?.webview.postMessage({
+            state.panel.webview.postMessage({
                 type: 'showFile',
                 filePath: fileName,
                 fullPath: filePath,
@@ -3723,19 +3747,22 @@ class CombinedPanelManager {
         }
     }
 
-    private static async runTask(data: any): Promise<void> {
-        if (data.filePath && this.currentFilePath) {
+    private static async runTask(targetPath: string, data: any): Promise<void> {
+        const state = this.panels.get(targetPath);
+        if (!state) return;
+
+        if (data.filePath && state.currentFilePath) {
             if (data.content) {
-                await this.saveCurrentFile(data.content);
+                await this.saveCurrentFile(targetPath, data.content);
             }
 
             const config = vscode.workspace.getConfiguration('aiCodingSidebar');
             const runCommand = config.get<string>('editor.runCommand', 'claude "read ${filePath} and save your report to the same directory as ${filePath}"');
-            const command = runCommand.replace(/\$\{filePath\}/g, this.currentFilePath);
+            const command = runCommand.replace(/\$\{filePath\}/g, state.currentFilePath);
 
             const terminal = vscode.window.createTerminal({
-                name: path.dirname(this.currentFilePath).split(path.sep).pop() || 'Task',
-                cwd: path.dirname(this.currentFilePath)
+                name: path.dirname(state.currentFilePath).split(path.sep).pop() || 'Task',
+                cwd: path.dirname(state.currentFilePath)
             });
             terminal.show();
             terminal.sendText(command);
@@ -3751,33 +3778,31 @@ class CombinedPanelManager {
         }
     }
 
-    private static setupFileWatcher(): void {
-        if (this.fileWatcher) {
-            this.fileWatcher.dispose();
+    private static setupFileWatcher(targetPath: string): void {
+        const state = this.panels.get(targetPath);
+        if (!state) return;
+
+        if (state.fileWatcher) {
+            state.fileWatcher.dispose();
         }
 
-        if (!this.currentPath) {
-            return;
-        }
-
-        const pattern = new vscode.RelativePattern(this.currentPath, '**/*');
-        this.fileWatcher = vscode.workspace.createFileSystemWatcher(pattern);
+        const pattern = new vscode.RelativePattern(state.currentPath, '**/*');
+        state.fileWatcher = vscode.workspace.createFileSystemWatcher(pattern);
 
         const refresh = () => {
-            setTimeout(() => this.updateFileList(), 100);
+            setTimeout(() => this.updateFileList(targetPath), 100);
         };
 
-        this.fileWatcher.onDidCreate(refresh);
-        this.fileWatcher.onDidDelete(refresh);
+        state.fileWatcher.onDidCreate(refresh);
+        state.fileWatcher.onDidDelete(refresh);
     }
 
-    private static async updateFileList(): Promise<void> {
-        if (!this.panel || !this.currentPath) {
-            return;
-        }
+    private static async updateFileList(targetPath: string): Promise<void> {
+        const state = this.panels.get(targetPath);
+        if (!state) return;
 
-        const files = this.getFilesInDirectory(this.currentPath);
-        this.panel.webview.postMessage({
+        const files = this.getFilesInDirectory(state.currentPath);
+        state.panel.webview.postMessage({
             type: 'updateFileList',
             files: files.map(f => ({
                 name: f.name,
@@ -3786,18 +3811,17 @@ class CombinedPanelManager {
                 created: f.created.toISOString(),
                 modified: f.modified.toISOString()
             })),
-            currentFilePath: this.currentFilePath
+            currentFilePath: state.currentFilePath
         });
     }
 
-    private static async updatePanel(): Promise<void> {
-        if (!this.panel || !this.currentPath) {
-            return;
-        }
+    private static async updatePanel(targetPath: string): Promise<void> {
+        const state = this.panels.get(targetPath);
+        if (!state) return;
 
-        const files = this.getFilesInDirectory(this.currentPath);
-        this.panel.title = `AI Coding: ${path.basename(this.currentPath)}`;
-        this.panel.webview.html = this.getHtmlForWebview(files);
+        const files = this.getFilesInDirectory(state.currentPath);
+        state.panel.title = `task: ${path.basename(state.currentPath)}`;
+        state.panel.webview.html = this.getHtmlForWebview(files);
     }
 
     private static getFilesInDirectory(dirPath: string): FileInfo[] {

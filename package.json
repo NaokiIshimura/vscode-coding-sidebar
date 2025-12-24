@@ -66,6 +66,11 @@
         "icon": "$(settings-gear)"
       },
       {
+        "command": "aiCodingSidebar.openCombinedPanelSettings",
+        "title": "Combined Panel Settings",
+        "icon": "$(settings-gear)"
+      },
+      {
         "command": "aiCodingSidebar.openUserSettings",
         "title": "Open User Settings",
         "icon": "$(settings)"
@@ -167,7 +172,7 @@
       },
       {
         "command": "aiCodingSidebar.openCombinedPanel",
-        "title": "Open in Editor Area",
+        "title": "Open Combined Panel",
         "icon": "$(split-horizontal)"
       }
     ],
@@ -185,14 +190,14 @@
         {
           "id": "aiCodingSidebarDetails",
           "name": "Docs",
-          "visibility": "collapsed"
+          "visibility": "visible"
         },
         {
           "id": "markdownEditor",
           "name": "Editor",
           "type": "webview",
           "retainContextWhenHidden": true,
-          "visibility": "collapsed"
+          "visibility": "visible"
         }
       ]
     },
@@ -221,11 +226,6 @@
           "command": "aiCodingSidebar.openFolderTreeSettings",
           "when": "view == aiCodingSidebarExplorer",
           "group": "navigation@3"
-        },
-        {
-          "command": "aiCodingSidebar.openCombinedPanel",
-          "when": "view == aiCodingSidebarExplorer",
-          "group": "navigation@4"
         },
         {
           "command": "aiCodingSidebar.createMarkdownFile",
@@ -392,6 +392,11 @@
           "type": "string",
           "default": "claude \"${editorContent}\"",
           "description": "Command template to execute when clicking the Run button without a file open. Use ${editorContent} as placeholder for the editor content."
+        },
+        "aiCodingSidebar.combinedPanel.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable Combined Panel. When enabled, selecting a directory in Tasks view will open the Combined Panel in the editor area."
         }
       }
     }

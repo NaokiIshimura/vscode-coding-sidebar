@@ -283,15 +283,14 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }, 500);
 
-    // フォルダ選択時にCombined Panelを開く
+    // フォルダ選択時の処理
     treeView.onDidChangeSelection(async (e) => {
         if (e.selection.length > 0) {
             const selectedItem = e.selection[0];
             tasksProvider.setSelectedItem(selectedItem);
             if (selectedItem.isDirectory) {
                 docsProvider.setRootPath(selectedItem.filePath);
-                // Combined Panelを開く
-                await CombinedPanelManager.open(selectedItem.filePath);
+                // Combined Panelはディレクトリのcommandで開く（設定による制御）
             }
         }
     });
@@ -484,6 +483,11 @@ export function activate(context: vscode.ExtensionContext) {
     // Editor設定を開くコマンドを登録
     const openEditorSettingsCommand = vscode.commands.registerCommand('aiCodingSidebar.openEditorSettings', async () => {
         await vscode.commands.executeCommand('workbench.action.openSettings', 'aiCodingSidebar.editor.runCommand');
+    });
+
+    // Combined Panel設定を開くコマンドを登録
+    const openCombinedPanelSettingsCommand = vscode.commands.registerCommand('aiCodingSidebar.openCombinedPanelSettings', async () => {
+        await vscode.commands.executeCommand('workbench.action.openSettings', 'aiCodingSidebar.combinedPanel');
     });
 
     // ワークスペース設定コマンドを登録
@@ -1424,7 +1428,20 @@ export function activate(context: vscode.ExtensionContext) {
         await CombinedPanelManager.open();
     });
 
-    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, openDocsSettingsCommand, openEditorSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, newDirectoryCommand, renameDirectoryCommand, deleteDirectoryCommand, archiveDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand, openCombinedPanelCommand);
+    // Open Combined Panel with path コマンドを登録（ディレクトリクリック用）
+    const openCombinedPanelWithPathCommand = vscode.commands.registerCommand('aiCodingSidebar.openCombinedPanelWithPath', async (targetPath: string) => {
+        if (targetPath) {
+            docsProvider.setRootPath(targetPath);
+            // 設定でCombined Panelが有効な場合のみ開く
+            const config = vscode.workspace.getConfiguration('aiCodingSidebar.combinedPanel');
+            const enabled = config.get<boolean>('enabled', false);
+            if (enabled) {
+                await CombinedPanelManager.open(targetPath);
+            }
+        }
+    });
+
+    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, openDocsSettingsCommand, openEditorSettingsCommand, openCombinedPanelSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, newDirectoryCommand, renameDirectoryCommand, deleteDirectoryCommand, archiveDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand, openCombinedPanelCommand, openCombinedPanelWithPathCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({
@@ -1722,6 +1739,12 @@ class TasksProvider implements vscode.TreeDataProvider<FileItem> {
                 new Date()
             );
             rootItem.contextValue = 'directory';
+            // ルートディレクトリもクリックでCombined Panelを開く
+            rootItem.command = {
+                command: 'aiCodingSidebar.openCombinedPanelWithPath',
+                title: 'Open Combined Panel',
+                arguments: [this.rootPath]
+            };
 
             return [rootItem];
         }
@@ -1748,6 +1771,15 @@ class TasksProvider implements vscode.TreeDataProvider<FileItem> {
                     file.size,
                     file.modified
                 );
+
+                // ディレクトリの場合はクリックでCombined Panelを開く
+                if (isDirectory) {
+                    item.command = {
+                        command: 'aiCodingSidebar.openCombinedPanelWithPath',
+                        title: 'Open Combined Panel',
+                        arguments: [file.path]
+                    };
+                }
 
                 if (isDirectory && this.activeFolderPath === file.path) {
                     item.description = 'Selected';
@@ -2611,16 +2643,6 @@ class MenuProvider implements vscode.TreeDataProvider<MenuItem> {
         if (!element) {
             // ルートレベル: メニュー項目を返す
             return [
-                // Open Combined Panel（トップに配置）
-                new MenuItem(
-                    'Open in Editor Area',
-                    'Open Docs & Editor in the editor area',
-                    {
-                        command: 'aiCodingSidebar.openCombinedPanel',
-                        title: 'Open in Editor Area'
-                    },
-                    new vscode.ThemeIcon('split-horizontal')
-                ),
                 // グローバル（親項目）
                 new MenuItem(
                     'Global',
@@ -2729,6 +2751,34 @@ class MenuProvider implements vscode.TreeDataProvider<MenuItem> {
                             'Cmd+M (macOS) / Ctrl+M (Windows/Linux) - When sidebar is focused',
                             undefined,
                             new vscode.ThemeIcon('keyboard')
+                        )
+                    ],
+                    vscode.TreeItemCollapsibleState.Collapsed
+                ),
+                // Beta Features（親項目）
+                new MenuItem(
+                    'Beta Features',
+                    'Experimental features',
+                    undefined,
+                    new vscode.ThemeIcon('beaker'),
+                    [
+                        new MenuItem(
+                            'Open Combined Panel',
+                            'Open Docs & Editor in the editor area',
+                            {
+                                command: 'aiCodingSidebar.openCombinedPanel',
+                                title: 'Open Combined Panel'
+                            },
+                            new vscode.ThemeIcon('split-horizontal')
+                        ),
+                        new MenuItem(
+                            'Combined Panel Settings',
+                            'Open Combined Panel settings',
+                            {
+                                command: 'aiCodingSidebar.openCombinedPanelSettings',
+                                title: 'Combined Panel Settings'
+                            },
+                            new vscode.ThemeIcon('settings-gear')
                         )
                     ],
                     vscode.TreeItemCollapsibleState.Collapsed
@@ -3386,6 +3436,7 @@ class EditorProvider implements vscode.WebviewViewProvider {
 // Panel state for each directory
 interface PanelState {
     panel: vscode.WebviewPanel;
+    rootPath: string;  // 初期ディレクトリ（これより上には移動できない）
     currentPath: string;
     currentFilePath?: string;
     currentContent?: string;
@@ -3439,6 +3490,7 @@ class CombinedPanelManager {
         // パネル状態を作成
         const panelState: PanelState = {
             panel,
+            rootPath: targetPath,  // 初期ディレクトリを保存
             currentPath: targetPath,
             currentFilePath: undefined,
             currentContent: undefined,
@@ -3593,6 +3645,20 @@ class CombinedPanelManager {
                                 vscode.window.showErrorMessage(`Failed to delete: ${error}`);
                             }
                         }
+                    }
+                    break;
+
+                case 'openDirectory':
+                    if (data.dirPath) {
+                        // 現在のパネルの内容を新しいディレクトリに更新
+                        currentState.currentPath = data.dirPath;
+                        currentState.currentFilePath = undefined;
+                        currentState.currentContent = undefined;
+                        currentState.isDirty = false;
+                        // ファイル監視を新しいディレクトリに更新
+                        this.setupFileWatcher(targetPath);
+                        // パネルを更新
+                        await this.updatePanel(targetPath);
                     }
                     break;
             }
@@ -3802,16 +3868,22 @@ class CombinedPanelManager {
         if (!state) return;
 
         const files = this.getFilesInDirectory(state.currentPath);
+        const parentPath = path.dirname(state.currentPath);
+        // ルートディレクトリより上には移動できない
+        const hasParent = state.currentPath !== state.rootPath && parentPath !== state.currentPath;
+
         state.panel.webview.postMessage({
             type: 'updateFileList',
             files: files.map(f => ({
                 name: f.name,
                 path: f.path,
+                isDirectory: f.isDirectory,
                 size: f.size,
                 created: f.created.toISOString(),
                 modified: f.modified.toISOString()
             })),
-            currentFilePath: state.currentFilePath
+            currentFilePath: state.currentFilePath,
+            parentPath: hasParent ? parentPath : null
         });
     }
 
@@ -3821,31 +3893,43 @@ class CombinedPanelManager {
 
         const files = this.getFilesInDirectory(state.currentPath);
         state.panel.title = `task: ${path.basename(state.currentPath)}`;
-        state.panel.webview.html = this.getHtmlForWebview(files, state.currentPath);
+        state.panel.webview.html = this.getHtmlForWebview(files, state.currentPath, state.rootPath);
     }
 
     private static getFilesInDirectory(dirPath: string): FileInfo[] {
+        const directories: FileInfo[] = [];
         const files: FileInfo[] = [];
 
         try {
             const entries = fs.readdirSync(dirPath, { withFileTypes: true });
 
             for (const entry of entries) {
-                if (entry.isDirectory()) continue;
-
                 const fullPath = path.join(dirPath, entry.name);
                 const stat = fs.statSync(fullPath);
-                if (stat.isDirectory()) continue;
 
-                files.push({
-                    name: entry.name,
-                    path: fullPath,
-                    isDirectory: false,
-                    size: stat.size,
-                    modified: stat.mtime,
-                    created: stat.birthtime
-                });
+                if (entry.isDirectory()) {
+                    directories.push({
+                        name: entry.name,
+                        path: fullPath,
+                        isDirectory: true,
+                        size: 0,
+                        modified: stat.mtime,
+                        created: stat.birthtime
+                    });
+                } else {
+                    files.push({
+                        name: entry.name,
+                        path: fullPath,
+                        isDirectory: false,
+                        size: stat.size,
+                        modified: stat.mtime,
+                        created: stat.birthtime
+                    });
+                }
             }
+
+            // ディレクトリは名前順でソート
+            directories.sort((a, b) => a.name.localeCompare(b.name));
 
             const config = vscode.workspace.getConfiguration('aiCodingSidebar.markdownList');
             const sortBy = config.get<string>('sortBy', 'created');
@@ -3864,18 +3948,40 @@ class CombinedPanelManager {
             console.error(`Failed to read directory: ${error}`);
         }
 
-        return files;
+        // ディレクトリを先に、その後ファイルを返す
+        return [...directories, ...files];
     }
 
-    private static getHtmlForWebview(files: FileInfo[], currentPath: string): string {
+    private static getHtmlForWebview(files: FileInfo[], currentPath: string, rootPath: string): string {
         const config = vscode.workspace.getConfiguration('aiCodingSidebar.markdownList');
         const sortBy = config.get<string>('sortBy', 'created');
         const sortOrder = config.get<string>('sortOrder', 'ascending');
         const sortByLabel = sortBy === 'name' ? 'Name' : sortBy === 'created' ? 'Created' : 'Modified';
         const sortOrderLabel = sortOrder === 'ascending' ? '↑' : '↓';
-        const directoryName = path.basename(currentPath);
+        // tasks viewのルートディレクトリからの相対パスを表示
+        const tasksViewRoot = this.tasksProvider?.getRootPath();
+        const directoryName = tasksViewRoot
+            ? path.relative(tasksViewRoot, currentPath) || path.basename(currentPath)
+            : path.basename(currentPath);
+        const parentPath = path.dirname(currentPath);
+        // ルートディレクトリより上には移動できない
+        const hasParent = currentPath !== rootPath && parentPath !== currentPath;
+
+        // 親ディレクトリへのリンク
+        const parentDirHtml = hasParent ? `
+            <div class="file-item directory-item parent-dir" data-path="${parentPath.replace(/"/g, '&quot;')}" data-is-directory="true">
+                <span class="file-name">📁 ..</span>
+            </div>
+        ` : '';
 
         const fileListHtml = files.map(file => {
+            if (file.isDirectory) {
+                return `
+                <div class="file-item directory-item" data-path="${file.path.replace(/"/g, '&quot;')}" data-is-directory="true">
+                    <span class="file-name">📁 ${file.name}</span>
+                </div>
+                `;
+            }
             const isMarkdown = file.name.endsWith('.md');
             const dateStr = file.created.toLocaleString();
             return `
@@ -4004,6 +4110,15 @@ class CombinedPanelManager {
         }
         .file-item.selected .file-date {
             color: var(--vscode-list-activeSelectionForeground);
+            opacity: 0.8;
+        }
+        .directory-item {
+            color: var(--vscode-symbolIcon-folderForeground, var(--vscode-foreground));
+        }
+        .directory-item:hover {
+            background-color: var(--vscode-list-hoverBackground);
+        }
+        .parent-dir {
             opacity: 0.8;
         }
 
@@ -4136,7 +4251,7 @@ class CombinedPanelManager {
                 </div>
             </div>
             <div id="file-list">
-                ${files.length === 0 ? '<div class="empty-state">No files</div>' : fileListHtml}
+                ${files.length === 0 && !hasParent ? '<div class="empty-state">No files</div>' : parentDirHtml + fileListHtml}
             </div>
         </div>
         <div id="resizer"></div>
@@ -4183,6 +4298,14 @@ Shortcuts:
             if (!item) return;
 
             const filePath = item.getAttribute('data-path');
+            const isDirectory = item.getAttribute('data-is-directory') === 'true';
+
+            // ディレクトリの場合は開く
+            if (isDirectory) {
+                vscode.postMessage({ type: 'openDirectory', dirPath: filePath });
+                return;
+            }
+
             const fileName = filePath.split('/').pop() || filePath.split('\\\\').pop() || '';
             const isTaskFile = /^\\d{4}_\\d{4}_\\d{4}_TASK\\.md$/.test(fileName);
 
@@ -4338,10 +4461,22 @@ Shortcuts:
                     break;
                 case 'updateFileList':
                     const listEl = document.getElementById('file-list');
-                    if (msg.files.length === 0) {
+                    if (msg.files.length === 0 && !msg.parentPath) {
                         listEl.innerHTML = '<div class="empty-state">No files</div>';
                     } else {
-                        listEl.innerHTML = msg.files.map(f => {
+                        let html = '';
+                        // 親ディレクトリへのリンク
+                        if (msg.parentPath) {
+                            html += '<div class="file-item directory-item parent-dir" data-path="' + msg.parentPath.replace(/"/g, '&quot;') + '" data-is-directory="true">' +
+                                '<span class="file-name">📁 ..</span>' +
+                                '</div>';
+                        }
+                        html += msg.files.map(f => {
+                            if (f.isDirectory) {
+                                return '<div class="file-item directory-item" data-path="' + f.path.replace(/"/g, '&quot;') + '" data-is-directory="true">' +
+                                    '<span class="file-name">📁 ' + f.name + '</span>' +
+                                    '</div>';
+                            }
                             const isMarkdown = f.name.endsWith('.md');
                             const dateStr = new Date(f.created).toLocaleString();
                             const selected = f.path === msg.currentFilePath ? ' selected' : '';
@@ -4350,6 +4485,7 @@ Shortcuts:
                                 '<span class="file-date">' + dateStr + '</span>' +
                                 '</div>';
                         }).join('');
+                        listEl.innerHTML = html;
                     }
                     break;
             }

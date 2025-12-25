@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.2] - 2025-12-25
+
+### Added
+- **Task Panel - Active Panels View**: Lists all open Task Panels in the sidebar for easy navigation
+  - Click to focus a panel
+  - Right-click to close a panel (with unsave confirmation)
+  - Shows unsaved indicator (●) for panels with pending changes
+  - Automatically updates when directory changes in tasksViewPanel
+  - Different icons distinguish panel types:
+    - Tree icon: Opened by selecting a directory in Tasks view
+    - Folder icon: Opened via "Open Task Panel" command
+
 ## [0.7.1] - 2025-12-25
 
 ### Added
@@ -593,6 +605,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.7.2]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.6.6...v0.7.0
 [0.6.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.6.5...v0.6.6

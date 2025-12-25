@@ -3481,6 +3481,7 @@ interface PanelState {
     currentContent?: string;
     isDirty: boolean;
     fileWatcher?: vscode.FileSystemWatcher;
+    previewViewColumn?: vscode.ViewColumn;  // 下ペインで開いたエディタのビューカラム
 }
 
 // Open Panels View item
@@ -3871,6 +3872,35 @@ class TaskPanelManager {
                     if (data.filePath) {
                         const fileUri = vscode.Uri.file(data.filePath);
                         await vscode.commands.executeCommand('vscode.open', fileUri, vscode.ViewColumn.Two);
+                    }
+                    break;
+
+                case 'previewFile':
+                    if (data.filePath) {
+                        const fileUri = vscode.Uri.file(data.filePath);
+                        const config = vscode.workspace.getConfiguration('aiCodingSidebar');
+                        const position = config.get<string>('taskPanel.nonTaskFilePosition', 'below');
+
+                        if (position === 'beside') {
+                            // Open to the right
+                            await vscode.commands.executeCommand('vscode.open', fileUri, vscode.ViewColumn.Two);
+                        } else {
+                            // Open below
+                            if (state.previewViewColumn) {
+                                // Reuse existing editor group
+                                await vscode.window.showTextDocument(fileUri, {
+                                    viewColumn: state.previewViewColumn,
+                                    preview: true
+                                });
+                            } else {
+                                // Create new editor group below
+                                await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
+                                await vscode.commands.executeCommand('workbench.action.newGroupBelow');
+                                const doc = await vscode.workspace.openTextDocument(fileUri);
+                                const editor = await vscode.window.showTextDocument(doc, { preview: true });
+                                state.previewViewColumn = editor.viewColumn;
+                            }
+                        }
                     }
                     break;
 
@@ -4932,25 +4962,25 @@ class TaskPanelManager {
         </div>
         <div id="resizer"></div>
         <div id="editor-panel">
-        <div id="editor-header">
-            <div class="editor-file-info">
-                <span id="current-file">Select a file to edit</span>
-                <span class="dirty-indicator" id="dirty-indicator">●</span>
+            <div id="editor-header">
+                <div class="editor-file-info">
+                    <span id="current-file">Select a file to edit</span>
+                    <span class="dirty-indicator" id="dirty-indicator">●</span>
+                </div>
+                <div class="editor-actions">
+                    <button class="icon-button" id="editor-settings-btn" title="Editor Settings">⚙</button>
+                    <button class="action-button" id="run-btn" title="Run (Cmd+R)">Run</button>
+                </div>
             </div>
-            <div class="editor-actions">
-                <button class="icon-button" id="editor-settings-btn" title="Editor Settings">⚙</button>
-                <button class="action-button" id="run-btn" title="Run (Cmd+R)">Run</button>
-            </div>
-        </div>
-        <div id="editor-container">
-            <textarea id="editor" placeholder="Select a file from the list or start typing to create a new file...
+            <div id="editor-container">
+                <textarea id="editor" placeholder="Select a file from the list or start typing to create a new file...
 
 Shortcuts:
   Cmd+S / Ctrl+S - Save
   Cmd+R / Ctrl+R - Run
   Cmd+M / Ctrl+M - New file"></textarea>
+            </div>
         </div>
-    </div>
     </div>
     <div id="context-menu">
         <div class="context-menu-item" data-action="copyPath">Copy Relative Path</div>
@@ -4986,14 +5016,14 @@ Shortcuts:
             const isTaskFile = /^\\d{4}_\\d{4}_\\d{4}_TASK\\.md$/.test(fileName);
 
             if (e.metaKey || e.ctrlKey) {
-                // Cmd/Ctrl+クリックは常に別ペインで開く
+                // Cmd/Ctrl+click always opens in separate pane
                 vscode.postMessage({ type: 'openInVSCode', filePath });
             } else if (isTaskFile) {
-                // YYYY_MMDD_HHMM_TASK.md形式は右ペインのエディターで開く
+                // YYYY_MMDD_HHMM_TASK.md format opens in Editor section
                 vscode.postMessage({ type: 'selectFile', filePath });
             } else {
-                // それ以外は別ペインで開く
-                vscode.postMessage({ type: 'openInVSCode', filePath });
+                // Other files open in Preview section
+                vscode.postMessage({ type: 'previewFile', filePath });
             }
         });
 

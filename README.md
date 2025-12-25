@@ -21,7 +21,8 @@ When enabled via `aiCodingSidebar.taskPanel.enabled`, the Task Panel provides an
 | **Active Panels View** | Lists all open Task Panels in the sidebar for easy navigation:<br>- Click to focus a panel<br>- Right-click to close a panel (with unsave confirmation)<br>- Shows unsaved indicator (●) for panels with pending changes<br>- Automatically updates when directory changes |
 | **Tab Icon** | Different icons distinguish how the panel was opened:<br>- **Tree icon**: Opened by selecting a directory in Tasks view<br>- **Folder icon**: Opened via "Open Task Panel" command |
 | **Terminal Reuse** | The Run button reuses existing terminals with the same name instead of creating new ones each time. |
-| **Non-Task File Position** | Configure where non-task files open when clicked:<br>- **below** (default): Opens in an editor group below the Task Panel<br>- **beside**: Opens in an editor group to the right of the Task Panel<br>- Configure via `aiCodingSidebar.taskPanel.nonTaskFilePosition` setting<br>- Cmd/Ctrl+click always opens files to the right |
+| **Non-Task File Position** | Configure where non-task files open when clicked:<br>- **below**: Opens in an editor group below the Task Panel<br>- **beside** (default): Opens in an editor group to the right of the Task Panel<br>- Configure via `aiCodingSidebar.taskPanel.nonTaskFilePosition` setting<br>- Cmd/Ctrl+click always opens files to the right |
+| **File Icons** | Files in the Docs section display icons based on their type, similar to the Docs view in the sidebar. |
 
 ## Usage
 
@@ -138,7 +139,7 @@ If the default relative path doesn't exist, Tasks displays a "Create directory" 
 | `editor.runCommand` | Command template to execute when clicking the Run button in the Editor view | string | `claude "read ${filePath} and save your report to the same directory as ${filePath}"` | Use `${filePath}` as placeholder for the file path |
 | `editor.runCommandWithoutFile` | Command template to execute when clicking the Run button without a file open | string | `claude "${editorContent}"` | Use `${editorContent}` as placeholder for the editor content |
 | `combinedPanel.enabled` | Enable Combined Panel (Beta) | boolean | `false` | When enabled, selecting a directory in Tasks view opens the Combined Panel in the editor area |
-| `taskPanel.nonTaskFilePosition` | Position to open non-task files in Task Panel | string | `"below"` | `"below"` (open below the Task Panel)<br>`"beside"` (open to the right of the Task Panel) |
+| `taskPanel.nonTaskFilePosition` | Position to open non-task files in Task Panel | string | `"beside"` | `"below"` (open below the Task Panel)<br>`"beside"` (open to the right of the Task Panel) |
 
 ### Example configuration
 
@@ -152,7 +153,7 @@ Add the following to `.vscode/settings.json`:
   "aiCodingSidebar.editor.runCommand": "claude \"read ${filePath} and save your report to the same directory as ${filePath}\"",
   "aiCodingSidebar.editor.runCommandWithoutFile": "claude \"${editorContent}\"",
   "aiCodingSidebar.combinedPanel.enabled": true,
-  "aiCodingSidebar.taskPanel.nonTaskFilePosition": "below"
+  "aiCodingSidebar.taskPanel.nonTaskFilePosition": "beside"
 }
 ```
 

@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.4] - 2025-12-25
+
+### Added
+- **Task Panel - File Icons**: Files in the Docs section now display icons based on their type
+  - Markdown files show 📝, TASK files show ✏️
+  - TypeScript/JavaScript, Python, JSON, and other file types have distinctive icons
+  - Consistent with the Docs view in the sidebar
+
+### Changed
+- **Task Panel - Default Non-Task File Position**: Changed default value from `"below"` to `"beside"`
+  - Non-task files now open to the right of the Task Panel by default
+  - Previous behavior can be restored by setting `aiCodingSidebar.taskPanel.nonTaskFilePosition` to `"below"`
+
 ## [0.7.3] - 2025-12-25
 
 ### Added
@@ -615,6 +628,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.7.4]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.3...v0.7.4
 [0.7.3]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.2...v0.7.3
 [0.7.2]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.0...v0.7.1

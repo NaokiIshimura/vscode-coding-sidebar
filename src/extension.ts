@@ -4658,6 +4658,55 @@ class TaskPanelManager {
         return [...directories, ...files];
     }
 
+    /**
+     * Get file icon for webview based on file extension
+     */
+    private static getFileIconForWebview(fileName: string): string {
+        const ext = path.extname(fileName).toLowerCase();
+
+        // Markdown files - check if it's a TASK file
+        if (ext === '.md') {
+            const timestampPattern = /^\d{4}_\d{4}_\d{4}_TASK\.md$/;
+            if (timestampPattern.test(fileName)) {
+                return '✏️'; // edit icon for TASK files
+            }
+            return '📝'; // markdown icon
+        }
+
+        // Extension-based icons
+        const iconMap: { [key: string]: string } = {
+            '.ts': '🔷',
+            '.tsx': '🔷',
+            '.js': '🟡',
+            '.jsx': '🟡',
+            '.json': '📋',
+            '.txt': '📄',
+            '.py': '🐍',
+            '.java': '☕',
+            '.cpp': '📘',
+            '.c': '📘',
+            '.h': '📘',
+            '.css': '🎨',
+            '.scss': '🎨',
+            '.html': '🌐',
+            '.xml': '🌐',
+            '.yml': '⚙️',
+            '.yaml': '⚙️',
+            '.sh': '💻',
+            '.bat': '💻',
+            '.png': '🖼️',
+            '.jpg': '🖼️',
+            '.jpeg': '🖼️',
+            '.gif': '🖼️',
+            '.svg': '🖼️',
+            '.pdf': '📕',
+            '.zip': '📦',
+            '.gitignore': '🔀'
+        };
+
+        return iconMap[ext] || '📄';
+    }
+
     private static getHtmlForWebview(files: FileInfo[], currentPath: string, rootPath: string): string {
         const config = vscode.workspace.getConfiguration('aiCodingSidebar.markdownList');
         const sortBy = config.get<string>('sortBy', 'created');
@@ -4690,9 +4739,10 @@ class TaskPanelManager {
             }
             const isMarkdown = file.name.endsWith('.md');
             const dateStr = file.created.toLocaleString();
+            const fileIcon = this.getFileIconForWebview(file.name);
             return `
                 <div class="file-item" data-path="${file.path.replace(/"/g, '&quot;')}" data-is-markdown="${isMarkdown}">
-                    <span class="file-name">${file.name}</span>
+                    <span class="file-name">${fileIcon} ${file.name}</span>
                     <span class="file-date">${dateStr}</span>
                 </div>
             `;

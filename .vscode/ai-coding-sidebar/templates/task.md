@@ -26,6 +26,12 @@
 - commit メッセージは英語にして
 - pr title, descriptionは英語にして
 
+# 用語
+  | 変数名         | 用途                                       |
+  |----------------|--------------------------------------------|
+  | tasksViewPanel | Tasks Viewでディレクトリ選択時に開くパネル |
+  | commandPanels  | "Open Task Panel" コマンドで開くパネル     |
+
 ---
 
 # task
@@ -40,7 +46,9 @@
 
 ### editor
 
-## combine panel
+### active panels
+
+## task panel
 
 ### docs section
 

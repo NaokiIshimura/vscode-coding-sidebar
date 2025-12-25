@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Task Panel - Default Non-Task File Position**: Changed default value from `"below"` to `"beside"`
   - Non-task files now open to the right of the Task Panel by default
   - Previous behavior can be restored by setting `aiCodingSidebar.taskPanel.nonTaskFilePosition` to `"below"`
+- **Task Panel - Terminal Working Directory**: Run button now opens terminals with the project root as the current working directory
+  - Previously opened terminals in the file's parent directory
+  - Ensures consistent command execution from the project root
 
 ## [0.7.3] - 2025-12-25
 

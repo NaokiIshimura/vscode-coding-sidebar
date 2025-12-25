@@ -4137,6 +4137,8 @@ class TaskPanelManager {
     }
 
     private static async runTaskForState(state: PanelState, data: any): Promise<void> {
+        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+
         if (data.filePath && state.currentFilePath) {
             if (data.content) {
                 await this.saveCurrentFileForState(state, data.content);
@@ -4151,7 +4153,7 @@ class TaskPanelManager {
             if (!terminal) {
                 terminal = vscode.window.createTerminal({
                     name: terminalName,
-                    cwd: path.dirname(state.currentFilePath)
+                    cwd: workspaceRoot
                 });
             }
             terminal.show();
@@ -4165,7 +4167,10 @@ class TaskPanelManager {
             const terminalName = 'Task';
             let terminal = vscode.window.terminals.find(t => t.name === terminalName);
             if (!terminal) {
-                terminal = vscode.window.createTerminal({ name: terminalName });
+                terminal = vscode.window.createTerminal({
+                    name: terminalName,
+                    cwd: workspaceRoot
+                });
             }
             terminal.show();
             terminal.sendText(command);
@@ -4515,6 +4520,8 @@ class TaskPanelManager {
         const state = this.commandPanels.get(targetPath);
         if (!state) return;
 
+        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+
         if (data.filePath && state.currentFilePath) {
             if (data.content) {
                 await this.saveCurrentFile(targetPath, data.content);
@@ -4529,7 +4536,7 @@ class TaskPanelManager {
             if (!terminal) {
                 terminal = vscode.window.createTerminal({
                     name: terminalName,
-                    cwd: path.dirname(state.currentFilePath)
+                    cwd: workspaceRoot
                 });
             }
             terminal.show();
@@ -4543,7 +4550,10 @@ class TaskPanelManager {
             const terminalName = 'Task';
             let terminal = vscode.window.terminals.find(t => t.name === terminalName);
             if (!terminal) {
-                terminal = vscode.window.createTerminal({ name: terminalName });
+                terminal = vscode.window.createTerminal({
+                    name: terminalName,
+                    cwd: workspaceRoot
+                });
             }
             terminal.show();
             terminal.sendText(command);

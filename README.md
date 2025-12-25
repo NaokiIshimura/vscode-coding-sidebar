@@ -20,7 +20,7 @@ When enabled via `aiCodingSidebar.taskPanel.enabled`, the Task Panel provides an
 | --- | --- |
 | **Active Panels View** | Lists all open Task Panels in the sidebar for easy navigation:<br>- Click to focus a panel<br>- Right-click to close a panel (with unsave confirmation)<br>- Shows unsaved indicator (●) for panels with pending changes<br>- Automatically updates when directory changes |
 | **Tab Icon** | Different icons distinguish how the panel was opened:<br>- **Tree icon**: Opened by selecting a directory in Tasks view<br>- **Folder icon**: Opened via "Open Task Panel" command |
-| **Terminal Reuse** | The Run button reuses existing terminals with the same name instead of creating new ones each time. |
+| **Terminal Reuse** | The Run button reuses existing terminals with the same name instead of creating new ones each time.<br>Terminals are opened with the project root as the current working directory. |
 | **Non-Task File Position** | Configure where non-task files open when clicked:<br>- **below**: Opens in an editor group below the Task Panel<br>- **beside** (default): Opens in an editor group to the right of the Task Panel<br>- Configure via `aiCodingSidebar.taskPanel.nonTaskFilePosition` setting<br>- Cmd/Ctrl+click always opens files to the right |
 | **File Icons** | Files in the Docs section display icons based on their type, similar to the Docs view in the sidebar. |
 

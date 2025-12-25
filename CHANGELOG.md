@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.5] - 2025-12-26
+
+### Added
+- **Task Panel - Context Menu**: Added right-click context menu for directories in Docs section
+  - "Open Task Panel": Opens a new Task Panel for the selected directory
+  - "Archive": Moves the directory to the archived folder
+  - Menu items only appear when right-clicking on directories (not files)
+
+### Changed
+- **Task Panel - Parent Directory Navigation**: Parent directory link ("..") is now always visible
+  - Previously only shown after navigating into a subdirectory
+  - Now displayed from the start when the parent directory is within the workspace
+  - Cannot navigate above the workspace root
+
 ## [0.7.4] - 2025-12-25
 
 ### Added
@@ -631,6 +645,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.7.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.4...v0.7.5
 [0.7.4]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.3...v0.7.4
 [0.7.3]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.2...v0.7.3
 [0.7.2]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.1...v0.7.2

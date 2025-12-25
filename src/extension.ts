@@ -3997,8 +3997,81 @@ class TaskPanelManager {
                         await this.updatePanelForState(state);
                     }
                     break;
+
+                case 'openTaskPanelForDir':
+                    if (data.dirPath) {
+                        await this.openFromCommand(data.dirPath);
+                    }
+                    break;
+
+                case 'archiveDirectory':
+                    if (data.dirPath) {
+                        await this.archiveDirectoryForState(state, data.dirPath);
+                    }
+                    break;
             }
         });
+    }
+
+    private static async archiveDirectoryForState(state: PanelState, dirPath: string): Promise<void> {
+        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+        if (!workspaceRoot) {
+            vscode.window.showErrorMessage('No workspace is open');
+            return;
+        }
+
+        const config = vscode.workspace.getConfiguration('aiCodingSidebar');
+        const defaultRelativePath = config.get<string>('defaultRelativePath', '.claude/tasks');
+
+        const defaultTasksPath = path.join(workspaceRoot, defaultRelativePath);
+        const archivedDirPath = path.join(defaultTasksPath, 'archived');
+        const originalName = path.basename(dirPath);
+
+        try {
+            // Create archived directory if it doesn't exist
+            if (!fs.existsSync(archivedDirPath)) {
+                fs.mkdirSync(archivedDirPath, { recursive: true });
+            }
+
+            // Check for name conflicts
+            let destPath = path.join(archivedDirPath, originalName);
+            let finalName = originalName;
+            let hasConflict = false;
+
+            if (fs.existsSync(destPath)) {
+                hasConflict = true;
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const hour = String(now.getHours()).padStart(2, '0');
+                const minute = String(now.getMinutes()).padStart(2, '0');
+                const second = String(now.getSeconds()).padStart(2, '0');
+                const timestamp = `${year}${month}${day}_${hour}${minute}${second}`;
+                finalName = `${originalName}_${timestamp}`;
+                destPath = path.join(archivedDirPath, finalName);
+            }
+
+            // Move directory
+            fs.renameSync(dirPath, destPath);
+
+            // Refresh views
+            await this.updateFileListForState(state);
+            this.tasksProvider?.refresh();
+            this.docsProvider?.refresh();
+
+            if (hasConflict) {
+                vscode.window.showInformationMessage(
+                    `Directory archived (renamed to "${finalName}" due to name conflict)`
+                );
+            } else {
+                vscode.window.showInformationMessage(
+                    `Directory "${originalName}" archived`
+                );
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to archive directory: ${error}`);
+        }
     }
 
     private static async openFileForState(state: PanelState, filePath: string): Promise<void> {
@@ -4196,7 +4269,13 @@ class TaskPanelManager {
     private static async updateFileListForState(state: PanelState): Promise<void> {
         const files = this.getFilesInDirectory(state.currentPath);
         const parentPath = path.dirname(state.currentPath);
-        const hasParent = state.currentPath !== state.rootPath && parentPath !== state.currentPath;
+        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+        // Show parent directory link if:
+        // 1. parentPath is not the same as currentPath (not at filesystem root)
+        // 2. parentPath starts with workspaceRoot (don't go above workspace)
+        const hasParent = parentPath !== state.currentPath &&
+            workspaceRoot !== undefined &&
+            parentPath.startsWith(workspaceRoot);
 
         state.panel.webview.postMessage({
             type: 'updateFileList',
@@ -4361,6 +4440,18 @@ class TaskPanelManager {
                         this.setupFileWatcher(targetPath);
                         // パネルを更新
                         await this.updatePanel(targetPath);
+                    }
+                    break;
+
+                case 'openTaskPanelForDir':
+                    if (data.dirPath) {
+                        await this.openFromCommand(data.dirPath);
+                    }
+                    break;
+
+                case 'archiveDirectory':
+                    if (data.dirPath && currentState) {
+                        await this.archiveDirectoryForState(currentState, data.dirPath);
                     }
                     break;
             }
@@ -4585,8 +4676,13 @@ class TaskPanelManager {
 
         const files = this.getFilesInDirectory(state.currentPath);
         const parentPath = path.dirname(state.currentPath);
-        // ルートディレクトリより上には移動できない
-        const hasParent = state.currentPath !== state.rootPath && parentPath !== state.currentPath;
+        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+        // Show parent directory link if:
+        // 1. parentPath is not the same as currentPath (not at filesystem root)
+        // 2. parentPath starts with workspaceRoot (don't go above workspace)
+        const hasParent = parentPath !== state.currentPath &&
+            workspaceRoot !== undefined &&
+            parentPath.startsWith(workspaceRoot);
 
         state.panel.webview.postMessage({
             type: 'updateFileList',
@@ -4729,8 +4825,13 @@ class TaskPanelManager {
             ? path.relative(tasksViewRoot, currentPath) || path.basename(currentPath)
             : path.basename(currentPath);
         const parentPath = path.dirname(currentPath);
-        // ルートディレクトリより上には移動できない
-        const hasParent = currentPath !== rootPath && parentPath !== currentPath;
+        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+        // Show parent directory link if:
+        // 1. parentPath is not the same as currentPath (not at filesystem root)
+        // 2. parentPath starts with workspaceRoot (don't go above workspace)
+        const hasParent = parentPath !== currentPath &&
+            workspaceRoot !== undefined &&
+            parentPath.startsWith(workspaceRoot);
 
         // 親ディレクトリへのリンク
         const parentDirHtml = hasParent ? `
@@ -4996,6 +5097,12 @@ class TaskPanelManager {
             background-color: var(--vscode-menu-separatorBackground);
             margin: 4px 0;
         }
+        .dir-only {
+            display: none;
+        }
+        .dir-only.show-dir {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -5043,10 +5150,14 @@ Shortcuts:
         </div>
     </div>
     <div id="context-menu">
+        <div class="context-menu-item dir-only" data-action="openTaskPanel">Open Task Panel</div>
+        <div class="context-menu-separator dir-only"></div>
         <div class="context-menu-item" data-action="copyPath">Copy Relative Path</div>
         <div class="context-menu-separator"></div>
         <div class="context-menu-item" data-action="rename">Rename...</div>
         <div class="context-menu-item" data-action="delete">Delete</div>
+        <div class="context-menu-separator dir-only"></div>
+        <div class="context-menu-item dir-only" data-action="archive">Archive</div>
     </div>
     <script>
         const vscode = acquireVsCodeApi();
@@ -5124,6 +5235,7 @@ Shortcuts:
         // Context Menu
         const contextMenu = document.getElementById('context-menu');
         let contextMenuTargetPath = '';
+        let contextMenuTargetIsDir = false;
 
         fileList.addEventListener('contextmenu', (e) => {
             const item = e.target.closest('.file-item');
@@ -5131,6 +5243,12 @@ Shortcuts:
 
             e.preventDefault();
             contextMenuTargetPath = item.getAttribute('data-path');
+            contextMenuTargetIsDir = item.getAttribute('data-is-directory') === 'true';
+
+            // Show/hide directory-only menu items
+            document.querySelectorAll('.dir-only').forEach(el => {
+                el.classList.toggle('show-dir', contextMenuTargetIsDir);
+            });
 
             contextMenu.style.left = e.clientX + 'px';
             contextMenu.style.top = e.clientY + 'px';
@@ -5149,6 +5267,9 @@ Shortcuts:
             if (!contextMenuTargetPath) return;
 
             switch (action) {
+                case 'openTaskPanel':
+                    vscode.postMessage({ type: 'openTaskPanelForDir', dirPath: contextMenuTargetPath });
+                    break;
                 case 'copyPath':
                     vscode.postMessage({ type: 'copyRelativePath', filePath: contextMenuTargetPath });
                     break;
@@ -5157,6 +5278,9 @@ Shortcuts:
                     break;
                 case 'delete':
                     vscode.postMessage({ type: 'deleteFile', filePath: contextMenuTargetPath });
+                    break;
+                case 'archive':
+                    vscode.postMessage({ type: 'archiveDirectory', dirPath: contextMenuTargetPath });
                     break;
             }
 

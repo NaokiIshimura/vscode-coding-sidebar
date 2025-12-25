@@ -8,13 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.7.1] - 2025-12-25
 
 ### Added
-- **Combined Panel - Tab Icon Differentiation**: Different icons distinguish how the panel was opened
+- **Task Panel - Tab Icon Differentiation**: Different icons distinguish how the panel was opened
   - Tree icon: When opened by selecting a directory in Tasks view
-  - Folder icon: When opened via "Open Combined Panel" command
+  - Folder icon: When opened via "Open Task Panel" command
   - Added `tree-light.svg` and `tree-dark.svg` icon resources
 
+### Changed
+- **Rename**: Combined Panel renamed to Task Panel
+  - `aiCodingSidebar.combinedPanel.enabled` → `aiCodingSidebar.taskPanel.enabled`
+  - "Open Combined Panel" → "Open Task Panel"
+  - "Combined Panel Settings" → "Task Panel Settings"
+
 ### Fixed
-- **Combined Panel - Terminal Reuse**: Run button now reuses existing terminals instead of creating new ones each time
+- **Task Panel - Terminal Reuse**: Run button now reuses existing terminals instead of creating new ones each time
   - Searches for an existing terminal with the same name before creating a new one
   - Consistent behavior with Editor view's Run functionality
   - Prevents terminal clutter when running multiple tasks

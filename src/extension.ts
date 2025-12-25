@@ -183,6 +183,10 @@ export function activate(context: vscode.ExtensionContext) {
     TaskPanelManager.initialize(context);
     TaskPanelManager.setProviders(docsProvider, tasksProvider);
 
+    // Open Panels Providerの初期化
+    const openPanelsProvider = new OpenPanelsProvider();
+    TaskPanelManager.setOpenPanelsProvider(openPanelsProvider);
+
     // プロジェクトルートを設定
     const initializeWithWorkspaceRoot = async () => {
         if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
@@ -267,6 +271,36 @@ export function activate(context: vscode.ExtensionContext) {
             EditorProvider.viewType,
             editorProvider
         )
+    );
+
+    // Open Panels Viewを登録
+    const openPanelsView = vscode.window.createTreeView('openPanels', {
+        treeDataProvider: openPanelsProvider,
+        showCollapseAll: false
+    });
+    context.subscriptions.push(openPanelsView);
+
+    // Open Panels用のコマンドを登録
+    context.subscriptions.push(
+        vscode.commands.registerCommand('aiCodingSidebar.focusPanel', (item: OpenPanelItem) => {
+            if (item) {
+                TaskPanelManager.focusPanel(item.panelId);
+            }
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('aiCodingSidebar.closePanel', async (item: OpenPanelItem) => {
+            if (item) {
+                await TaskPanelManager.closePanel(item.panelId);
+            }
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('aiCodingSidebar.refreshOpenPanels', () => {
+            openPanelsProvider.refresh();
+        })
     );
 
     // 初期化を実行
@@ -3449,6 +3483,67 @@ interface PanelState {
     fileWatcher?: vscode.FileSystemWatcher;
 }
 
+// Open Panels View item
+class OpenPanelItem extends vscode.TreeItem {
+    constructor(
+        public readonly panelId: string,
+        public readonly displayName: string,
+        public readonly panelPath: string,
+        public readonly isTasksViewPanel: boolean,
+        public readonly isDirty: boolean
+    ) {
+        super(displayName, vscode.TreeItemCollapsibleState.None);
+        this.contextValue = 'openPanel';
+        this.description = isDirty ? '●' : undefined;
+        this.tooltip = panelPath;
+        this.iconPath = new vscode.ThemeIcon(isTasksViewPanel ? 'list-tree' : 'folder-opened');
+        this.command = {
+            command: 'aiCodingSidebar.focusPanel',
+            title: 'Focus Panel',
+            arguments: [this]
+        };
+    }
+}
+
+// Open Panels View provider
+class OpenPanelsProvider implements vscode.TreeDataProvider<OpenPanelItem> {
+    private _onDidChangeTreeData: vscode.EventEmitter<OpenPanelItem | undefined | null | void> = new vscode.EventEmitter<OpenPanelItem | undefined | null | void>();
+    readonly onDidChangeTreeData: vscode.Event<OpenPanelItem | undefined | null | void> = this._onDidChangeTreeData.event;
+
+    constructor() { }
+
+    refresh(): void {
+        this._onDidChangeTreeData.fire();
+    }
+
+    getTreeItem(element: OpenPanelItem): vscode.TreeItem {
+        return element;
+    }
+
+    async getChildren(element?: OpenPanelItem): Promise<OpenPanelItem[]> {
+        if (element) {
+            return [];
+        }
+
+        const items: OpenPanelItem[] = [];
+
+        // Get panels from TaskPanelManager
+        const panelInfos = TaskPanelManager.getAllPanelInfos();
+
+        for (const info of panelInfos) {
+            items.push(new OpenPanelItem(
+                info.id,
+                info.displayName,
+                info.rootPath,
+                info.isTasksViewPanel,
+                info.isDirty
+            ));
+        }
+
+        return items;
+    }
+}
+
 // Task Panel Manager - DocsとEditorを1つのエディター領域に統合表示
 class TaskPanelManager {
     // Tasks view用の単一パネル（ディレクトリ選択時に切り替え）
@@ -3458,6 +3553,7 @@ class TaskPanelManager {
     private static context: vscode.ExtensionContext;
     private static docsProvider?: DocsProvider;
     private static tasksProvider?: TasksProvider;
+    private static openPanelsProvider?: OpenPanelsProvider;
 
     public static initialize(context: vscode.ExtensionContext): void {
         this.context = context;
@@ -3466,6 +3562,104 @@ class TaskPanelManager {
     public static setProviders(docsProvider: DocsProvider, tasksProvider: TasksProvider): void {
         this.docsProvider = docsProvider;
         this.tasksProvider = tasksProvider;
+    }
+
+    public static setOpenPanelsProvider(provider: OpenPanelsProvider): void {
+        this.openPanelsProvider = provider;
+    }
+
+    // Notify OpenPanelsProvider to refresh
+    private static notifyPanelChange(): void {
+        this.openPanelsProvider?.refresh();
+    }
+
+    // Get all panel information for OpenPanelsProvider
+    public static getAllPanelInfos(): Array<{
+        id: string;
+        displayName: string;
+        rootPath: string;
+        isTasksViewPanel: boolean;
+        isDirty: boolean;
+    }> {
+        const infos: Array<{
+            id: string;
+            displayName: string;
+            rootPath: string;
+            isTasksViewPanel: boolean;
+            isDirty: boolean;
+        }> = [];
+
+        // Tasks View Panel
+        if (this.tasksViewPanel) {
+            infos.push({
+                id: 'tasksView',
+                displayName: path.basename(this.tasksViewPanel.rootPath),
+                rootPath: this.tasksViewPanel.rootPath,
+                isTasksViewPanel: true,
+                isDirty: this.tasksViewPanel.isDirty
+            });
+        }
+
+        // Command Panels
+        for (const [panelPath, state] of this.commandPanels) {
+            infos.push({
+                id: panelPath,
+                displayName: path.basename(panelPath),
+                rootPath: panelPath,
+                isTasksViewPanel: false,
+                isDirty: state.isDirty
+            });
+        }
+
+        return infos;
+    }
+
+    // Focus on a specific panel
+    public static focusPanel(panelId: string): void {
+        if (panelId === 'tasksView' && this.tasksViewPanel) {
+            this.tasksViewPanel.panel.reveal();
+        } else {
+            const state = this.commandPanels.get(panelId);
+            if (state) {
+                state.panel.reveal();
+            }
+        }
+    }
+
+    // Close a specific panel
+    public static async closePanel(panelId: string): Promise<void> {
+        if (panelId === 'tasksView' && this.tasksViewPanel) {
+            // Check for unsaved changes
+            if (this.tasksViewPanel.isDirty && this.tasksViewPanel.currentFilePath && this.tasksViewPanel.currentContent) {
+                const result = await vscode.window.showWarningMessage(
+                    'Do you want to save changes before closing?',
+                    'Save', 'Don\'t Save', 'Cancel'
+                );
+                if (result === 'Save') {
+                    await this.saveCurrentFileForState(this.tasksViewPanel);
+                } else if (result === 'Cancel') {
+                    return;
+                }
+            }
+            this.tasksViewPanel.panel.dispose();
+        } else {
+            const state = this.commandPanels.get(panelId);
+            if (state) {
+                // Check for unsaved changes
+                if (state.isDirty && state.currentFilePath && state.currentContent) {
+                    const result = await vscode.window.showWarningMessage(
+                        'Do you want to save changes before closing?',
+                        'Save', 'Don\'t Save', 'Cancel'
+                    );
+                    if (result === 'Save') {
+                        await this.saveCurrentFileForState(state);
+                    } else if (result === 'Cancel') {
+                        return;
+                    }
+                }
+                state.panel.dispose();
+            }
+        }
     }
 
     // Tasks viewからディレクトリ選択時に呼び出される（単一パネルで管理）
@@ -3503,6 +3697,9 @@ class TaskPanelManager {
             // パネルを更新
             await this.updatePanelForState(this.tasksViewPanel);
             this.tasksViewPanel.panel.reveal();
+
+            // Notify OpenPanelsProvider (directory changed)
+            this.notifyPanelChange();
             return;
         }
 
@@ -3543,6 +3740,7 @@ class TaskPanelManager {
                 this.tasksViewPanel.fileWatcher.dispose();
             }
             this.tasksViewPanel = null;
+            this.notifyPanelChange();
         });
 
         // ファイル監視を設定
@@ -3553,6 +3751,9 @@ class TaskPanelManager {
 
         // メッセージハンドリング
         this.setupMessageHandlingForState(panelState);
+
+        // Notify OpenPanelsProvider
+        this.notifyPanelChange();
     }
 
     // Open Task Panelコマンドから呼び出される（ディレクトリごとに複数パネル管理）
@@ -3609,6 +3810,7 @@ class TaskPanelManager {
                 state.fileWatcher.dispose();
             }
             this.commandPanels.delete(targetPath);
+            this.notifyPanelChange();
         });
 
         // ファイル監視を設定
@@ -3619,6 +3821,9 @@ class TaskPanelManager {
 
         // メッセージハンドリング
         this.setupMessageHandlingForState(panelState);
+
+        // Notify OpenPanelsProvider
+        this.notifyPanelChange();
     }
 
     // 後方互換性のためのエイリアス
@@ -3642,8 +3847,12 @@ class TaskPanelManager {
                     break;
 
                 case 'contentChanged':
+                    const wasDirty = state.isDirty;
                     state.isDirty = true;
                     state.currentContent = data.content;
+                    if (!wasDirty) {
+                        this.notifyPanelChange();
+                    }
                     break;
 
                 case 'runTask':
@@ -3806,6 +4015,7 @@ class TaskPanelManager {
                     type: 'updateDirtyState',
                     isDirty: false
                 });
+                this.notifyPanelChange();
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to save file: ${error}`);
             }
@@ -3839,6 +4049,7 @@ class TaskPanelManager {
                     fullPath: filePath,
                     content: contentToSave
                 });
+                this.notifyPanelChange();
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to save file: ${error}`);
             }

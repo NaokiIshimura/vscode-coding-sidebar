@@ -18,6 +18,7 @@ When enabled via `aiCodingSidebar.taskPanel.enabled`, the Task Panel provides an
 
 | Feature | Description |
 | --- | --- |
+| **Active Panels View** | Lists all open Task Panels in the sidebar for easy navigation:<br>- Click to focus a panel<br>- Right-click to close a panel (with unsave confirmation)<br>- Shows unsaved indicator (●) for panels with pending changes<br>- Automatically updates when directory changes |
 | **Tab Icon** | Different icons distinguish how the panel was opened:<br>- **Tree icon**: Opened by selecting a directory in Tasks view<br>- **Folder icon**: Opened via "Open Task Panel" command |
 | **Terminal Reuse** | The Run button reuses existing terminals with the same name instead of creating new ones each time. |
 

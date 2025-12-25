@@ -23,6 +23,8 @@ When enabled via `aiCodingSidebar.taskPanel.enabled`, the Task Panel provides an
 | **Terminal Reuse** | The Run button reuses existing terminals with the same name instead of creating new ones each time.<br>Terminals are opened with the project root as the current working directory. |
 | **Non-Task File Position** | Configure where non-task files open when clicked:<br>- **below**: Opens in an editor group below the Task Panel<br>- **beside** (default): Opens in an editor group to the right of the Task Panel<br>- Configure via `aiCodingSidebar.taskPanel.nonTaskFilePosition` setting<br>- Cmd/Ctrl+click always opens files to the right |
 | **File Icons** | Files in the Docs section display icons based on their type, similar to the Docs view in the sidebar. |
+| **Parent Directory Navigation** | Parent directory link ("..") is always visible when within the workspace, allowing easy navigation to parent directories. |
+| **Context Menu** | Right-click on directories in the Docs section to access:<br>- **Open Task Panel**: Open a new Task Panel for the selected directory<br>- **Archive**: Move the directory to the archived folder |
 
 ## Usage
 

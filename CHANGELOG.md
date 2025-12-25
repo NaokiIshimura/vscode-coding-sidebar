@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.1] - 2025-12-25
+
+### Added
+- **Combined Panel - Tab Icon Differentiation**: Different icons distinguish how the panel was opened
+  - Tree icon: When opened by selecting a directory in Tasks view
+  - Folder icon: When opened via "Open Combined Panel" command
+  - Added `tree-light.svg` and `tree-dark.svg` icon resources
+
+### Fixed
+- **Combined Panel - Terminal Reuse**: Run button now reuses existing terminals instead of creating new ones each time
+  - Searches for an existing terminal with the same name before creating a new one
+  - Consistent behavior with Editor view's Run functionality
+  - Prevents terminal clutter when running multiple tasks
+
 ## [0.7.0] - 2025-12-25
 
 ### Added
@@ -573,6 +587,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.7.1]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.6.6...v0.7.0
 [0.6.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.6.5...v0.6.6
 [0.6.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.6.3...v0.6.5

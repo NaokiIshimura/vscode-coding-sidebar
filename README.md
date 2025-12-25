@@ -12,6 +12,15 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 | **Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a timestamp-named Markdown file (format: `YYYY_MMDD_HHMM_TASK.md`).<br>Other Markdown files open in the standard editor.<br>Save with `Cmd+S` / `Ctrl+S` (creates new file if none is open - saves to current Docs directory or Tasks directory).<br>Run task with `Cmd+R` / `Ctrl+R` to send a customizable command to terminal (auto-saves before running, works even without a file open).<br>Create new markdown file with `Cmd+M` / `Ctrl+M`.<br>**Customizable run command**: Configure the command executed by the Run button in settings.<br>**Run without file**: Execute commands using editor content when no file is open.<br>Automatically switches to read-only mode when the file is active in VSCode editor.<br>Auto-saves when switching to another extension or file.<br>Restores the editing file when returning from another extension.<br>**Settings icon**: Quick access to run command configuration. |
 | **Menu** | Open user or global settings.<br>Customize templates.<br>Quick shortcuts: Open terminal, Checkout default branch, Git pull.<br>**Beta Features**: Open Combined Panel to view Docs & Editor in the editor area. |
 
+### Combined Panel (Beta)
+
+When enabled via `aiCodingSidebar.combinedPanel.enabled`, the Combined Panel provides an integrated view of Docs and Editor in the editor area.
+
+| Feature | Description |
+| --- | --- |
+| **Tab Icon** | Different icons distinguish how the panel was opened:<br>- **Tree icon**: Opened by selecting a directory in Tasks view<br>- **Folder icon**: Opened via "Open Combined Panel" command |
+| **Terminal Reuse** | The Run button reuses existing terminals with the same name instead of creating new ones each time. |
+
 ## Usage
 
 ### Keyboard Shortcuts

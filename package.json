@@ -2,7 +2,7 @@
   "name": "ai-coding-sidebar",
   "displayName": "AI Coding Sidebar",
   "description": "A sidebar extension that strengthens integration with AI coding tools.Browse and manage files and folders efficiently to keep coding with AI smooth.",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "publisher": "nacn",
   "icon": "images/icon.png",
   "repository": {
@@ -66,8 +66,8 @@
         "icon": "$(settings-gear)"
       },
       {
-        "command": "aiCodingSidebar.openCombinedPanelSettings",
-        "title": "Combined Panel Settings",
+        "command": "aiCodingSidebar.openTaskPanelSettings",
+        "title": "Task Panel Settings",
         "icon": "$(settings-gear)"
       },
       {
@@ -171,8 +171,8 @@
         "icon": "$(archive)"
       },
       {
-        "command": "aiCodingSidebar.openCombinedPanel",
-        "title": "Open Combined Panel",
+        "command": "aiCodingSidebar.openTaskPanel",
+        "title": "Open Task Panel",
         "icon": "$(split-horizontal)"
       }
     ],
@@ -218,14 +218,19 @@
           "group": "navigation@1"
         },
         {
+          "command": "aiCodingSidebar.openTaskPanel",
+          "when": "view == aiCodingSidebarExplorer && config.aiCodingSidebar.taskPanel.enabled",
+          "group": "navigation@2"
+        },
+        {
           "command": "aiCodingSidebar.refresh",
           "when": "view == aiCodingSidebarExplorer",
-          "group": "navigation@2"
+          "group": "navigation@3"
         },
         {
           "command": "aiCodingSidebar.openFolderTreeSettings",
           "when": "view == aiCodingSidebarExplorer",
-          "group": "navigation@3"
+          "group": "navigation@4"
         },
         {
           "command": "aiCodingSidebar.createMarkdownFile",
@@ -278,6 +283,11 @@
           "command": "aiCodingSidebar.archiveDirectory",
           "when": "view == aiCodingSidebarExplorer && viewItem == directory",
           "group": "3_archive@1"
+        },
+        {
+          "command": "aiCodingSidebar.openTaskPanel",
+          "when": "view == aiCodingSidebarExplorer && viewItem == directory",
+          "group": "0_panel@1"
         },
         {
           "command": "aiCodingSidebar.copyRelativePath",
@@ -393,10 +403,10 @@
           "default": "claude \"${editorContent}\"",
           "description": "Command template to execute when clicking the Run button without a file open. Use ${editorContent} as placeholder for the editor content."
         },
-        "aiCodingSidebar.combinedPanel.enabled": {
+        "aiCodingSidebar.taskPanel.enabled": {
           "type": "boolean",
           "default": false,
-          "description": "Enable Combined Panel. When enabled, selecting a directory in Tasks view will open the Combined Panel in the editor area."
+          "description": "Enable Task Panel. When enabled, selecting a directory in Tasks view will open the Task Panel in the editor area."
         }
       }
     }

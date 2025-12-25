@@ -20,8 +20,9 @@ AIコーディングツールとの連携を強化するサイドバー拡張機
 | --- | --- |
 | **Active Panels View** | 開いているTask Panelをサイドバーに一覧表示:<br>- クリックでパネルにフォーカス<br>- 右クリックでパネルを閉じる（未保存確認付き）<br>- 未保存のパネルに●インジケーターを表示<br>- ディレクトリ変更時に自動更新 |
 | **タブアイコン** | パネルの開き方によって異なるアイコンを表示:<br>- **ツリーアイコン**: Tasks viewでディレクトリを選択して開いた場合<br>- **フォルダアイコン**: 「Open Task Panel」コマンドで開いた場合 |
-| **ターミナル再利用** | Runボタンは毎回新しいターミナルを作成せず、同じ名前の既存ターミナルを再利用します。 |
-| **非タスクファイルの表示位置** | タスクファイル以外のファイルをクリックした際の表示位置を設定可能:<br>- **below**（デフォルト）: Task Panelの下にエディタグループを作成して表示<br>- **beside**: Task Panelの右側にエディタグループを作成して表示<br>- `aiCodingSidebar.taskPanel.nonTaskFilePosition`設定で変更可能<br>- Cmd/Ctrl+クリックは常に右側で開く |
+| **ターミナル再利用** | Runボタンは毎回新しいターミナルを作成せず、同じ名前の既存ターミナルを再利用します。<br>ターミナルはプロジェクトルートをカレントディレクトリとして開きます。 |
+| **非タスクファイルの表示位置** | タスクファイル以外のファイルをクリックした際の表示位置を設定可能:<br>- **below**: Task Panelの下にエディタグループを作成して表示<br>- **beside**（デフォルト）: Task Panelの右側にエディタグループを作成して表示<br>- `aiCodingSidebar.taskPanel.nonTaskFilePosition`設定で変更可能<br>- Cmd/Ctrl+クリックは常に右側で開く |
+| **ファイルアイコン** | Docsセクションのファイルにタイプ別のアイコンを表示。サイドバーのDocsビューと同様の表示。 |
 
 ## 使用方法
 
@@ -142,7 +143,7 @@ created: {{datetime}}
 | `editor.runCommand` | Editorビューのrunボタンで実行されるコマンドテンプレート | string | `claude "read ${filePath} and save your report to the same directory as ${filePath}"` | `${filePath}`をファイルパスのプレースホルダーとして使用 |
 | `editor.runCommandWithoutFile` | ファイル未開時にrunボタンで実行されるコマンドテンプレート | string | `claude "${editorContent}"` | `${editorContent}`をエディタ内容のプレースホルダーとして使用 |
 | `combinedPanel.enabled` | Combined Panelを有効化（ベータ版） | boolean | `false` | 有効にするとTasksビューでディレクトリを選択したときにエディタ領域でCombined Panelを開く |
-| `taskPanel.nonTaskFilePosition` | Task Panelで非タスクファイルを開く位置 | string | `"below"` | `"below"`: Task Panelの下で開く<br>`"beside"`: Task Panelの右側で開く |
+| `taskPanel.nonTaskFilePosition` | Task Panelで非タスクファイルを開く位置 | string | `"beside"` | `"below"`: Task Panelの下で開く<br>`"beside"`: Task Panelの右側で開く |
 
 ### 設定例
 
@@ -156,7 +157,7 @@ created: {{datetime}}
   "aiCodingSidebar.editor.runCommand": "claude \"read ${filePath} and save your report to the same directory as ${filePath}\"",
   "aiCodingSidebar.editor.runCommandWithoutFile": "claude \"${editorContent}\"",
   "aiCodingSidebar.combinedPanel.enabled": true,
-  "aiCodingSidebar.taskPanel.nonTaskFilePosition": "below"
+  "aiCodingSidebar.taskPanel.nonTaskFilePosition": "beside"
 }
 ```
 

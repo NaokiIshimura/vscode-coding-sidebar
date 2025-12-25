@@ -4137,6 +4137,8 @@ class TaskPanelManager {
     }
 
     private static async runTaskForState(state: PanelState, data: any): Promise<void> {
+        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+
         if (data.filePath && state.currentFilePath) {
             if (data.content) {
                 await this.saveCurrentFileForState(state, data.content);
@@ -4151,7 +4153,7 @@ class TaskPanelManager {
             if (!terminal) {
                 terminal = vscode.window.createTerminal({
                     name: terminalName,
-                    cwd: path.dirname(state.currentFilePath)
+                    cwd: workspaceRoot
                 });
             }
             terminal.show();
@@ -4165,7 +4167,10 @@ class TaskPanelManager {
             const terminalName = 'Task';
             let terminal = vscode.window.terminals.find(t => t.name === terminalName);
             if (!terminal) {
-                terminal = vscode.window.createTerminal({ name: terminalName });
+                terminal = vscode.window.createTerminal({
+                    name: terminalName,
+                    cwd: workspaceRoot
+                });
             }
             terminal.show();
             terminal.sendText(command);
@@ -4515,6 +4520,8 @@ class TaskPanelManager {
         const state = this.commandPanels.get(targetPath);
         if (!state) return;
 
+        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+
         if (data.filePath && state.currentFilePath) {
             if (data.content) {
                 await this.saveCurrentFile(targetPath, data.content);
@@ -4529,7 +4536,7 @@ class TaskPanelManager {
             if (!terminal) {
                 terminal = vscode.window.createTerminal({
                     name: terminalName,
-                    cwd: path.dirname(state.currentFilePath)
+                    cwd: workspaceRoot
                 });
             }
             terminal.show();
@@ -4543,7 +4550,10 @@ class TaskPanelManager {
             const terminalName = 'Task';
             let terminal = vscode.window.terminals.find(t => t.name === terminalName);
             if (!terminal) {
-                terminal = vscode.window.createTerminal({ name: terminalName });
+                terminal = vscode.window.createTerminal({
+                    name: terminalName,
+                    cwd: workspaceRoot
+                });
             }
             terminal.show();
             terminal.sendText(command);
@@ -4658,6 +4668,55 @@ class TaskPanelManager {
         return [...directories, ...files];
     }
 
+    /**
+     * Get file icon for webview based on file extension
+     */
+    private static getFileIconForWebview(fileName: string): string {
+        const ext = path.extname(fileName).toLowerCase();
+
+        // Markdown files - check if it's a TASK file
+        if (ext === '.md') {
+            const timestampPattern = /^\d{4}_\d{4}_\d{4}_TASK\.md$/;
+            if (timestampPattern.test(fileName)) {
+                return '✏️'; // edit icon for TASK files
+            }
+            return '📝'; // markdown icon
+        }
+
+        // Extension-based icons
+        const iconMap: { [key: string]: string } = {
+            '.ts': '🔷',
+            '.tsx': '🔷',
+            '.js': '🟡',
+            '.jsx': '🟡',
+            '.json': '📋',
+            '.txt': '📄',
+            '.py': '🐍',
+            '.java': '☕',
+            '.cpp': '📘',
+            '.c': '📘',
+            '.h': '📘',
+            '.css': '🎨',
+            '.scss': '🎨',
+            '.html': '🌐',
+            '.xml': '🌐',
+            '.yml': '⚙️',
+            '.yaml': '⚙️',
+            '.sh': '💻',
+            '.bat': '💻',
+            '.png': '🖼️',
+            '.jpg': '🖼️',
+            '.jpeg': '🖼️',
+            '.gif': '🖼️',
+            '.svg': '🖼️',
+            '.pdf': '📕',
+            '.zip': '📦',
+            '.gitignore': '🔀'
+        };
+
+        return iconMap[ext] || '📄';
+    }
+
     private static getHtmlForWebview(files: FileInfo[], currentPath: string, rootPath: string): string {
         const config = vscode.workspace.getConfiguration('aiCodingSidebar.markdownList');
         const sortBy = config.get<string>('sortBy', 'created');
@@ -4690,9 +4749,10 @@ class TaskPanelManager {
             }
             const isMarkdown = file.name.endsWith('.md');
             const dateStr = file.created.toLocaleString();
+            const fileIcon = this.getFileIconForWebview(file.name);
             return `
                 <div class="file-item" data-path="${file.path.replace(/"/g, '&quot;')}" data-is-markdown="${isMarkdown}">
-                    <span class="file-name">${file.name}</span>
+                    <span class="file-name">${fileIcon} ${file.name}</span>
                     <span class="file-date">${dateStr}</span>
                 </div>
             `;

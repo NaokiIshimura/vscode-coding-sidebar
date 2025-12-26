@@ -5,6 +5,13 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.7.8] - 2025-12-27
+
+### 追加
+- **Menu - Shortcut**: Shortcutセクションに「Duplicate Workspace in New Window」を追加
+  - 現在のワークスペースを新しいVSCodeウィンドウで複製して開く
+  - VSCodeのビルトインコマンド `workbench.action.duplicateWorkspaceInNewWindow` を使用
+
 ## [0.4.6] - 2025-11-09
 
 ### 追加

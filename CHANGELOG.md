@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.6] - 2025-12-27
+
+### Changed
+- **Task Panel - Parent Directory Navigation**: Parent directory navigation is now restricted to the Tasks view root directory
+  - Previously could navigate up to the workspace root
+  - Now cannot navigate above the Tasks view root directory
+  - Provides better scope control within the configured task directory
+
 ## [0.7.5] - 2025-12-26
 
 ### Added
@@ -645,6 +653,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.7.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.5...v0.7.6
 [0.7.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.4...v0.7.5
 [0.7.4]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.3...v0.7.4
 [0.7.3]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.2...v0.7.3

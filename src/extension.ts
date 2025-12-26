@@ -4269,13 +4269,14 @@ class TaskPanelManager {
     private static async updateFileListForState(state: PanelState): Promise<void> {
         const files = this.getFilesInDirectory(state.currentPath);
         const parentPath = path.dirname(state.currentPath);
-        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+        // Use Tasks View root as the boundary for parent navigation
+        const tasksViewRoot = this.tasksProvider?.getRootPath();
         // Show parent directory link if:
         // 1. parentPath is not the same as currentPath (not at filesystem root)
-        // 2. parentPath starts with workspaceRoot (don't go above workspace)
+        // 2. tasksViewRoot is defined and parentPath starts with tasksViewRoot (don't go above tasks view root)
         const hasParent = parentPath !== state.currentPath &&
-            workspaceRoot !== undefined &&
-            parentPath.startsWith(workspaceRoot);
+            tasksViewRoot !== undefined &&
+            parentPath.startsWith(tasksViewRoot);
 
         state.panel.webview.postMessage({
             type: 'updateFileList',
@@ -4676,13 +4677,14 @@ class TaskPanelManager {
 
         const files = this.getFilesInDirectory(state.currentPath);
         const parentPath = path.dirname(state.currentPath);
-        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+        // Use Tasks View root as the boundary for parent navigation
+        const tasksViewRoot = this.tasksProvider?.getRootPath();
         // Show parent directory link if:
         // 1. parentPath is not the same as currentPath (not at filesystem root)
-        // 2. parentPath starts with workspaceRoot (don't go above workspace)
+        // 2. tasksViewRoot is defined and parentPath starts with tasksViewRoot (don't go above tasks view root)
         const hasParent = parentPath !== state.currentPath &&
-            workspaceRoot !== undefined &&
-            parentPath.startsWith(workspaceRoot);
+            tasksViewRoot !== undefined &&
+            parentPath.startsWith(tasksViewRoot);
 
         state.panel.webview.postMessage({
             type: 'updateFileList',
@@ -4825,13 +4827,12 @@ class TaskPanelManager {
             ? path.relative(tasksViewRoot, currentPath) || path.basename(currentPath)
             : path.basename(currentPath);
         const parentPath = path.dirname(currentPath);
-        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
         // Show parent directory link if:
         // 1. parentPath is not the same as currentPath (not at filesystem root)
-        // 2. parentPath starts with workspaceRoot (don't go above workspace)
+        // 2. tasksViewRoot is defined and parentPath starts with tasksViewRoot (don't go above tasks view root)
         const hasParent = parentPath !== currentPath &&
-            workspaceRoot !== undefined &&
-            parentPath.startsWith(workspaceRoot);
+            tasksViewRoot !== undefined &&
+            parentPath.startsWith(tasksViewRoot);
 
         // 親ディレクトリへのリンク
         const parentDirHtml = hasParent ? `

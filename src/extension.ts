@@ -2762,6 +2762,15 @@ class MenuProvider implements vscode.TreeDataProvider<MenuItem> {
                                 title: 'Git Pull'
                             },
                             new vscode.ThemeIcon('arrow-down')
+                        ),
+                        new MenuItem(
+                            'Duplicate Workspace in New Window',
+                            'Open a copy of this workspace in a new window',
+                            {
+                                command: 'workbench.action.duplicateWorkspaceInNewWindow',
+                                title: 'Duplicate Workspace in New Window'
+                            },
+                            new vscode.ThemeIcon('multiple-windows')
                         )
                     ],
                     vscode.TreeItemCollapsibleState.Collapsed

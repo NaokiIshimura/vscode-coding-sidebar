@@ -17,6 +17,7 @@
 - READMEを更新して
 - README-JAを更新して
 - CHANGELOGを更新して
+- CHANGELOG-JAを更新して
 - git commit
 - pr 作成
   - pr title の先頭には「[{バージョン}] 」をつけて

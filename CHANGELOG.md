@@ -731,7 +731,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+<<<<<<< HEAD
 [0.7.15]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.14...v0.7.15
+=======
+>>>>>>> origin/main
 [0.7.14]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.13...v0.7.14
 [0.7.13]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.11...v0.7.13
 [0.7.11]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.10...v0.7.11

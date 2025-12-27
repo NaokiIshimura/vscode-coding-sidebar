@@ -237,7 +237,10 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+<<<<<<< HEAD
 [0.7.15]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.14...v0.7.15
+=======
+>>>>>>> origin/main
 [0.7.14]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.13...v0.7.14
 [0.7.13]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.11...v0.7.13
 [0.7.9]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.8...v0.7.9

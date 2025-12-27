@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.20] - 2025-12-27
+
+### Changed
+- **Tasks View - Settings Integration**: Merged "Folder Tree Settings" and "Docs Settings" into a single "Tasks Settings"
+  - Settings icon now opens all Tasks-related settings in one view
+  - Simplified title menu with fewer icons
+- **Tasks View - Menu Order**: Changed the order of title menu icons
+  - New order: Start Task → Create Markdown File → Refresh → Tasks Settings
+  - Create Markdown File is now positioned next to Start Task for easier access
+
 ## [0.7.19] - 2025-12-27
 
 ### Changed

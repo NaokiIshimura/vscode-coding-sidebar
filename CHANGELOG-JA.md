@@ -5,6 +5,16 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.7.20] - 2025-12-27
+
+### 変更
+- **Tasks View - 設定の統合**: 「Folder Tree Settings」と「Docs Settings」を「Tasks Settings」に統合
+  - 設定アイコンですべてのTasks関連設定を一箇所で表示
+  - タイトルメニューのアイコン数を削減してシンプルに
+- **Tasks View - メニュー順序**: タイトルメニューのアイコン順序を変更
+  - 新しい順序: Start Task → Create Markdown File → Refresh → Tasks Settings
+  - Create Markdown FileをStart Taskの隣に配置してアクセスしやすく
+
 ## [0.7.19] - 2025-12-27
 
 ### 変更

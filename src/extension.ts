@@ -441,14 +441,9 @@ export function activate(context: vscode.ExtensionContext) {
         await vscode.commands.executeCommand('workbench.action.openSettings', 'aiCodingSidebar');
     });
 
-    // フォルダツリー設定を開くコマンドを登録
-    const openFolderTreeSettingsCommand = vscode.commands.registerCommand('aiCodingSidebar.openFolderTreeSettings', async () => {
-        await vscode.commands.executeCommand('workbench.action.openSettings', 'aiCodingSidebar.defaultRelativePath');
-    });
-
-    // Docs設定を開くコマンドを登録
-    const openDocsSettingsCommand = vscode.commands.registerCommand('aiCodingSidebar.openDocsSettings', async () => {
-        await vscode.commands.executeCommand('workbench.action.openSettings', '@ext:nacn.ai-coding-sidebar markdownList');
+    // Tasks設定を開くコマンドを登録
+    const openTasksSettingsCommand = vscode.commands.registerCommand('aiCodingSidebar.openTasksSettings', async () => {
+        await vscode.commands.executeCommand('workbench.action.openSettings', '@ext:nacn.ai-coding-sidebar');
     });
 
     // Editor設定を開くコマンドを登録
@@ -1371,7 +1366,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openFolderTreeSettingsCommand, openDocsSettingsCommand, openEditorSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, newDirectoryCommand, renameDirectoryCommand, deleteDirectoryCommand, archiveDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand, navigateToDirectoryCommand);
+    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openTasksSettingsCommand, openEditorSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, newDirectoryCommand, renameDirectoryCommand, deleteDirectoryCommand, archiveDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand, navigateToDirectoryCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({

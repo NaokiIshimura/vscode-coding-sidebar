@@ -2,7 +2,7 @@
   "name": "ai-coding-sidebar",
   "displayName": "AI Coding Panel",
   "description": "A sidebar extension that strengthens integration with AI coding tools.Browse and manage files and folders efficiently to keep coding with AI smooth.",
-  "version": "0.7.19",
+  "version": "0.7.20",
   "publisher": "nacn",
   "icon": "images/icon.png",
   "repository": {
@@ -51,13 +51,8 @@
         "icon": "$(settings-gear)"
       },
       {
-        "command": "aiCodingSidebar.openFolderTreeSettings",
-        "title": "Folder Tree Settings",
-        "icon": "$(settings-gear)"
-      },
-      {
-        "command": "aiCodingSidebar.openDocsSettings",
-        "title": "Docs Settings",
+        "command": "aiCodingSidebar.openTasksSettings",
+        "title": "Tasks Settings",
         "icon": "$(settings-gear)"
       },
       {
@@ -231,24 +226,19 @@
           "group": "navigation@1"
         },
         {
-          "command": "aiCodingSidebar.refresh",
+          "command": "aiCodingSidebar.createMarkdownFile",
           "when": "view == aiCodingSidebarExplorer",
           "group": "navigation@2"
         },
         {
-          "command": "aiCodingSidebar.openFolderTreeSettings",
+          "command": "aiCodingSidebar.refresh",
           "when": "view == aiCodingSidebarExplorer",
           "group": "navigation@3"
         },
         {
-          "command": "aiCodingSidebar.createMarkdownFile",
+          "command": "aiCodingSidebar.openTasksSettings",
           "when": "view == aiCodingSidebarExplorer",
           "group": "navigation@4"
-        },
-        {
-          "command": "aiCodingSidebar.openDocsSettings",
-          "when": "view == aiCodingSidebarExplorer",
-          "group": "navigation@5"
         },
         {
           "command": "aiCodingSidebar.createMarkdownFile",

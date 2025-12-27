@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.14] - 2025-12-27
+
+### Added
+- **Terminal View - Clickable Links**: URLs and file paths are now clickable in the terminal
+  - URLs open in the default browser when clicked
+  - File paths (e.g., `./src/file.ts:123`) open in the editor when clicked
+  - Supports line number navigation for file paths
+  - Uses xterm-addon-web-links for URL detection
+  - Custom link provider for file path detection
+
 ## [0.7.13] - 2025-12-27
 
 ### Changed
@@ -713,6 +723,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.7.14]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.13...v0.7.14
 [0.7.13]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.11...v0.7.13
 [0.7.11]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.10...v0.7.11
 [0.7.10]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.9...v0.7.10

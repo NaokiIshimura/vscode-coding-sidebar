@@ -1597,17 +1597,8 @@ class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDra
 
     private updateTitle(): void {
         if (this.treeView) {
-            const currentPath = this.activeFolderPath || this.rootPath;
-            if (currentPath && this.rootPath) {
-                const relativePath = path.relative(this.rootPath, currentPath);
-                if (relativePath) {
-                    this.treeView.title = `Tasks: ${relativePath}`;
-                } else {
-                    this.treeView.title = 'Tasks';
-                }
-            } else {
-                this.treeView.title = 'Tasks';
-            }
+            // タイトルは「TASKS」固定
+            this.treeView.title = 'TASKS';
         }
     }
 
@@ -1898,6 +1889,27 @@ class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDra
         // 現在表示するディレクトリパス
         const currentPath = this.activeFolderPath || this.rootPath;
         const items: FileItem[] = [];
+
+        // パス表示アイテム（最上部に表示）
+        // ルートディレクトリの場合のみプロジェクトルートからのパスを表示
+        let displayPath: string;
+        if (currentPath === this.rootPath && this.projectRootPath) {
+            displayPath = path.relative(this.projectRootPath, this.rootPath);
+        } else {
+            displayPath = path.relative(this.rootPath, currentPath);
+        }
+        const pathItem = new FileItem(
+            displayPath || '.',
+            vscode.TreeItemCollapsibleState.None,
+            currentPath,
+            true,
+            0,
+            new Date()
+        );
+        pathItem.contextValue = 'pathDisplay';
+        pathItem.iconPath = new vscode.ThemeIcon('folder-opened');
+        pathItem.tooltip = currentPath;
+        items.push(pathItem);
 
         // 親ディレクトリへ戻るアイテム（ルートより上には戻れない）
         if (currentPath !== this.rootPath) {
@@ -3282,7 +3294,10 @@ class TerminalProvider implements vscode.WebviewViewProvider {
      */
     public focus(): void {
         if (this._view) {
-            this._view.show(true);
+            // preserveFocus: false でフォーカスを移動
+            this._view.show(false);
+            // Webview内のxtermにフォーカスを当てる
+            this._view.webview.postMessage({ type: 'focus' });
         }
     }
 
@@ -3475,6 +3490,9 @@ class TerminalProvider implements vscode.WebviewViewProvider {
                     case 'error':
                         errorMessage.textContent = message.message;
                         errorMessage.style.display = 'block';
+                        break;
+                    case 'focus':
+                        term.focus();
                         break;
                 }
             });

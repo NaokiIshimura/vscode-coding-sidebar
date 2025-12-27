@@ -2,7 +2,7 @@
   "name": "ai-coding-sidebar",
   "displayName": "AI Coding Sidebar",
   "description": "A sidebar extension that strengthens integration with AI coding tools.Browse and manage files and folders efficiently to keep coding with AI smooth.",
-  "version": "0.7.11",
+  "version": "0.7.12",
   "publisher": "nacn",
   "icon": "images/icon.png",
   "repository": {
@@ -542,9 +542,10 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run compile && npm run copy-xterm",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
+    "copy-xterm": "mkdir -p media/xterm && cp node_modules/xterm/css/xterm.css media/xterm/ && cp node_modules/xterm/lib/xterm.js media/xterm/ && cp node_modules/xterm-addon-fit/lib/xterm-addon-fit.js media/xterm/",
     "package": "npx vsce package --out releases/ --allow-missing-repository --no-dependencies",
     "version:patch": "npm version patch --no-git-tag-version",
     "version:minor": "npm version minor --no-git-tag-version",

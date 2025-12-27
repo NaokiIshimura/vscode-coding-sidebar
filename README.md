@@ -126,7 +126,6 @@ If the default relative path doesn't exist, Tasks displays a "Create directory" 
 | `markdownList.sortOrder` | Sort order for files in Docs | string | `"ascending"` | `"ascending"` (ascending)<br>`"descending"` (descending) |
 | `editor.runCommand` | Command template to execute when clicking the Run button in the Editor view | string | `claude "read ${filePath} and save your report to the same directory as ${filePath}"` | Use `${filePath}` as placeholder for the file path |
 | `editor.runCommandWithoutFile` | Command template to execute when clicking the Run button without a file open | string | `claude "${editorContent}"` | Use `${editorContent}` as placeholder for the editor content |
-| `editor.useTerminalView` | Send Run commands to the embedded Terminal view | boolean | `true` | When enabled, Run button sends commands to the Terminal view instead of VSCode's integrated terminal |
 | `terminal.shell` | Shell executable path for Terminal view | string | `""` | Leave empty to use system default shell |
 | `terminal.fontSize` | Font size for Terminal view | number | `12` | Any positive number |
 | `terminal.fontFamily` | Font family for Terminal view | string | `"monospace"` | Any valid font family |
@@ -145,7 +144,6 @@ Add the following to `.vscode/settings.json`:
   "aiCodingSidebar.markdownList.sortOrder": "ascending",
   "aiCodingSidebar.editor.runCommand": "claude \"read ${filePath} and save your report to the same directory as ${filePath}\"",
   "aiCodingSidebar.editor.runCommandWithoutFile": "claude \"${editorContent}\"",
-  "aiCodingSidebar.editor.useTerminalView": true,
   "aiCodingSidebar.terminal.fontSize": 12,
   "aiCodingSidebar.terminal.cursorStyle": "block"
 }

@@ -191,11 +191,12 @@
         {
           "id": "workspaceSettings",
           "name": "Menu",
-          "visibility": "visible"
+          "visibility": "collapsed"
         },
         {
           "id": "aiCodingSidebarExplorer",
-          "name": "Tasks"
+          "name": "Tasks",
+          "visibility": "visible"
         },
         {
           "id": "markdownEditor",
@@ -209,7 +210,7 @@
           "name": "Terminal",
           "type": "webview",
           "retainContextWhenHidden": true,
-          "visibility": "collapsed"
+          "visibility": "visible"
         }
       ]
     },
@@ -414,11 +415,6 @@
           "type": "string",
           "default": "claude \"${editorContent}\"",
           "description": "Command template to execute when clicking the Run button without a file open. Use ${editorContent} as placeholder for the editor content."
-        },
-        "aiCodingSidebar.editor.useTerminalView": {
-          "type": "boolean",
-          "default": true,
-          "description": "When enabled, the Run button sends commands to the Terminal view instead of the standard VS Code terminal."
         },
         "aiCodingSidebar.terminal.shell": {
           "type": "string",

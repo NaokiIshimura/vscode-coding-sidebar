@@ -2454,34 +2454,6 @@ class MenuProvider implements vscode.TreeDataProvider<MenuItem> {
                         )
                     ],
                     vscode.TreeItemCollapsibleState.Collapsed
-                ),
-                // Beta Features（親項目）
-                new MenuItem(
-                    'Beta Features',
-                    'Experimental features',
-                    undefined,
-                    new vscode.ThemeIcon('beaker'),
-                    [
-                        new MenuItem(
-                            'Open Task Panel',
-                            'Open Docs & Editor in the editor area',
-                            {
-                                command: 'aiCodingSidebar.openTaskPanel',
-                                title: 'Open Task Panel'
-                            },
-                            new vscode.ThemeIcon('split-horizontal')
-                        ),
-                        new MenuItem(
-                            'Task Panel Settings',
-                            'Open Task Panel settings',
-                            {
-                                command: 'aiCodingSidebar.openTaskPanelSettings',
-                                title: 'Task Panel Settings'
-                            },
-                            new vscode.ThemeIcon('settings-gear')
-                        )
-                    ],
-                    vscode.TreeItemCollapsibleState.Collapsed
                 )
             ];
         } else {
@@ -2702,49 +2674,29 @@ class EditorProvider implements vscode.WebviewViewProvider {
                         // Get the run command template from settings
                         const config = vscode.workspace.getConfiguration('aiCodingSidebar');
                         const commandTemplate = config.get<string>('editor.runCommand', 'claude "read ${filePath} and save your report to the same directory as ${filePath}"');
-                        const useTerminalView = config.get<boolean>('editor.useTerminalView', true);
 
                         // Replace ${filePath} placeholder with actual file path
                         const command = commandTemplate.replace(/\$\{filePath\}/g, relativeFilePath.trim());
 
-                        if (useTerminalView && this._terminalProvider) {
-                            // Send command to Terminal view
+                        // Send command to Terminal view
+                        if (this._terminalProvider) {
                             this._terminalProvider.focus();
                             await this._terminalProvider.sendCommand(command);
-                        } else {
-                            // Use VS Code standard terminal
-                            const terminalName = path.basename(path.dirname(this._currentFilePath));
-                            let terminal = vscode.window.terminals.find(t => t.name === terminalName);
-                            if (!terminal) {
-                                terminal = vscode.window.createTerminal(terminalName);
-                            }
-                            terminal.show();
-                            terminal.sendText(command, true);
                         }
                     } else if (data.editorContent && data.editorContent.trim()) {
                         // No file open - use the editor content directly
                         const config = vscode.workspace.getConfiguration('aiCodingSidebar');
                         const commandTemplate = config.get<string>('editor.runCommandWithoutFile', 'claude "${editorContent}"');
-                        const useTerminalView = config.get<boolean>('editor.useTerminalView', true);
 
                         // Replace ${editorContent} placeholder with actual editor content
                         // Escape double quotes in editor content to prevent command injection
                         const escapedContent = data.editorContent.trim().replace(/"/g, '\\"');
                         const command = commandTemplate.replace(/\$\{editorContent\}/g, escapedContent);
 
-                        if (useTerminalView && this._terminalProvider) {
-                            // Send command to Terminal view
+                        // Send command to Terminal view
+                        if (this._terminalProvider) {
                             this._terminalProvider.focus();
                             await this._terminalProvider.sendCommand(command);
-                        } else {
-                            // Use VS Code standard terminal
-                            const terminalName = 'AI Coding Panel';
-                            let terminal = vscode.window.terminals.find(t => t.name === terminalName);
-                            if (!terminal) {
-                                terminal = vscode.window.createTerminal(terminalName);
-                            }
-                            terminal.show();
-                            terminal.sendText(command, true);
                         }
                     } else {
                         vscode.window.showWarningMessage('Please enter some text in the editor to run a task.');

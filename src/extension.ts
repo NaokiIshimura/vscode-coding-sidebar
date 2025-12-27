@@ -14,6 +14,7 @@ import { DragDropHandler } from './services/DragDropHandler';
 import { SearchService } from './services/SearchService';
 import { ConfigurationProvider } from './services/ConfigurationProvider';
 import { FileWatcherService } from './services/FileWatcherService';
+import { TerminalService } from './services/TerminalService';
 
 // テンプレートを読み込んで変数を置換する関数
 function loadTemplate(context: vscode.ExtensionContext, variables: { [key: string]: string }): string {
@@ -179,6 +180,10 @@ export function activate(context: vscode.ExtensionContext) {
     editorProvider.setDetailsProvider(docsProvider);
     editorProvider.setTasksProvider(tasksProvider);
 
+    // Terminal Providerを作成（EditorProviderに設定するため先に作成）
+    const terminalProvider = new TerminalProvider(context.extensionUri);
+    editorProvider.setTerminalProvider(terminalProvider);
+
     // Task Panel Managerの初期化
     TaskPanelManager.initialize(context);
     TaskPanelManager.setProviders(docsProvider, tasksProvider);
@@ -273,6 +278,33 @@ export function activate(context: vscode.ExtensionContext) {
         )
     );
 
+    // Terminal Viewを登録
+    context.subscriptions.push(
+        vscode.window.registerWebviewViewProvider(
+            TerminalProvider.viewType,
+            terminalProvider
+        )
+    );
+
+    // Terminal用のコマンドを登録
+    context.subscriptions.push(
+        vscode.commands.registerCommand('aiCodingSidebar.terminalNew', () => {
+            terminalProvider.newTerminal();
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('aiCodingSidebar.terminalClear', () => {
+            terminalProvider.clearTerminal();
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('aiCodingSidebar.terminalKill', () => {
+            terminalProvider.killTerminal();
+        })
+    );
+
     // Open Panels Viewを登録
     const openPanelsView = vscode.window.createTreeView('openPanels', {
         treeDataProvider: openPanelsProvider,
@@ -325,6 +357,8 @@ export function activate(context: vscode.ExtensionContext) {
             if (selectedItem.isDirectory) {
                 docsProvider.setRootPath(selectedItem.filePath);
                 // Task Panelはディレクトリのcommandで開く（設定による制御）
+                // Docsビューにフォーカスを移す
+                await vscode.commands.executeCommand('aiCodingSidebarDetails.focus');
             }
         }
     });
@@ -2475,27 +2509,20 @@ class DocsProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDrag
             const entries = fs.readdirSync(dirPath, { withFileTypes: true });
 
             for (const entry of entries) {
-                // フォルダを除外し、ファイルのみを対象にする
-                if (entry.isDirectory()) {
-                    continue;
+                // ファイル一覧ペインではファイルのみを表示
+                if (!entry.isDirectory()) {
+                    const fullPath = path.join(dirPath, entry.name);
+                    const stat = fs.statSync(fullPath);
+
+                    files.push({
+                        name: entry.name,
+                        path: fullPath,
+                        isDirectory: false,
+                        size: stat.size,
+                        modified: stat.mtime,
+                        created: stat.birthtime
+                    });
                 }
-
-                const fullPath = path.join(dirPath, entry.name);
-                const stat = fs.statSync(fullPath);
-
-                // シンボリックリンクなどで実体がフォルダの場合も除外
-                if (stat.isDirectory()) {
-                    continue;
-                }
-
-                files.push({
-                    name: entry.name,
-                    path: fullPath,
-                    isDirectory: false,
-                    size: stat.size,
-                    modified: stat.mtime,
-                    created: stat.birthtime
-                });
             }
 
             // Get sort configuration
@@ -2503,7 +2530,7 @@ class DocsProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDrag
             const sortBy = config.get<string>('sortBy', 'created');
             const sortOrder = config.get<string>('sortOrder', 'ascending');
 
-            // Sort files based on configuration
+            // Sort based on configuration
             files.sort((a, b) => {
                 let comparison = 0;
 
@@ -2849,6 +2876,7 @@ class EditorProvider implements vscode.WebviewViewProvider {
     private _isDirty: boolean = false;
     private _detailsProvider?: DocsProvider;
     private _tasksProvider?: TasksProvider;
+    private _terminalProvider?: TerminalProvider;
     private _pendingFileToRestore?: string;
 
     constructor(
@@ -3048,39 +3076,53 @@ class EditorProvider implements vscode.WebviewViewProvider {
                             relativeFilePath = this._currentFilePath;
                         }
 
-                        // Use parent directory name as terminal name
-                        const terminalName = path.basename(path.dirname(this._currentFilePath));
-                        let terminal = vscode.window.terminals.find(t => t.name === terminalName);
-                        if (!terminal) {
-                            terminal = vscode.window.createTerminal(terminalName);
-                        }
-                        terminal.show();
-
                         // Get the run command template from settings
                         const config = vscode.workspace.getConfiguration('aiCodingSidebar');
                         const commandTemplate = config.get<string>('editor.runCommand', 'claude "read ${filePath} and save your report to the same directory as ${filePath}"');
+                        const useTerminalView = config.get<boolean>('editor.useTerminalView', true);
 
                         // Replace ${filePath} placeholder with actual file path
                         const command = commandTemplate.replace(/\$\{filePath\}/g, relativeFilePath.trim());
-                        terminal.sendText(command, true);
+
+                        if (useTerminalView && this._terminalProvider) {
+                            // Send command to Terminal view
+                            this._terminalProvider.focus();
+                            await this._terminalProvider.sendCommand(command);
+                        } else {
+                            // Use VS Code standard terminal
+                            const terminalName = path.basename(path.dirname(this._currentFilePath));
+                            let terminal = vscode.window.terminals.find(t => t.name === terminalName);
+                            if (!terminal) {
+                                terminal = vscode.window.createTerminal(terminalName);
+                            }
+                            terminal.show();
+                            terminal.sendText(command, true);
+                        }
                     } else if (data.editorContent && data.editorContent.trim()) {
                         // No file open - use the editor content directly
                         const config = vscode.workspace.getConfiguration('aiCodingSidebar');
                         const commandTemplate = config.get<string>('editor.runCommandWithoutFile', 'claude "${editorContent}"');
+                        const useTerminalView = config.get<boolean>('editor.useTerminalView', true);
 
                         // Replace ${editorContent} placeholder with actual editor content
                         // Escape double quotes in editor content to prevent command injection
                         const escapedContent = data.editorContent.trim().replace(/"/g, '\\"');
                         const command = commandTemplate.replace(/\$\{editorContent\}/g, escapedContent);
 
-                        // Use default terminal name when no file is open
-                        const terminalName = 'AI Coding Sidebar';
-                        let terminal = vscode.window.terminals.find(t => t.name === terminalName);
-                        if (!terminal) {
-                            terminal = vscode.window.createTerminal(terminalName);
+                        if (useTerminalView && this._terminalProvider) {
+                            // Send command to Terminal view
+                            this._terminalProvider.focus();
+                            await this._terminalProvider.sendCommand(command);
+                        } else {
+                            // Use VS Code standard terminal
+                            const terminalName = 'AI Coding Sidebar';
+                            let terminal = vscode.window.terminals.find(t => t.name === terminalName);
+                            if (!terminal) {
+                                terminal = vscode.window.createTerminal(terminalName);
+                            }
+                            terminal.show();
+                            terminal.sendText(command, true);
                         }
-                        terminal.show();
-                        terminal.sendText(command, true);
                     } else {
                         vscode.window.showWarningMessage('Please enter some text in the editor to run a task.');
                     }
@@ -3189,6 +3231,10 @@ class EditorProvider implements vscode.WebviewViewProvider {
 
     public setTasksProvider(provider: TasksProvider): void {
         this._tasksProvider = provider;
+    }
+
+    public setTerminalProvider(provider: TerminalProvider): void {
+        this._terminalProvider = provider;
     }
 
     public clearFile(): void {
@@ -5393,6 +5439,299 @@ Shortcuts:
     </script>
 </body>
 </html>`;
+    }
+}
+
+// Terminal Provider
+class TerminalProvider implements vscode.WebviewViewProvider {
+    public static readonly viewType = 'terminalView';
+    private _view?: vscode.WebviewView;
+    private _terminalService: TerminalService;
+    private _currentSessionId?: string;
+    private _outputDisposable?: vscode.Disposable;
+
+    constructor(
+        private readonly _extensionUri: vscode.Uri,
+    ) {
+        this._terminalService = new TerminalService();
+    }
+
+    public resolveWebviewView(
+        webviewView: vscode.WebviewView,
+        context: vscode.WebviewViewResolveContext,
+        _token: vscode.CancellationToken,
+    ) {
+        this._view = webviewView;
+
+        webviewView.webview.options = {
+            enableScripts: true,
+            localResourceRoots: [this._extensionUri]
+        };
+
+        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+
+        // Webviewからのメッセージを受信
+        webviewView.webview.onDidReceiveMessage(async (data) => {
+            switch (data.type) {
+                case 'ready':
+                    // WebViewの準備が完了したらターミナルを開始
+                    await this._startTerminal();
+                    break;
+                case 'input':
+                    // ユーザー入力をPTYに送信
+                    if (this._currentSessionId) {
+                        this._terminalService.write(this._currentSessionId, data.data);
+                    }
+                    break;
+                case 'resize':
+                    // ターミナルサイズの変更
+                    if (this._currentSessionId) {
+                        this._terminalService.resize(this._currentSessionId, data.cols, data.rows);
+                    }
+                    break;
+            }
+        });
+
+        // WebViewが破棄されたときにセッションを終了
+        webviewView.onDidDispose(() => {
+            this._cleanup();
+        });
+    }
+
+    private async _startTerminal(): Promise<void> {
+        if (!this._terminalService.isAvailable()) {
+            this._view?.webview.postMessage({
+                type: 'error',
+                message: 'Terminal is not available. node-pty could not be loaded.'
+            });
+            return;
+        }
+
+        try {
+            // 既存のセッションをクリーンアップ
+            this._cleanup();
+
+            // ワークスペースルートを取得
+            const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+
+            // 新しいセッションを作成
+            this._currentSessionId = await this._terminalService.createSession(workspaceRoot);
+
+            // 出力リスナーを登録
+            this._outputDisposable = this._terminalService.onOutput(this._currentSessionId, (data) => {
+                this._view?.webview.postMessage({
+                    type: 'output',
+                    data: data
+                });
+            });
+
+            // ターミナル開始を通知
+            this._view?.webview.postMessage({
+                type: 'started'
+            });
+        } catch (error) {
+            console.error('Failed to start terminal:', error);
+            this._view?.webview.postMessage({
+                type: 'error',
+                message: `Failed to start terminal: ${error}`
+            });
+        }
+    }
+
+    private _cleanup(): void {
+        if (this._outputDisposable) {
+            this._outputDisposable.dispose();
+            this._outputDisposable = undefined;
+        }
+        if (this._currentSessionId) {
+            this._terminalService.killSession(this._currentSessionId);
+            this._currentSessionId = undefined;
+        }
+    }
+
+    public clearTerminal(): void {
+        this._view?.webview.postMessage({ type: 'clear' });
+    }
+
+    public killTerminal(): void {
+        this._cleanup();
+        this._view?.webview.postMessage({ type: 'killed' });
+    }
+
+    public async newTerminal(): Promise<void> {
+        this._cleanup();
+        this._view?.webview.postMessage({ type: 'clear' });
+        await this._startTerminal();
+    }
+
+    /**
+     * ターミナルにコマンドを送信
+     * @param command 実行するコマンド
+     * @param addNewline 改行を追加するかどうか（デフォルト: true）
+     */
+    public async sendCommand(command: string, addNewline: boolean = true): Promise<void> {
+        // ターミナルが開始されていない場合は開始
+        if (!this._currentSessionId) {
+            await this._startTerminal();
+        }
+
+        if (this._currentSessionId) {
+            // コマンドを送信
+            const commandToSend = addNewline ? command + '\n' : command;
+            this._terminalService.write(this._currentSessionId, commandToSend);
+        }
+    }
+
+    /**
+     * ターミナルビューをフォーカス
+     */
+    public focus(): void {
+        if (this._view) {
+            this._view.show(true);
+        }
+    }
+
+    private _getHtmlForWebview(webview: vscode.Webview): string {
+        // xterm.jsのローカルリソースURIを取得
+        const xtermCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'xterm', 'xterm.css'));
+        const xtermJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'xterm', 'xterm.js'));
+        const xtermFitUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'xterm', 'xterm-addon-fit.js'));
+
+        // 設定を取得
+        const config = vscode.workspace.getConfiguration('aiCodingSidebar');
+        const fontSize = config.get<number>('terminal.fontSize', 12);
+        const fontFamily = config.get<string>('terminal.fontFamily', 'monospace');
+        const cursorStyle = config.get<string>('terminal.cursorStyle', 'block');
+        const cursorBlink = config.get<boolean>('terminal.cursorBlink', true);
+        const scrollback = config.get<number>('terminal.scrollback', 1000);
+
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src ${webview.cspSource} 'unsafe-inline';">
+    <title>Terminal</title>
+    <link rel="stylesheet" href="${xtermCssUri}">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background: var(--vscode-terminal-background, #1e1e1e);
+        }
+        #terminal-container {
+            height: 100%;
+            width: 100%;
+        }
+        #error-message {
+            color: var(--vscode-errorForeground, #f44747);
+            padding: 10px;
+            display: none;
+        }
+        .xterm {
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="error-message"></div>
+    <div id="terminal-container"></div>
+    <script src="${xtermJsUri}"></script>
+    <script src="${xtermFitUri}"></script>
+    <script>
+        (function() {
+            const vscode = acquireVsCodeApi();
+            const terminalContainer = document.getElementById('terminal-container');
+            const errorMessage = document.getElementById('error-message');
+
+            // xterm.jsの初期化
+            const term = new Terminal({
+                fontSize: ${fontSize},
+                fontFamily: '${fontFamily}',
+                cursorStyle: '${cursorStyle}',
+                cursorBlink: ${cursorBlink},
+                scrollback: ${scrollback},
+                theme: {
+                    background: 'var(--vscode-terminal-background)',
+                    foreground: 'var(--vscode-terminal-foreground)',
+                    cursor: 'var(--vscode-terminalCursor-foreground)',
+                    cursorAccent: 'var(--vscode-terminalCursor-background)',
+                    selectionBackground: 'var(--vscode-terminal-selectionBackground)'
+                }
+            });
+
+            // Fit Addonをロード
+            const fitAddon = new FitAddon.FitAddon();
+            term.loadAddon(fitAddon);
+
+            // ターミナルを開く
+            term.open(terminalContainer);
+            fitAddon.fit();
+
+            // ユーザー入力をExtensionに送信
+            term.onData(data => {
+                vscode.postMessage({ type: 'input', data: data });
+            });
+
+            // リサイズを監視
+            const resizeObserver = new ResizeObserver(() => {
+                try {
+                    fitAddon.fit();
+                    vscode.postMessage({
+                        type: 'resize',
+                        cols: term.cols,
+                        rows: term.rows
+                    });
+                } catch (e) {
+                    console.error('Resize error:', e);
+                }
+            });
+            resizeObserver.observe(terminalContainer);
+
+            // Extensionからのメッセージを処理
+            window.addEventListener('message', event => {
+                const message = event.data;
+                switch (message.type) {
+                    case 'output':
+                        term.write(message.data);
+                        break;
+                    case 'clear':
+                        term.clear();
+                        break;
+                    case 'started':
+                        errorMessage.style.display = 'none';
+                        terminalContainer.style.display = 'block';
+                        fitAddon.fit();
+                        vscode.postMessage({
+                            type: 'resize',
+                            cols: term.cols,
+                            rows: term.rows
+                        });
+                        break;
+                    case 'killed':
+                        term.write('\\r\\n[Process terminated]\\r\\n');
+                        break;
+                    case 'error':
+                        errorMessage.textContent = message.message;
+                        errorMessage.style.display = 'block';
+                        break;
+                }
+            });
+
+            // 準備完了を通知
+            vscode.postMessage({ type: 'ready' });
+        })();
+    </script>
+</body>
+</html>`;
+    }
+
+    dispose(): void {
+        this._cleanup();
+        this._terminalService.dispose();
     }
 }
 

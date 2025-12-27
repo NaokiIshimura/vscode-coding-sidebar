@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.10] - 2025-12-27
+
+### Added
+- **Terminal View**: Embedded terminal in the sidebar using xterm.js and VSCode's built-in node-pty
+  - Full PTY support for shell command execution
+  - Controls: New terminal, Clear, and Kill buttons in the title bar
+  - Default visibility: Collapsed (expand when needed)
+  - Configurable settings:
+    - `aiCodingSidebar.terminal.shell`: Shell executable path (default: system shell)
+    - `aiCodingSidebar.terminal.fontSize`: Font size (default: 12)
+    - `aiCodingSidebar.terminal.fontFamily`: Font family (default: monospace)
+    - `aiCodingSidebar.terminal.cursorStyle`: Cursor style - block/underline/bar (default: block)
+    - `aiCodingSidebar.terminal.cursorBlink`: Enable cursor blinking (default: true)
+    - `aiCodingSidebar.terminal.scrollback`: Number of scrollback lines (default: 1000)
+- **Editor View - Terminal Integration**: Run commands can be sent to the embedded Terminal view
+  - Added `aiCodingSidebar.editor.useTerminalView` setting (default: true)
+  - When enabled, Run button sends commands to Terminal view instead of VSCode's integrated terminal
+  - When disabled, uses VSCode's integrated terminal as before
+
+### Changed
+- **Tasks View - Auto Focus**: Automatically focuses on Docs view when selecting a directory
+  - Improves workflow by moving focus to the file list after directory selection
+
 ## [0.7.9] - 2025-12-27
 
 ### Changed
@@ -668,6 +691,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.7.10]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.9...v0.7.10
 [0.7.9]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.8...v0.7.9
 [0.7.8]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.6...v0.7.8
 [0.7.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.5...v0.7.6

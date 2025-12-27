@@ -1,6 +1,7 @@
 # Compiled output
 out/
 *.js
+!media/xterm/*.js
 *.js.map
 
 # Node.js dependencies

@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.19] - 2025-12-27
+
+### Changed
+- **Tasks View - Title**: Changed title to fixed "TASKS" instead of dynamic "Tasks: path"
+  - Path is now displayed as the first item in the list instead of in the title
+  - At root directory: Shows path relative to project root (e.g., ".claude/tasks")
+  - In subdirectories: Shows path relative to Tasks root (e.g., "v0.7.19")
+- **Editor View - Run Focus**: Terminal view now receives focus when clicking the Run button
+  - Previously, focus remained on the Editor view after running
+  - Now automatically focuses the terminal for immediate interaction
+
 ## [0.7.18] - 2025-12-27
 
 ### Changed
@@ -777,10 +788,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
-<<<<<<< HEAD
+[0.7.19]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.18...v0.7.19
+[0.7.18]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.17...v0.7.18
+[0.7.17]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.16...v0.7.17
+[0.7.16]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.15...v0.7.16
 [0.7.15]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.14...v0.7.15
-=======
->>>>>>> origin/main
 [0.7.14]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.13...v0.7.14
 [0.7.13]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.11...v0.7.13
 [0.7.11]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.10...v0.7.11

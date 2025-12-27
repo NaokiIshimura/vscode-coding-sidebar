@@ -5,6 +5,17 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.7.19] - 2025-12-27
+
+### 変更
+- **Tasks View - タイトル**: タイトルを動的な「Tasks: パス」から固定の「TASKS」に変更
+  - パスはタイトルではなくリストの先頭アイテムとして表示されるように
+  - ルートディレクトリ: プロジェクトルートからの相対パスを表示（例: ".claude/tasks"）
+  - サブディレクトリ: Tasksルートからの相対パスを表示（例: "v0.7.19"）
+- **Editor View - Run時のフォーカス**: Runボタンをクリックした際にTerminal viewにフォーカスが移動するように変更
+  - 以前はRun実行後もEditor viewにフォーカスが残っていた
+  - ターミナルとの即座のインタラクションのため自動的にフォーカスを移動
+
 ## [0.7.18] - 2025-12-27
 
 ### 変更
@@ -283,10 +294,11 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
-<<<<<<< HEAD
+[0.7.19]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.18...v0.7.19
+[0.7.18]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.17...v0.7.18
+[0.7.17]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.16...v0.7.17
+[0.7.16]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.15...v0.7.16
 [0.7.15]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.14...v0.7.15
-=======
->>>>>>> origin/main
 [0.7.14]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.13...v0.7.14
 [0.7.13]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.11...v0.7.13
 [0.7.9]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.8...v0.7.9

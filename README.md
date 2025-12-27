@@ -7,15 +7,14 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 
 | Feature | Description |
 | --- | --- |
-| **Tasks** | Display directories under a specified path.<br>Configure a default path in settings.<br>Create new directories.<br>**Auto-focus**: Automatically focuses on Docs view when selecting a directory.<br>**Settings icon**: Quick access to default path configuration. |
-| **Docs** | Display all files and create new ones.<br>Files are sorted by creation date (ascending) by default.<br>The current sort order is shown in the view title (e.g., "Docs (Created ↑)").<br>Customize sort order in settings.<br>**Auto-refresh**: Automatically updates the file list when files are created, modified, or deleted in the current directory.<br>**Settings icon**: Quick access to sort configuration. |
-| **Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a timestamp-named Markdown file (format: `YYYY_MMDD_HHMM_TASK.md`).<br>Other Markdown files open in the standard editor.<br>Save with `Cmd+S` / `Ctrl+S` (creates new file if none is open - saves to current Docs directory or Tasks directory).<br>Run task with `Cmd+R` / `Ctrl+R` to send a customizable command to terminal (auto-saves before running, works even without a file open).<br>Create new markdown file with `Cmd+M` / `Ctrl+M`.<br>**Customizable run command**: Configure the command executed by the Run button in settings.<br>**Run without file**: Execute commands using editor content when no file is open.<br>**Terminal View integration**: Run commands can be sent to the embedded Terminal view (configurable).<br>Automatically switches to read-only mode when the file is active in VSCode editor.<br>Auto-saves when switching to another extension or file.<br>Restores the editing file when returning from another extension.<br>**Settings icon**: Quick access to run command configuration. |
+| **Tasks** | Display directories and files under a specified path in a unified hierarchical view.<br>Configure a default path in settings.<br>Create new directories and files.<br>**Hierarchical display**: Directories contain both subdirectories and files in a tree structure.<br>Files are sorted by creation date (ascending) by default within each directory.<br>**Drag & Drop**: Copy files by dragging them within the view or from external sources.<br>**Auto-refresh**: Automatically updates when files are created, modified, or deleted.<br>**Settings icon**: Quick access to default path and sort configuration. |
+| **Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a timestamp-named Markdown file (format: `YYYY_MMDD_HHMM_TASK.md`).<br>Other Markdown files open in the standard editor.<br>Save with `Cmd+S` / `Ctrl+S` (creates new file if none is open - saves to current Tasks directory).<br>Run task with `Cmd+R` / `Ctrl+R` to send a customizable command to terminal (auto-saves before running, works even without a file open).<br>Create new markdown file with `Cmd+M` / `Ctrl+M`.<br>**Customizable run command**: Configure the command executed by the Run button in settings.<br>**Run without file**: Execute commands using editor content when no file is open.<br>**Terminal View integration**: Run commands can be sent to the embedded Terminal view (configurable).<br>Automatically switches to read-only mode when the file is active in VSCode editor.<br>Auto-saves when switching to another extension or file.<br>Restores the editing file when returning from another extension.<br>**Settings icon**: Quick access to run command configuration. |
 | **Terminal** | Embedded terminal in the sidebar using xterm.js.<br>Supports shell commands with full PTY support.<br>**Configurable**: Customize shell path, font size, font family, cursor style, cursor blink, and scrollback lines.<br>**Controls**: New terminal, Clear, and Kill buttons in the title bar.<br>**Default visibility**: Collapsed (expand when needed). |
-| **Menu** | Open user or global settings.<br>Customize templates.<br>Quick shortcuts: Open terminal, Checkout default branch, Git pull, Duplicate workspace in new window.<br>**Beta Features**: Open Task Panel to view Docs & Editor in the editor area. |
+| **Menu** | Open user or global settings.<br>Customize templates.<br>Quick shortcuts: Open terminal, Checkout default branch, Git pull, Duplicate workspace in new window.<br>**Beta Features**: Open Task Panel to view files & Editor in the editor area. |
 
 ### Task Panel (Beta)
 
-When enabled via `aiCodingSidebar.taskPanel.enabled`, the Task Panel provides an integrated view of Docs and Editor in the editor area.
+When enabled via `aiCodingSidebar.taskPanel.enabled`, the Task Panel provides an integrated view of files and Editor in the editor area.
 
 | Feature | Description |
 | --- | --- |
@@ -41,14 +40,14 @@ When enabled via `aiCodingSidebar.taskPanel.enabled`, the Task Panel provides an
 ### Basic actions
 1. Click the "AI Coding Sidebar" icon in the activity bar (or press `Cmd+Shift+A` / `Ctrl+Shift+A`).
 2. Use Tasks to create the folder you use for AI coding.
-3. Create Markdown files from Docs.
-4. Click a timestamp-named Markdown file (e.g., `2025_1103_1227_TASK.md`) in Docs to edit it in the Editor view below. Other Markdown files open in the standard editor.
+3. Create Markdown files from the Tasks view.
+4. Click a timestamp-named Markdown file (e.g., `2025_1103_1227_TASK.md`) in Tasks to edit it in the Editor view below. Other Markdown files open in the standard editor.
 5. Write instructions for the AI in the Editor and save with `Cmd+S` / `Ctrl+S`.
-6. Right-click the Markdown file in Docs and choose "Copy Relative Path," then share it with your AI tool.
+6. Right-click the Markdown file in Tasks and choose "Copy Relative Path," then share it with your AI tool.
 
 ## Template Feature
 
-When you create a file from Docs, you can automatically populate it with a template. This keeps Markdown files used for AI coding consistent and saves time.
+When you create a file from Tasks, you can automatically populate it with a template. This keeps Markdown files used for AI coding consistent and saves time.
 
 ### Configure the template
 1. Click the gear icon (⚙️) in the Tasks pane.
@@ -93,7 +92,7 @@ Use the following variables inside a template:
 | Rename | Rename files and folders. |
 | Delete | Delete files and folders (moved to trash). |
 | Copy / Cut / Paste | Perform standard clipboard operations. |
-| Drag & Drop | Copy files by dragging them within the Docs view or from external sources. Displays a success message after copying. |
+| Drag & Drop | Copy files by dragging them within the Tasks view or from external sources. Displays a success message after copying. |
 | Archive | Archive task directories to keep your workspace organized. Right-click a directory in Tasks view and select "Archive" to move it to the `archived` folder. If a directory with the same name already exists, a timestamp is automatically added to avoid conflicts. |
 | Checkout Branch | Right-click a directory to checkout a git branch using the directory name. Creates the branch if it doesn't exist, or switches to it if it already exists. |
 
@@ -103,9 +102,9 @@ Use the following variables inside a template:
 
 | Item | Steps |
 | --- | --- |
-| Start Task | Click the rocket icon (🚀) in Tasks title menu.<br>Creates a new directory under the default path and automatically generates a timestamped Markdown file.<br>The file is selected in Docs with "editing" label and opens in Editor View. |
+| Start Task | Click the rocket icon (🚀) in Tasks title menu.<br>Creates a new directory under the default path and automatically generates a timestamped Markdown file.<br>The file is selected in Tasks with "editing" label and opens in Editor View. |
 | New Directory | Click the folder icon in Tasks.<br>Creates a new directory under the currently selected directory. |
-| Create a file | Click the "+" icon in Docs.<br>A timestamped Markdown file is created (for example, `2025_1103_1227_TASK.md`) and opens in Editor View. |
+| Create a file | Click the "+" icon in Tasks.<br>A timestamped Markdown file is created (for example, `2025_1103_1227_TASK.md`) and opens in Editor View. |
 
 ### Configure the Default Relative Path
 

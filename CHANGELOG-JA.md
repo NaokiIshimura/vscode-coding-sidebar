@@ -5,6 +5,21 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.7.13] - 2025-12-27
+
+### 変更
+- **Tasks View - 統合階層表示**: TasksビューとDocsビューを単一の階層ツリービューに統合
+  - ディレクトリ内にサブディレクトリとファイルをツリー構造で表示
+  - ファイルはデフォルトで各ディレクトリ内で作成日時の昇順でソート
+  - 別々のDocsビューを削除 - すべてのコンテンツがTasksに統合
+  - ドラッグ&ドロップ機能をTasksビューに移植
+  - ビュー数を削減してシンプルなサイドバーを実現
+
+### 削除
+- **Docs View**: 別々のDocsビューを削除
+  - すべてのファイル閲覧機能がTasksビューに統合
+  - ファイル操作（作成、名前変更、削除、コピー）はTasksのコンテキストメニューから利用可能
+
 ## [0.7.9] - 2025-12-27
 
 ### 変更
@@ -204,6 +219,7 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.7.13]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.11...v0.7.13
 [0.7.9]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.8...v0.7.9
 [0.7.8]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.6...v0.7.8
 [0.3.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.5...v0.3.6

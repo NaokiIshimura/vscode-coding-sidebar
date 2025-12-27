@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Editor View - Run Focus**: Terminal view now receives focus when clicking the Run button
   - Previously, focus remained on the Editor view after running
   - Now automatically focuses the terminal for immediate interaction
+- **Terminal View - Scroll Position**: Scroll position is now maintained at bottom when resizing
+  - When the view is resized while scrolled to the bottom, it stays at the bottom
+  - If scrolled up, the scroll position is preserved
 
 ## [0.7.18] - 2025-12-27
 

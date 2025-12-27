@@ -3452,7 +3452,16 @@ class TerminalProvider implements vscode.WebviewViewProvider {
             // リサイズを監視
             const resizeObserver = new ResizeObserver(() => {
                 try {
+                    // リサイズ前にスクロール位置が最下部かどうかを確認
+                    const wasAtBottom = term.buffer.active.viewportY === term.buffer.active.baseY;
+
                     fitAddon.fit();
+
+                    // スクロール位置が最下部だった場合は維持
+                    if (wasAtBottom) {
+                        term.scrollToBottom();
+                    }
+
                     vscode.postMessage({
                         type: 'resize',
                         cols: term.cols,

@@ -5,6 +5,13 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.7.16] - 2025-12-27
+
+### 修正
+- **Terminal View**: Marketplaceからインストールした際にターミナルが表示されない問題を修正
+  - xterm.jsライブラリファイルをGit追跡対象に追加（`.gitignore`で除外されていた）
+  - `.gitignore`を更新して`media/xterm/*.js`ファイルがVSIXパッケージに含まれるように
+
 ## [0.7.15] - 2025-12-27
 
 ### 追加

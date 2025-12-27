@@ -5,6 +5,14 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.7.9] - 2025-12-27
+
+### 変更
+- **Active Panels View - デフォルト表示状態**: デフォルトの表示状態を「表示」から「折りたたみ」に変更
+  - Active Panelsビューはサイドバーを開いた時にデフォルトで折りたたまれた状態になります
+  - 開いているTask Panelの一覧を確認したい場合にユーザーが展開できます
+  - Task Panelを頻繁に使用しないユーザーのサイドバーの視覚的な煩雑さを軽減
+
 ## [0.7.8] - 2025-12-27
 
 ### 追加
@@ -196,6 +204,8 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.7.9]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.8...v0.7.9
+[0.7.8]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.6...v0.7.8
 [0.3.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.5...v0.3.6
 [0.3.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.4...v0.3.5
 [0.3.4]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.3...v0.3.4

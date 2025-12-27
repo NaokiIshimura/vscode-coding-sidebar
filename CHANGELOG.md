@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.9] - 2025-12-27
+
+### Changed
+- **Active Panels View - Default Visibility**: Changed default visibility from "visible" to "collapsed"
+  - Active Panels view is now collapsed by default when first opening the sidebar
+  - Users can expand the view when needed to see the list of open Task Panels
+  - Reduces visual clutter in the sidebar for users who don't frequently use Task Panels
+
 ## [0.7.8] - 2025-12-27
 
 ### Added
@@ -660,6 +668,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.7.9]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.8...v0.7.9
+[0.7.8]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.6...v0.7.8
 [0.7.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.5...v0.7.6
 [0.7.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.4...v0.7.5
 [0.7.4]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.3...v0.7.4

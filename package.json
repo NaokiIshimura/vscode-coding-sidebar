@@ -2,7 +2,7 @@
   "name": "ai-coding-sidebar",
   "displayName": "AI Coding Sidebar",
   "description": "A sidebar extension that strengthens integration with AI coding tools.Browse and manage files and folders efficiently to keep coding with AI smooth.",
-  "version": "0.7.9",
+  "version": "0.7.10",
   "publisher": "nacn",
   "icon": "images/icon.png",
   "repository": {
@@ -189,6 +189,21 @@
         "command": "aiCodingSidebar.refreshOpenPanels",
         "title": "Refresh Open Panels",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "aiCodingSidebar.terminalNew",
+        "title": "New Terminal",
+        "icon": "$(add)"
+      },
+      {
+        "command": "aiCodingSidebar.terminalClear",
+        "title": "Clear Terminal",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "aiCodingSidebar.terminalKill",
+        "title": "Kill Terminal",
+        "icon": "$(trash)"
       }
     ],
     "views": {
@@ -219,6 +234,13 @@
           "type": "webview",
           "retainContextWhenHidden": true,
           "visibility": "visible"
+        },
+        {
+          "id": "terminalView",
+          "name": "Terminal",
+          "type": "webview",
+          "retainContextWhenHidden": true,
+          "visibility": "collapsed"
         }
       ]
     },
@@ -282,6 +304,21 @@
           "command": "aiCodingSidebar.refreshOpenPanels",
           "when": "view == openPanels",
           "group": "navigation@1"
+        },
+        {
+          "command": "aiCodingSidebar.terminalNew",
+          "when": "view == terminalView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "aiCodingSidebar.terminalClear",
+          "when": "view == terminalView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "aiCodingSidebar.terminalKill",
+          "when": "view == terminalView",
+          "group": "navigation@3"
         }
       ],
       "view/item/context": [
@@ -439,6 +476,11 @@
           "default": "claude \"${editorContent}\"",
           "description": "Command template to execute when clicking the Run button without a file open. Use ${editorContent} as placeholder for the editor content."
         },
+        "aiCodingSidebar.editor.useTerminalView": {
+          "type": "boolean",
+          "default": true,
+          "description": "When enabled, the Run button sends commands to the Terminal view instead of the standard VS Code terminal."
+        },
         "aiCodingSidebar.taskPanel.enabled": {
           "type": "boolean",
           "default": false,
@@ -456,6 +498,45 @@
             "Open files below the Task Panel",
             "Open files beside the Task Panel (to the right)"
           ]
+        },
+        "aiCodingSidebar.terminal.shell": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the shell executable. Leave empty to use the default shell."
+        },
+        "aiCodingSidebar.terminal.fontSize": {
+          "type": "number",
+          "default": 12,
+          "minimum": 6,
+          "maximum": 32,
+          "description": "Font size for the terminal."
+        },
+        "aiCodingSidebar.terminal.fontFamily": {
+          "type": "string",
+          "default": "monospace",
+          "description": "Font family for the terminal."
+        },
+        "aiCodingSidebar.terminal.cursorStyle": {
+          "type": "string",
+          "enum": [
+            "block",
+            "underline",
+            "bar"
+          ],
+          "default": "block",
+          "description": "Cursor style for the terminal."
+        },
+        "aiCodingSidebar.terminal.cursorBlink": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether the cursor should blink."
+        },
+        "aiCodingSidebar.terminal.scrollback": {
+          "type": "number",
+          "default": 1000,
+          "minimum": 100,
+          "maximum": 10000,
+          "description": "Number of lines to keep in the scrollback buffer."
         }
       }
     }
@@ -471,9 +552,13 @@
     "build:release": "npm run compile && npm run package"
   },
   "devDependencies": {
-    "@types/vscode": "^1.74.0",
     "@types/node": "16.x",
-    "typescript": "^4.9.4",
-    "@vscode/vsce": "^3.6.2"
+    "@types/vscode": "^1.74.0",
+    "@vscode/vsce": "^3.6.2",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "xterm": "^5.3.0",
+    "xterm-addon-fit": "^0.8.0"
   }
 }

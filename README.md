@@ -7,9 +7,10 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 
 | Feature | Description |
 | --- | --- |
-| **Tasks** | Display directories under a specified path.<br>Configure a default path in settings.<br>Create new directories.<br>**Settings icon**: Quick access to default path configuration. |
+| **Tasks** | Display directories under a specified path.<br>Configure a default path in settings.<br>Create new directories.<br>**Auto-focus**: Automatically focuses on Docs view when selecting a directory.<br>**Settings icon**: Quick access to default path configuration. |
 | **Docs** | Display all files and create new ones.<br>Files are sorted by creation date (ascending) by default.<br>The current sort order is shown in the view title (e.g., "Docs (Created ↑)").<br>Customize sort order in settings.<br>**Auto-refresh**: Automatically updates the file list when files are created, modified, or deleted in the current directory.<br>**Settings icon**: Quick access to sort configuration. |
-| **Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a timestamp-named Markdown file (format: `YYYY_MMDD_HHMM_TASK.md`).<br>Other Markdown files open in the standard editor.<br>Save with `Cmd+S` / `Ctrl+S` (creates new file if none is open - saves to current Docs directory or Tasks directory).<br>Run task with `Cmd+R` / `Ctrl+R` to send a customizable command to terminal (auto-saves before running, works even without a file open).<br>Create new markdown file with `Cmd+M` / `Ctrl+M`.<br>**Customizable run command**: Configure the command executed by the Run button in settings.<br>**Run without file**: Execute commands using editor content when no file is open.<br>Automatically switches to read-only mode when the file is active in VSCode editor.<br>Auto-saves when switching to another extension or file.<br>Restores the editing file when returning from another extension.<br>**Settings icon**: Quick access to run command configuration. |
+| **Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a timestamp-named Markdown file (format: `YYYY_MMDD_HHMM_TASK.md`).<br>Other Markdown files open in the standard editor.<br>Save with `Cmd+S` / `Ctrl+S` (creates new file if none is open - saves to current Docs directory or Tasks directory).<br>Run task with `Cmd+R` / `Ctrl+R` to send a customizable command to terminal (auto-saves before running, works even without a file open).<br>Create new markdown file with `Cmd+M` / `Ctrl+M`.<br>**Customizable run command**: Configure the command executed by the Run button in settings.<br>**Run without file**: Execute commands using editor content when no file is open.<br>**Terminal View integration**: Run commands can be sent to the embedded Terminal view (configurable).<br>Automatically switches to read-only mode when the file is active in VSCode editor.<br>Auto-saves when switching to another extension or file.<br>Restores the editing file when returning from another extension.<br>**Settings icon**: Quick access to run command configuration. |
+| **Terminal** | Embedded terminal in the sidebar using xterm.js.<br>Supports shell commands with full PTY support.<br>**Configurable**: Customize shell path, font size, font family, cursor style, cursor blink, and scrollback lines.<br>**Controls**: New terminal, Clear, and Kill buttons in the title bar.<br>**Default visibility**: Collapsed (expand when needed). |
 | **Menu** | Open user or global settings.<br>Customize templates.<br>Quick shortcuts: Open terminal, Checkout default branch, Git pull, Duplicate workspace in new window.<br>**Beta Features**: Open Task Panel to view Docs & Editor in the editor area. |
 
 ### Task Panel (Beta)
@@ -140,6 +141,13 @@ If the default relative path doesn't exist, Tasks displays a "Create directory" 
 | `markdownList.sortOrder` | Sort order for files in Docs | string | `"ascending"` | `"ascending"` (ascending)<br>`"descending"` (descending) |
 | `editor.runCommand` | Command template to execute when clicking the Run button in the Editor view | string | `claude "read ${filePath} and save your report to the same directory as ${filePath}"` | Use `${filePath}` as placeholder for the file path |
 | `editor.runCommandWithoutFile` | Command template to execute when clicking the Run button without a file open | string | `claude "${editorContent}"` | Use `${editorContent}` as placeholder for the editor content |
+| `editor.useTerminalView` | Send Run commands to the embedded Terminal view | boolean | `true` | When enabled, Run button sends commands to the Terminal view instead of VSCode's integrated terminal |
+| `terminal.shell` | Shell executable path for Terminal view | string | `""` | Leave empty to use system default shell |
+| `terminal.fontSize` | Font size for Terminal view | number | `12` | Any positive number |
+| `terminal.fontFamily` | Font family for Terminal view | string | `"monospace"` | Any valid font family |
+| `terminal.cursorStyle` | Cursor style for Terminal view | string | `"block"` | `"block"`, `"underline"`, `"bar"` |
+| `terminal.cursorBlink` | Enable cursor blinking in Terminal view | boolean | `true` | `true` or `false` |
+| `terminal.scrollback` | Number of scrollback lines in Terminal view | number | `1000` | Any positive number |
 | `combinedPanel.enabled` | Enable Combined Panel (Beta) | boolean | `false` | When enabled, selecting a directory in Tasks view opens the Combined Panel in the editor area |
 | `taskPanel.nonTaskFilePosition` | Position to open non-task files in Task Panel | string | `"beside"` | `"below"` (open below the Task Panel)<br>`"beside"` (open to the right of the Task Panel) |
 
@@ -154,6 +162,9 @@ Add the following to `.vscode/settings.json`:
   "aiCodingSidebar.markdownList.sortOrder": "ascending",
   "aiCodingSidebar.editor.runCommand": "claude \"read ${filePath} and save your report to the same directory as ${filePath}\"",
   "aiCodingSidebar.editor.runCommandWithoutFile": "claude \"${editorContent}\"",
+  "aiCodingSidebar.editor.useTerminalView": true,
+  "aiCodingSidebar.terminal.fontSize": 12,
+  "aiCodingSidebar.terminal.cursorStyle": "block",
   "aiCodingSidebar.combinedPanel.enabled": true,
   "aiCodingSidebar.taskPanel.nonTaskFilePosition": "beside"
 }

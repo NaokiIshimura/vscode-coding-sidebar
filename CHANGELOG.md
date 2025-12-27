@@ -15,6 +15,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Uses xterm-addon-web-links for URL detection
   - Custom link provider for file path detection
 
+## [0.7.13] - 2025-12-27
+
+### Changed
+- **Tasks View - Unified Hierarchical Display**: Merged Tasks and Docs views into a single hierarchical tree view
+  - Directories now display both subdirectories and files in a tree structure
+  - Files are sorted by creation date (ascending) by default within each directory
+  - Removed the separate Docs view - all content is now in Tasks
+  - Drag & Drop functionality moved to Tasks view
+  - Simplified sidebar with fewer views for a cleaner interface
+
+### Removed
+- **Docs View**: Removed the separate Docs view
+  - All file browsing functionality is now integrated into the Tasks view
+  - File operations (create, rename, delete, copy) are available via context menu in Tasks
+
 ## [0.7.11] - 2025-12-27
 
 ### Fixed
@@ -708,7 +723,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
-[0.7.14]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.11...v0.7.14
+[0.7.14]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.13...v0.7.14
+[0.7.13]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.11...v0.7.13
 [0.7.11]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.10...v0.7.11
 [0.7.10]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.9...v0.7.10
 [0.7.9]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.8...v0.7.9

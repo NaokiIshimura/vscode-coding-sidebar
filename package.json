@@ -224,11 +224,6 @@
           "name": "Tasks"
         },
         {
-          "id": "aiCodingSidebarDetails",
-          "name": "Docs",
-          "visibility": "visible"
-        },
-        {
           "id": "markdownEditor",
           "name": "Editor",
           "type": "webview",
@@ -277,18 +272,13 @@
         },
         {
           "command": "aiCodingSidebar.createMarkdownFile",
-          "when": "view == aiCodingSidebarDetails",
-          "group": "navigation@1"
+          "when": "view == aiCodingSidebarExplorer",
+          "group": "navigation@5"
         },
         {
           "command": "aiCodingSidebar.openDocsSettings",
-          "when": "view == aiCodingSidebarDetails",
-          "group": "navigation@2"
-        },
-        {
-          "command": "aiCodingSidebar.refresh",
-          "when": "view == aiCodingSidebarDetails",
-          "group": "navigation@3"
+          "when": "view == aiCodingSidebarExplorer",
+          "group": "navigation@6"
         },
         {
           "command": "aiCodingSidebar.createMarkdownFile",
@@ -363,33 +353,33 @@
           "group": "1_copy@2"
         },
         {
-          "command": "aiCodingSidebar.showInPanel",
-          "when": "view == aiCodingSidebarDetails && viewItem == directory",
-          "group": "inline"
-        },
-        {
           "command": "aiCodingSidebar.createMarkdownFile",
-          "when": "view == aiCodingSidebarDetails && viewItem == directory",
+          "when": "view == aiCodingSidebarExplorer && viewItem == directory",
           "group": "2_workspace"
         },
         {
+          "command": "aiCodingSidebar.createFile",
+          "when": "view == aiCodingSidebarExplorer && viewItem == directory",
+          "group": "2_workspace@2"
+        },
+        {
           "command": "aiCodingSidebar.rename",
-          "when": "view == aiCodingSidebarDetails",
+          "when": "view == aiCodingSidebarExplorer && viewItem == file",
           "group": "3_edit@1"
         },
         {
           "command": "aiCodingSidebar.delete",
-          "when": "view == aiCodingSidebarDetails",
+          "when": "view == aiCodingSidebarExplorer && viewItem == file",
           "group": "3_edit@2"
         },
         {
           "command": "aiCodingSidebar.openInEditor",
-          "when": "view == aiCodingSidebarDetails && viewItem == file",
+          "when": "view == aiCodingSidebarExplorer && viewItem == file",
           "group": "1_copy@1"
         },
         {
           "command": "aiCodingSidebar.copyRelativePath",
-          "when": "view == aiCodingSidebarDetails",
+          "when": "view == aiCodingSidebarExplorer && viewItem == file",
           "group": "1_copy@2"
         },
         {

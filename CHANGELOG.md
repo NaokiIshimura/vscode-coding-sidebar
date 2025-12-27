@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.15] - 2025-12-27
+
+### Added
+- **Terminal View - Session Persistence**: Terminal session and output history are now preserved when switching views or extensions
+  - Added `retainContextWhenHidden: true` to Terminal view configuration
+  - Terminal output buffer (xterm.js) is maintained when the view becomes hidden
+  - No more loss of terminal history when focusing on other views or extensions
+
 ## [0.7.14] - 2025-12-27
 
 ### Added
@@ -723,6 +731,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+<<<<<<< HEAD
+[0.7.15]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.14...v0.7.15
+=======
+>>>>>>> origin/main
 [0.7.14]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.13...v0.7.14
 [0.7.13]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.11...v0.7.13
 [0.7.11]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.10...v0.7.11

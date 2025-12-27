@@ -5,6 +5,14 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.7.15] - 2025-12-27
+
+### 追加
+- **Terminal View - セッション維持**: ビューや拡張機能を切り替えてもターミナルセッションと出力履歴が保持されるように
+  - Terminal viewの設定に`retainContextWhenHidden: true`を追加
+  - ビューが非表示になってもターミナル出力バッファ（xterm.js）が維持される
+  - 他のビューや拡張機能にフォーカスを移動しても、ターミナル履歴が失われなくなりました
+
 ## [0.7.14] - 2025-12-27
 
 ### 追加
@@ -229,6 +237,10 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+<<<<<<< HEAD
+[0.7.15]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.14...v0.7.15
+=======
+>>>>>>> origin/main
 [0.7.14]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.13...v0.7.14
 [0.7.13]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.11...v0.7.13
 [0.7.9]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.8...v0.7.9

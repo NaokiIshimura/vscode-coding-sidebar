@@ -451,6 +451,11 @@ export function activate(context: vscode.ExtensionContext) {
         await vscode.commands.executeCommand('workbench.action.openSettings', 'aiCodingSidebar.editor.runCommand');
     });
 
+    // Terminal設定を開くコマンドを登録
+    const openTerminalSettingsCommand = vscode.commands.registerCommand('aiCodingSidebar.openTerminalSettings', async () => {
+        await vscode.commands.executeCommand('workbench.action.openSettings', 'aiCodingSidebar.terminal');
+    });
+
     // ワークスペース設定コマンドを登録
     const setupWorkspaceCommand = vscode.commands.registerCommand('aiCodingSidebar.setupWorkspace', async () => {
         if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
@@ -1366,7 +1371,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openTasksSettingsCommand, openEditorSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, newDirectoryCommand, renameDirectoryCommand, deleteDirectoryCommand, archiveDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand, navigateToDirectoryCommand);
+    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openTasksSettingsCommand, openEditorSettingsCommand, openTerminalSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, newDirectoryCommand, renameDirectoryCommand, deleteDirectoryCommand, archiveDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand, navigateToDirectoryCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({
@@ -3191,6 +3196,15 @@ class TerminalProvider implements vscode.WebviewViewProvider {
                         }
                     }
                     break;
+                case 'newTerminal':
+                    await this.newTerminal();
+                    break;
+                case 'clearTerminal':
+                    this.clearTerminal();
+                    break;
+                case 'killTerminal':
+                    this.killTerminal();
+                    break;
             }
         });
 
@@ -3216,6 +3230,11 @@ class TerminalProvider implements vscode.WebviewViewProvider {
             // ワークスペースルートを取得
             const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 
+            // シェル名を取得
+            const config = vscode.workspace.getConfiguration('aiCodingSidebar');
+            const shellPath = config.get<string>('terminal.shell') || process.env.SHELL || '/bin/bash';
+            const shellName = path.basename(shellPath);
+
             // 新しいセッションを作成
             this._currentSessionId = await this._terminalService.createSession(workspaceRoot);
 
@@ -3227,9 +3246,10 @@ class TerminalProvider implements vscode.WebviewViewProvider {
                 });
             });
 
-            // ターミナル開始を通知
+            // ターミナル開始を通知（シェル名を含む）
             this._view?.webview.postMessage({
-                type: 'started'
+                type: 'started',
+                shellName: shellName
             });
         } catch (error) {
             console.error('Failed to start terminal:', error);
@@ -3328,8 +3348,44 @@ class TerminalProvider implements vscode.WebviewViewProvider {
             overflow: hidden;
             background: var(--vscode-terminal-background, #1e1e1e);
         }
+        #header {
+            height: 33px;
+            padding: 0 8px;
+            background-color: var(--vscode-editor-background);
+            border-bottom: 1px solid var(--vscode-panel-border);
+            font-size: 12px;
+            color: var(--vscode-foreground);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-sizing: border-box;
+        }
+        .header-title {
+            display: flex;
+            align-items: center;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .header-button {
+            padding: 2px 6px;
+            font-size: 11px;
+            background-color: transparent;
+            color: var(--vscode-foreground);
+            border: 1px solid var(--vscode-button-border, transparent);
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        .header-button:hover {
+            background-color: var(--vscode-toolbar-hoverBackground);
+        }
+        .header-button.danger:hover {
+            background-color: var(--vscode-inputValidation-errorBackground, #5a1d1d);
+        }
         #terminal-container {
-            height: 100%;
+            height: calc(100% - 33px);
             width: 100%;
         }
         #error-message {
@@ -3343,6 +3399,16 @@ class TerminalProvider implements vscode.WebviewViewProvider {
     </style>
 </head>
 <body>
+    <div id="header">
+        <div class="header-title">
+            <span id="shell-name">Terminal</span>
+        </div>
+        <div class="header-actions">
+            <button class="header-button" id="new-button" title="New Terminal">+ New</button>
+            <button class="header-button" id="clear-button" title="Clear Terminal">Clear</button>
+            <button class="header-button danger" id="kill-button" title="Kill Terminal">Kill</button>
+        </div>
+    </div>
     <div id="error-message"></div>
     <div id="terminal-container"></div>
     <script src="${xtermJsUri}"></script>
@@ -3481,6 +3547,10 @@ class TerminalProvider implements vscode.WebviewViewProvider {
                     case 'started':
                         errorMessage.style.display = 'none';
                         terminalContainer.style.display = 'block';
+                        // シェル名を更新
+                        if (message.shellName) {
+                            document.getElementById('shell-name').textContent = message.shellName;
+                        }
                         fitAddon.fit();
                         vscode.postMessage({
                             type: 'resize',
@@ -3499,6 +3569,17 @@ class TerminalProvider implements vscode.WebviewViewProvider {
                         term.focus();
                         break;
                 }
+            });
+
+            // ヘッダーボタンのイベントハンドラ
+            document.getElementById('new-button')?.addEventListener('click', () => {
+                vscode.postMessage({ type: 'newTerminal' });
+            });
+            document.getElementById('clear-button')?.addEventListener('click', () => {
+                vscode.postMessage({ type: 'clearTerminal' });
+            });
+            document.getElementById('kill-button')?.addEventListener('click', () => {
+                vscode.postMessage({ type: 'killTerminal' });
             });
 
             // 準備完了を通知

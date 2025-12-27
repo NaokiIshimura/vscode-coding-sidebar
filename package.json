@@ -2,7 +2,7 @@
   "name": "ai-coding-sidebar",
   "displayName": "AI Coding Panel",
   "description": "A sidebar extension that strengthens integration with AI coding tools.Browse and manage files and folders efficiently to keep coding with AI smooth.",
-  "version": "0.7.20",
+  "version": "0.7.21",
   "publisher": "nacn",
   "icon": "images/icon.png",
   "repository": {
@@ -179,6 +179,11 @@
         "command": "aiCodingSidebar.terminalKill",
         "title": "Kill Terminal",
         "icon": "$(trash)"
+      },
+      {
+        "command": "aiCodingSidebar.openTerminalSettings",
+        "title": "Terminal Settings",
+        "icon": "$(settings-gear)"
       }
     ],
     "views": {
@@ -251,19 +256,9 @@
           "group": "navigation@2"
         },
         {
-          "command": "aiCodingSidebar.terminalNew",
+          "command": "aiCodingSidebar.openTerminalSettings",
           "when": "view == terminalView",
           "group": "navigation@1"
-        },
-        {
-          "command": "aiCodingSidebar.terminalClear",
-          "when": "view == terminalView",
-          "group": "navigation@2"
-        },
-        {
-          "command": "aiCodingSidebar.terminalKill",
-          "when": "view == terminalView",
-          "group": "navigation@3"
         }
       ],
       "view/item/context": [

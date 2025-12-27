@@ -5647,6 +5647,12 @@ class TerminalProvider implements vscode.WebviewViewProvider {
             const terminalContainer = document.getElementById('terminal-container');
             const errorMessage = document.getElementById('error-message');
 
+            // CSS変数から色を取得するヘルパー関数
+            function getCssVar(name, fallback) {
+                const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+                return value || fallback;
+            }
+
             // xterm.jsの初期化
             const term = new Terminal({
                 fontSize: ${fontSize},
@@ -5655,11 +5661,11 @@ class TerminalProvider implements vscode.WebviewViewProvider {
                 cursorBlink: ${cursorBlink},
                 scrollback: ${scrollback},
                 theme: {
-                    background: 'var(--vscode-terminal-background)',
-                    foreground: 'var(--vscode-terminal-foreground)',
-                    cursor: 'var(--vscode-terminalCursor-foreground)',
-                    cursorAccent: 'var(--vscode-terminalCursor-background)',
-                    selectionBackground: 'var(--vscode-terminal-selectionBackground)'
+                    background: getCssVar('--vscode-terminal-background', '#1e1e1e'),
+                    foreground: getCssVar('--vscode-terminal-foreground', '#cccccc'),
+                    cursor: getCssVar('--vscode-terminalCursor-foreground', '#ffffff'),
+                    cursorAccent: getCssVar('--vscode-terminalCursor-background', '#000000'),
+                    selectionBackground: getCssVar('--vscode-terminal-selectionBackground', '#264f78')
                 }
             });
 

@@ -5,6 +5,20 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.7.17] - 2025-12-27
+
+### 変更
+- **名称変更**: 拡張機能の表記名を「AI Coding Sidebar」から「AI Coding Panel」に変更
+  - アクティビティバータイトル、設定タイトル、ステータスバー、ターミナル名を更新
+  - READMEとREADME-JAドキュメントを更新
+- **Tasks View - ディレクトリクリック動作**: Task Panel設定に応じてディレクトリクリック時の動作を変更
+  - `taskPanel.enabled: false`の場合: クリックで展開/折りたたみ（標準動作）
+  - `taskPanel.enabled: true`の場合: クリックでTask Panelを開く（従来の動作）
+
+### 削除
+- **Tasks View - Selectedラベル**: ディレクトリの「Selected」ラベル表示を削除
+  - Docsビュー連携のための旧機能で、不要となったため削除
+
 ## [0.7.16] - 2025-12-27
 
 ### 修正

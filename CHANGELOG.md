@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.17] - 2025-12-27
+
+### Changed
+- **Rename**: Changed extension display name from "AI Coding Sidebar" to "AI Coding Panel"
+  - Updated activity bar title, settings title, status bar, and terminal name
+  - Updated README and README-JA documentation
+- **Tasks View - Directory Click Behavior**: Directory click behavior now depends on Task Panel setting
+  - When `taskPanel.enabled: false`: Click to expand/collapse directories (standard behavior)
+  - When `taskPanel.enabled: true`: Click to open Task Panel (previous behavior)
+
+### Removed
+- **Tasks View - Selected Label**: Removed "Selected" label display on directories
+  - This was a legacy feature for Docs view integration that is no longer needed
+
 ## [0.7.16] - 2025-12-27
 
 ### Fixed

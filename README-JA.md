@@ -1,4 +1,4 @@
-# AI Coding Sidebar
+# AI Coding Panel
 
 AIコーディングツールとの連携を強化するサイドバー拡張機能。
 ファイルとフォルダを効率的に閲覧・管理し、AIとのコーディング作業をスムーズに。
@@ -32,13 +32,13 @@ AIコーディングツールとの連携を強化するサイドバー拡張機
 
 | ショートカット | 動作 |
 | --- | --- |
-| `Cmd+Shift+A` (macOS)<br>`Ctrl+Shift+A` (Windows/Linux) | AI Coding Sidebarにフォーカス |
+| `Cmd+Shift+A` (macOS)<br>`Ctrl+Shift+A` (Windows/Linux) | AI Coding Panelにフォーカス |
 | `Cmd+S` (macOS)<br>`Ctrl+S` (Windows/Linux) | タスクを開始（サイドバーにフォーカス時） |
 | `Cmd+M` (macOS)<br>`Ctrl+M` (Windows/Linux) | Markdownファイルを新規作成（サイドバーにフォーカス時） |
 | `Cmd+R` (macOS)<br>`Ctrl+R` (Windows/Linux) | Editorでタスクを実行（自動保存してターミナルにコマンドを送信） |
 
 ### 基本操作
-1. アクティビティバーの「AI Coding Sidebar」アイコンをクリック（または`Cmd+Shift+A` / `Ctrl+Shift+A`を押す）
+1. アクティビティバーの「AI Coding Panel」アイコンをクリック（または`Cmd+Shift+A` / `Ctrl+Shift+A`を押す）
 2. TasksでAIコーディング用のディレクトリを作成
 3. Docsでmarkdownファイルを作成
 4. Docsでタイムスタンプ形式のMarkdownファイル（例: `2025_1103_1227_TASK.md`）をクリックして、下部のEditorビューで編集。その他のMarkdownファイルは通常のエディタで開く
@@ -206,7 +206,7 @@ npm run watch
 
 ### デバッグ中の操作
 - 新しいVSCodeウィンドウ（Extension Development Host）が開く
-- アクティビティバーに「AI Coding Sidebar」アイコンが表示される
+- アクティビティバーに「AI Coding Panel」アイコンが表示される
 - ブレークポイントの設定、変数の検査、ステップ実行が可能
 - `Ctrl+R` / `Cmd+R` で拡張機能をリロード
 
@@ -280,7 +280,7 @@ code --uninstall-extension ai-coding-sidebar
 
 ### VSCode内から
 1. 拡張機能サイドバーを開く（`Ctrl+Shift+X` / `Cmd+Shift+X`）
-2. インストール済みの拡張機能から「AI Coding Sidebar」を検索
+2. インストール済みの拡張機能から「AI Coding Panel」を検索
 3. アンインストールボタンをクリック
 
 ## 要件

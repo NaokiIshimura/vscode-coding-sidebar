@@ -146,7 +146,7 @@ async function setupClaudeFolder(workspaceRoot: string): Promise<void> {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-    console.log('AI Coding Sidebar activated');
+    console.log('AI Coding Panel activated');
 
     // サービスクラスの初期化
     const fileOperationService = new FileOperationService();
@@ -162,8 +162,8 @@ export function activate(context: vscode.ExtensionContext) {
 
     // ステータスバーアイテムを作成
     const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-    statusBarItem.text = "$(gear) AI Coding Sidebar Settings";
-    statusBarItem.tooltip = "AI Coding Sidebar extension workspace settings";
+    statusBarItem.text = "$(gear) AI Coding Panel Settings";
+    statusBarItem.tooltip = "AI Coding Panel extension workspace settings";
     statusBarItem.command = "aiCodingSidebar.setupWorkspace";
     statusBarItem.show();
     context.subscriptions.push(statusBarItem);
@@ -2007,17 +2007,16 @@ class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDra
                     file.modified
                 );
 
-                // ディレクトリの場合はクリックでTask Panelを開く
+                // ディレクトリの場合、Task Panel有効時のみクリックでTask Panelを開く
                 if (isDirectory) {
-                    item.command = {
-                        command: 'aiCodingSidebar.openTaskPanelWithPath',
-                        title: 'Open Task Panel',
-                        arguments: [file.path]
-                    };
-
-                    if (this.activeFolderPath === file.path) {
-                        item.description = 'Selected';
-                        item.tooltip = `${item.tooltip}\nCurrent folder`;
+                    const config = vscode.workspace.getConfiguration('aiCodingSidebar');
+                    const taskPanelEnabled = config.get<boolean>('taskPanel.enabled', false);
+                    if (taskPanelEnabled) {
+                        item.command = {
+                            command: 'aiCodingSidebar.openTaskPanelWithPath',
+                            title: 'Open Task Panel',
+                            arguments: [file.path]
+                        };
                     }
                 } else {
                     // 現在Markdown Editorで編集中のファイルに「editing」表記を追加
@@ -2395,7 +2394,7 @@ class MenuProvider implements vscode.TreeDataProvider<MenuItem> {
                     [
                         new MenuItem(
                             'Open User Settings',
-                            'Open AI Coding Sidebar user settings',
+                            'Open AI Coding Panel user settings',
                             {
                                 command: 'aiCodingSidebar.openUserSettings',
                                 title: 'Open User Settings'
@@ -2414,7 +2413,7 @@ class MenuProvider implements vscode.TreeDataProvider<MenuItem> {
                     [
                         new MenuItem(
                             'Open Workspace Settings',
-                            'Open AI Coding Sidebar workspace settings',
+                            'Open AI Coding Panel workspace settings',
                             {
                                 command: 'aiCodingSidebar.openWorkspaceSettings',
                                 title: 'Open Workspace Settings'
@@ -2790,7 +2789,7 @@ class EditorProvider implements vscode.WebviewViewProvider {
                             await this._terminalProvider.sendCommand(command);
                         } else {
                             // Use VS Code standard terminal
-                            const terminalName = 'AI Coding Sidebar';
+                            const terminalName = 'AI Coding Panel';
                             let terminal = vscode.window.terminals.find(t => t.name === terminalName);
                             if (!terminal) {
                                 terminal = vscode.window.createTerminal(terminalName);
@@ -4593,7 +4592,7 @@ class TaskPanelManager {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Coding Sidebar</title>
+    <title>AI Coding Panel</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {

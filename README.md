@@ -1,4 +1,4 @@
-# AI Coding Sidebar
+# AI Coding Panel
 
 A sidebar extension that strengthens integration with AI coding tools.
 Browse and manage files and folders efficiently to keep coding with AI smooth.
@@ -32,13 +32,13 @@ When enabled via `aiCodingSidebar.taskPanel.enabled`, the Task Panel provides an
 
 | Shortcut | Action |
 | --- | --- |
-| `Cmd+Shift+A` (macOS)<br>`Ctrl+Shift+A` (Windows/Linux) | Focus AI Coding Sidebar |
+| `Cmd+Shift+A` (macOS)<br>`Ctrl+Shift+A` (Windows/Linux) | Focus AI Coding Panel |
 | `Cmd+S` (macOS)<br>`Ctrl+S` (Windows/Linux) | Start Task (when sidebar is focused) |
 | `Cmd+M` (macOS)<br>`Ctrl+M` (Windows/Linux) | Create new Markdown file (when sidebar is focused) |
 | `Cmd+R` (macOS)<br>`Ctrl+R` (Windows/Linux) | Run task in Editor (auto-saves and sends command to terminal) |
 
 ### Basic actions
-1. Click the "AI Coding Sidebar" icon in the activity bar (or press `Cmd+Shift+A` / `Ctrl+Shift+A`).
+1. Click the "AI Coding Panel" icon in the activity bar (or press `Cmd+Shift+A` / `Ctrl+Shift+A`).
 2. Use Tasks to create the folder you use for AI coding.
 3. Create Markdown files from the Tasks view.
 4. Click a timestamp-named Markdown file (e.g., `2025_1103_1227_TASK.md`) in Tasks to edit it in the Editor view below. Other Markdown files open in the standard editor.
@@ -202,7 +202,7 @@ npm run watch
 
 ### While debugging
 - A new VS Code window (Extension Development Host) opens.
-- The activity bar now shows the "AI Coding Sidebar" icon.
+- The activity bar now shows the "AI Coding Panel" icon.
 - Set breakpoints, inspect variables, and step through code.
 - Press `Ctrl+R` / `Cmd+R` to reload the extension.
 
@@ -276,7 +276,7 @@ code --uninstall-extension ai-coding-sidebar
 
 ### Inside VS Code
 1. Open the Extensions view (`Ctrl+Shift+X` / `Cmd+Shift+X`).
-2. Search for "AI Coding Sidebar."
+2. Search for "AI Coding Panel."
 3. Click "Uninstall."
 
 ## Requirements

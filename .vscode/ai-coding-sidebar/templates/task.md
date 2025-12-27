@@ -19,11 +19,4 @@
 
 ### terminal
 
-### active panels
-
-## task panel
-
-### docs section
-
-### editor section
-
+## settings

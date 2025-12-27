@@ -5,6 +5,31 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.7.18] - 2025-12-27
+
+### 変更
+- **Tasks View - フラットリスト表示**: ツリービューからフラットリスト表示に変更
+  - 現在のディレクトリの内容のみを表示（ツリー展開なし）
+  - ディレクトリをクリックでそのディレクトリに移動
+  - ".."アイテムで親ディレクトリに戻る
+  - タイトルにルートからの相対パスを動的に表示（例: "Tasks: subdir1/subdir2"）
+- **Start Taskコマンド**: 作成したディレクトリに自動的に移動するように変更
+  - Start Taskでディレクトリを作成後、ビューが新しいディレクトリの内容を表示
+- **ビューのデフォルト表示**: 各ビューのデフォルト表示状態を変更
+  - Menu: デフォルトで折りたたみ
+  - Terminal: デフォルトで表示（以前は折りたたみ）
+
+### 削除
+- **Task Panel（ベータ版）**: Task Panel機能を完全に削除
+  - `TaskPanelManager`クラスと関連機能を削除
+  - `aiCodingSidebar.taskPanel.enabled`設定を削除
+  - `aiCodingSidebar.taskPanel.nonTaskFilePosition`設定を削除
+- **Active Panelsビュー**: サイドバーからActive Panelsビューを削除
+  - このビューは開いているTask Panelの管理に使用されていました
+- **Menu View - Beta Features**: MenuビューからBeta Featuresセクションを削除
+- **Editor設定**: `aiCodingSidebar.editor.useTerminalView`設定を削除
+  - Runボタンは常にTerminal viewにコマンドを送信するようになりました
+
 ## [0.7.17] - 2025-12-27
 
 ### 変更

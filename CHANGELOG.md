@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.18] - 2025-12-27
+
+### Changed
+- **Tasks View - Flat List Display**: Changed from tree view to flat list display
+  - Shows only the contents of the current directory (no tree expansion)
+  - Click a directory to navigate into it
+  - Use ".." item to go back to the parent directory
+  - Dynamic title shows the current path relative to root (e.g., "Tasks: subdir1/subdir2")
+- **Start Task Command**: Now automatically navigates to the newly created directory
+  - After creating a directory with Start Task, the view switches to show the new directory's contents
+- **View Default Visibility**: Changed default visibility for views
+  - Menu: Now collapsed by default
+  - Terminal: Now visible by default (previously collapsed)
+
+### Removed
+- **Task Panel (Beta)**: Removed Task Panel feature entirely
+  - Removed `TaskPanelManager` class and related functionality
+  - Removed `aiCodingSidebar.taskPanel.enabled` setting
+  - Removed `aiCodingSidebar.taskPanel.nonTaskFilePosition` setting
+- **Active Panels View**: Removed Active Panels view from the sidebar
+  - This view was used to manage open Task Panels
+- **Menu View - Beta Features**: Removed Beta Features section from Menu view
+- **Editor Setting**: Removed `aiCodingSidebar.editor.useTerminalView` setting
+  - Run button now always sends commands to the Terminal view
+
 ## [0.7.17] - 2025-12-27
 
 ### Changed

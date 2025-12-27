@@ -2,7 +2,7 @@
   "name": "ai-coding-sidebar",
   "displayName": "AI Coding Panel",
   "description": "A sidebar extension that strengthens integration with AI coding tools.Browse and manage files and folders efficiently to keep coding with AI smooth.",
-  "version": "0.7.17",
+  "version": "0.7.18",
   "publisher": "nacn",
   "icon": "images/icon.png",
   "repository": {
@@ -63,11 +63,6 @@
       {
         "command": "aiCodingSidebar.openEditorSettings",
         "title": "Editor Settings",
-        "icon": "$(settings-gear)"
-      },
-      {
-        "command": "aiCodingSidebar.openTaskPanelSettings",
-        "title": "Task Panel Settings",
         "icon": "$(settings-gear)"
       },
       {
@@ -171,24 +166,9 @@
         "icon": "$(archive)"
       },
       {
-        "command": "aiCodingSidebar.openTaskPanel",
-        "title": "Open Task Panel",
-        "icon": "$(split-horizontal)"
-      },
-      {
-        "command": "aiCodingSidebar.focusPanel",
-        "title": "Focus Panel",
-        "icon": "$(eye)"
-      },
-      {
-        "command": "aiCodingSidebar.closePanel",
-        "title": "Close Panel",
-        "icon": "$(close)"
-      },
-      {
-        "command": "aiCodingSidebar.refreshOpenPanels",
-        "title": "Refresh Open Panels",
-        "icon": "$(refresh)"
+        "command": "aiCodingSidebar.navigateToDirectory",
+        "title": "Navigate to Directory",
+        "icon": "$(folder)"
       },
       {
         "command": "aiCodingSidebar.terminalNew",
@@ -211,17 +191,12 @@
         {
           "id": "workspaceSettings",
           "name": "Menu",
-          "visibility": "visible"
-        },
-        {
-          "id": "openPanels",
-          "name": "Active Panels",
-          "visibility": "collapsed",
-          "when": "config.aiCodingSidebar.taskPanel.enabled"
+          "visibility": "collapsed"
         },
         {
           "id": "aiCodingSidebarExplorer",
-          "name": "Tasks"
+          "name": "Tasks",
+          "visibility": "visible"
         },
         {
           "id": "markdownEditor",
@@ -235,7 +210,7 @@
           "name": "Terminal",
           "type": "webview",
           "retainContextWhenHidden": true,
-          "visibility": "collapsed"
+          "visibility": "visible"
         }
       ]
     },
@@ -256,29 +231,24 @@
           "group": "navigation@1"
         },
         {
-          "command": "aiCodingSidebar.openTaskPanel",
-          "when": "view == aiCodingSidebarExplorer && config.aiCodingSidebar.taskPanel.enabled",
-          "group": "navigation@2"
-        },
-        {
           "command": "aiCodingSidebar.refresh",
           "when": "view == aiCodingSidebarExplorer",
-          "group": "navigation@3"
+          "group": "navigation@2"
         },
         {
           "command": "aiCodingSidebar.openFolderTreeSettings",
           "when": "view == aiCodingSidebarExplorer",
-          "group": "navigation@4"
+          "group": "navigation@3"
         },
         {
           "command": "aiCodingSidebar.createMarkdownFile",
           "when": "view == aiCodingSidebarExplorer",
-          "group": "navigation@5"
+          "group": "navigation@4"
         },
         {
           "command": "aiCodingSidebar.openDocsSettings",
           "when": "view == aiCodingSidebarExplorer",
-          "group": "navigation@6"
+          "group": "navigation@5"
         },
         {
           "command": "aiCodingSidebar.createMarkdownFile",
@@ -289,11 +259,6 @@
           "command": "aiCodingSidebar.openEditorSettings",
           "when": "view == markdownEditor",
           "group": "navigation@2"
-        },
-        {
-          "command": "aiCodingSidebar.refreshOpenPanels",
-          "when": "view == openPanels",
-          "group": "navigation@1"
         },
         {
           "command": "aiCodingSidebar.terminalNew",
@@ -338,11 +303,6 @@
           "group": "3_archive@1"
         },
         {
-          "command": "aiCodingSidebar.openTaskPanel",
-          "when": "view == aiCodingSidebarExplorer && viewItem == directory",
-          "group": "0_panel@1"
-        },
-        {
           "command": "aiCodingSidebar.copyRelativePath",
           "when": "view == aiCodingSidebarExplorer",
           "group": "1_copy@1"
@@ -381,16 +341,6 @@
           "command": "aiCodingSidebar.copyRelativePath",
           "when": "view == aiCodingSidebarExplorer && viewItem == file",
           "group": "1_copy@2"
-        },
-        {
-          "command": "aiCodingSidebar.focusPanel",
-          "when": "view == openPanels",
-          "group": "inline"
-        },
-        {
-          "command": "aiCodingSidebar.closePanel",
-          "when": "view == openPanels",
-          "group": "1_close@1"
         }
       ],
       "webview/context": [
@@ -465,29 +415,6 @@
           "type": "string",
           "default": "claude \"${editorContent}\"",
           "description": "Command template to execute when clicking the Run button without a file open. Use ${editorContent} as placeholder for the editor content."
-        },
-        "aiCodingSidebar.editor.useTerminalView": {
-          "type": "boolean",
-          "default": true,
-          "description": "When enabled, the Run button sends commands to the Terminal view instead of the standard VS Code terminal."
-        },
-        "aiCodingSidebar.taskPanel.enabled": {
-          "type": "boolean",
-          "default": false,
-          "description": "Enable Task Panel. When enabled, selecting a directory in Tasks view will open the Task Panel in the editor area."
-        },
-        "aiCodingSidebar.taskPanel.nonTaskFilePosition": {
-          "type": "string",
-          "enum": [
-            "below",
-            "beside"
-          ],
-          "default": "beside",
-          "description": "Position to open non-task files in Task Panel.",
-          "enumDescriptions": [
-            "Open files below the Task Panel",
-            "Open files beside the Task Panel (to the right)"
-          ]
         },
         "aiCodingSidebar.terminal.shell": {
           "type": "string",

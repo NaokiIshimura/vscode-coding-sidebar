@@ -7,24 +7,10 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 
 | Feature | Description |
 | --- | --- |
-| **Tasks** | Display directories and files under a specified path in a unified hierarchical view.<br>Configure a default path in settings.<br>Create new directories and files.<br>**Hierarchical display**: Directories contain both subdirectories and files in a tree structure.<br>Files are sorted by creation date (ascending) by default within each directory.<br>**Drag & Drop**: Copy files by dragging them within the view or from external sources.<br>**Auto-refresh**: Automatically updates when files are created, modified, or deleted.<br>**Settings icon**: Quick access to default path and sort configuration. |
+| **Tasks** | Display directories and files under a specified path in a flat list view.<br>Configure a default path in settings.<br>Create new directories and files.<br>**Flat list display**: Shows contents of the current directory only (not a tree structure).<br>**Directory navigation**: Click a directory to navigate into it. Use ".." to go back to the parent directory.<br>**Dynamic title**: Shows the current path relative to the root (e.g., "Tasks: subdir1/subdir2").<br>Files are sorted by creation date (ascending) by default.<br>**Drag & Drop**: Copy files by dragging them within the view or from external sources.<br>**Auto-refresh**: Automatically updates when files are created, modified, or deleted.<br>**Settings icon**: Quick access to default path and sort configuration. |
 | **Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a timestamp-named Markdown file (format: `YYYY_MMDD_HHMM_TASK.md`).<br>Other Markdown files open in the standard editor.<br>Save with `Cmd+S` / `Ctrl+S` (creates new file if none is open - saves to current Tasks directory).<br>Run task with `Cmd+R` / `Ctrl+R` to send a customizable command to terminal (auto-saves before running, works even without a file open).<br>Create new markdown file with `Cmd+M` / `Ctrl+M`.<br>**Customizable run command**: Configure the command executed by the Run button in settings.<br>**Run without file**: Execute commands using editor content when no file is open.<br>**Terminal View integration**: Run commands can be sent to the embedded Terminal view (configurable).<br>Automatically switches to read-only mode when the file is active in VSCode editor.<br>Auto-saves when switching to another extension or file.<br>Restores the editing file when returning from another extension.<br>**Settings icon**: Quick access to run command configuration. |
 | **Terminal** | Embedded terminal in the sidebar using xterm.js.<br>Supports shell commands with full PTY support.<br>**Session persistence**: Terminal session and output history are preserved when switching views or extensions.<br>**Clickable links**: URLs open in browser, file paths (e.g., `./src/file.ts:123`) open in editor with line navigation.<br>**Configurable**: Customize shell path, font size, font family, cursor style, cursor blink, and scrollback lines.<br>**Controls**: New terminal, Clear, and Kill buttons in the title bar.<br>**Default visibility**: Collapsed (expand when needed). |
-| **Menu** | Open user or global settings.<br>Customize templates.<br>Quick shortcuts: Open terminal, Checkout default branch, Git pull, Duplicate workspace in new window.<br>**Beta Features**: Open Task Panel to view files & Editor in the editor area. |
-
-### Task Panel (Beta)
-
-When enabled via `aiCodingSidebar.taskPanel.enabled`, the Task Panel provides an integrated view of files and Editor in the editor area.
-
-| Feature | Description |
-| --- | --- |
-| **Active Panels View** | Lists all open Task Panels in the sidebar for easy navigation:<br>- Click to focus a panel<br>- Right-click to close a panel (with unsave confirmation)<br>- Shows unsaved indicator (●) for panels with pending changes<br>- Automatically updates when directory changes |
-| **Tab Icon** | Different icons distinguish how the panel was opened:<br>- **Tree icon**: Opened by selecting a directory in Tasks view<br>- **Folder icon**: Opened via "Open Task Panel" command |
-| **Terminal Reuse** | The Run button reuses existing terminals with the same name instead of creating new ones each time.<br>Terminals are opened with the project root as the current working directory. |
-| **Non-Task File Position** | Configure where non-task files open when clicked:<br>- **below**: Opens in an editor group below the Task Panel<br>- **beside** (default): Opens in an editor group to the right of the Task Panel<br>- Configure via `aiCodingSidebar.taskPanel.nonTaskFilePosition` setting<br>- Cmd/Ctrl+click always opens files to the right |
-| **File Icons** | Files in the Docs section display icons based on their type, similar to the Docs view in the sidebar. |
-| **Parent Directory Navigation** | Parent directory link ("..") is always visible when within the Tasks view root directory, allowing easy navigation to parent directories without going above the configured root. |
-| **Context Menu** | Right-click on directories in the Docs section to access:<br>- **Open Task Panel**: Open a new Task Panel for the selected directory<br>- **Archive**: Move the directory to the archived folder |
+| **Menu** | Open user or global settings.<br>Customize templates.<br>Quick shortcuts: Open terminal, Checkout default branch, Git pull, Duplicate workspace in new window. |
 
 ## Usage
 
@@ -140,15 +126,12 @@ If the default relative path doesn't exist, Tasks displays a "Create directory" 
 | `markdownList.sortOrder` | Sort order for files in Docs | string | `"ascending"` | `"ascending"` (ascending)<br>`"descending"` (descending) |
 | `editor.runCommand` | Command template to execute when clicking the Run button in the Editor view | string | `claude "read ${filePath} and save your report to the same directory as ${filePath}"` | Use `${filePath}` as placeholder for the file path |
 | `editor.runCommandWithoutFile` | Command template to execute when clicking the Run button without a file open | string | `claude "${editorContent}"` | Use `${editorContent}` as placeholder for the editor content |
-| `editor.useTerminalView` | Send Run commands to the embedded Terminal view | boolean | `true` | When enabled, Run button sends commands to the Terminal view instead of VSCode's integrated terminal |
 | `terminal.shell` | Shell executable path for Terminal view | string | `""` | Leave empty to use system default shell |
 | `terminal.fontSize` | Font size for Terminal view | number | `12` | Any positive number |
 | `terminal.fontFamily` | Font family for Terminal view | string | `"monospace"` | Any valid font family |
 | `terminal.cursorStyle` | Cursor style for Terminal view | string | `"block"` | `"block"`, `"underline"`, `"bar"` |
 | `terminal.cursorBlink` | Enable cursor blinking in Terminal view | boolean | `true` | `true` or `false` |
 | `terminal.scrollback` | Number of scrollback lines in Terminal view | number | `1000` | Any positive number |
-| `combinedPanel.enabled` | Enable Combined Panel (Beta) | boolean | `false` | When enabled, selecting a directory in Tasks view opens the Combined Panel in the editor area |
-| `taskPanel.nonTaskFilePosition` | Position to open non-task files in Task Panel | string | `"beside"` | `"below"` (open below the Task Panel)<br>`"beside"` (open to the right of the Task Panel) |
 
 ### Example configuration
 
@@ -161,11 +144,8 @@ Add the following to `.vscode/settings.json`:
   "aiCodingSidebar.markdownList.sortOrder": "ascending",
   "aiCodingSidebar.editor.runCommand": "claude \"read ${filePath} and save your report to the same directory as ${filePath}\"",
   "aiCodingSidebar.editor.runCommandWithoutFile": "claude \"${editorContent}\"",
-  "aiCodingSidebar.editor.useTerminalView": true,
   "aiCodingSidebar.terminal.fontSize": 12,
-  "aiCodingSidebar.terminal.cursorStyle": "block",
-  "aiCodingSidebar.combinedPanel.enabled": true,
-  "aiCodingSidebar.taskPanel.nonTaskFilePosition": "beside"
+  "aiCodingSidebar.terminal.cursorStyle": "block"
 }
 ```
 

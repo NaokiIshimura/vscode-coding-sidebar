@@ -7,24 +7,10 @@ AIコーディングツールとの連携を強化するサイドバー拡張機
 
 | 機能 | 説明 |
 | --- | --- |
-| **Tasks** | 指定したディレクトリ配下のフォルダとファイルを階層構造で表示<br>settingsでデフォルトのパスを設定できる<br>ディレクトリとファイルを作成できる<br>**階層表示**: ディレクトリ内にサブディレクトリとファイルをツリー構造で表示<br>ファイルはデフォルトで作成日時の昇順でソート<br>**ドラッグ&ドロップ**: ビュー内または外部からのファイルをドラッグしてコピー<br>**自動更新**: ファイルが作成、変更、削除されたときに自動的に更新<br>**設定アイコン**: デフォルトパスとソート設定へのクイックアクセス |
+| **Tasks** | 指定したディレクトリ配下のフォルダとファイルをフラットリストで表示<br>settingsでデフォルトのパスを設定できる<br>ディレクトリとファイルを作成できる<br>**フラットリスト表示**: 現在のディレクトリの内容のみを表示（ツリー構造ではない）<br>**ディレクトリナビゲーション**: ディレクトリをクリックでそのディレクトリに移動。".."で親ディレクトリに戻る<br>**動的タイトル**: ルートからの相対パスを表示（例: "Tasks: subdir1/subdir2"）<br>ファイルはデフォルトで作成日時の昇順でソート<br>**ドラッグ&ドロップ**: ビュー内または外部からのファイルをドラッグしてコピー<br>**自動更新**: ファイルが作成、変更、削除されたときに自動的に更新<br>**設定アイコン**: デフォルトパスとソート設定へのクイックアクセス |
 | **Editor** | サイドバー内でMarkdownファイルを直接編集可能<br>タイムスタンプ形式のMarkdownファイル（形式: `YYYY_MMDD_HHMM_TASK.md`）を選択すると自動的に表示<br>その他のMarkdownファイルは通常のエディタで開く<br>`Cmd+S` / `Ctrl+S`で保存（ファイル未開時は現在のTasksディレクトリに新規作成）<br>`Cmd+R` / `Ctrl+R`でカスタマイズ可能なコマンドをターミナルに送信（実行前に自動保存、ファイル未開でも実行可能）<br>`Cmd+M` / `Ctrl+M`で新しいMarkdownファイルを作成<br>**カスタマイズ可能な実行コマンド**: Runボタンで実行されるコマンドを設定でカスタマイズ可能<br>**ファイル未開でも実行可能**: ファイルを開いていない状態でもエディタの内容を使用してコマンドを実行<br>**Terminalビュー連携**: Runコマンドを埋め込みTerminalビューに送信可能（設定で変更可能）<br>VSCodeエディタでファイルがアクティブになると自動的に読み取り専用モードに切り替わる<br>別の拡張機能やファイルに切り替える際に自動保存<br>別の拡張機能から戻ってきたときに編集中のファイルを復元<br>**設定アイコン**: 実行コマンド設定へのクイックアクセス |
 | **Terminal** | xterm.jsを使用したサイドバー埋め込みターミナル<br>完全なPTYサポートによるシェルコマンド実行<br>**セッション維持**: ビューや拡張機能を切り替えてもターミナルセッションと出力履歴が保持される<br>**クリック可能リンク**: URLはブラウザで開き、ファイルパス（例: `./src/file.ts:123`）はエディタで行番号指定して開く<br>**設定可能**: シェルパス、フォントサイズ、フォントファミリー、カーソルスタイル、カーソル点滅、スクロールバック行数をカスタマイズ可能<br>**コントロール**: タイトルバーにNew terminal、Clear、Killボタン<br>**デフォルト表示**: 折りたたみ（必要に応じて展開） |
-| **Menu** | ユーザ設定を開く<br>グローバル設定を開く<br>テンプレートをカスタマイズ<br>ショートカット機能: ターミナルを開く、デフォルトブランチへ切り替え、Git pull、新しいウィンドウでワークスペースを複製<br>**Beta Features**: Task Panelでエディタ領域にファイル一覧 & Editorを表示 |
-
-### Task Panel（ベータ版）
-
-`aiCodingSidebar.taskPanel.enabled`を有効にすると、Task Panelでエディタ領域にDocsとEditorを統合表示できます。
-
-| 機能 | 説明 |
-| --- | --- |
-| **Active Panels View** | 開いているTask Panelをサイドバーに一覧表示:<br>- クリックでパネルにフォーカス<br>- 右クリックでパネルを閉じる（未保存確認付き）<br>- 未保存のパネルに●インジケーターを表示<br>- ディレクトリ変更時に自動更新 |
-| **タブアイコン** | パネルの開き方によって異なるアイコンを表示:<br>- **ツリーアイコン**: Tasks viewでディレクトリを選択して開いた場合<br>- **フォルダアイコン**: 「Open Task Panel」コマンドで開いた場合 |
-| **ターミナル再利用** | Runボタンは毎回新しいターミナルを作成せず、同じ名前の既存ターミナルを再利用します。<br>ターミナルはプロジェクトルートをカレントディレクトリとして開きます。 |
-| **非タスクファイルの表示位置** | タスクファイル以外のファイルをクリックした際の表示位置を設定可能:<br>- **below**: Task Panelの下にエディタグループを作成して表示<br>- **beside**（デフォルト）: Task Panelの右側にエディタグループを作成して表示<br>- `aiCodingSidebar.taskPanel.nonTaskFilePosition`設定で変更可能<br>- Cmd/Ctrl+クリックは常に右側で開く |
-| **ファイルアイコン** | Docsセクションのファイルにタイプ別のアイコンを表示。サイドバーのDocsビューと同様の表示。 |
-| **親ディレクトリナビゲーション** | 親ディレクトリリンク（".."）がTasks viewのルートディレクトリ内であれば常に表示され、設定したルートより上には移動できないよう制限。 |
-| **コンテキストメニュー** | Docsセクションでディレクトリを右クリックして以下にアクセス:<br>- **Open Task Panel**: 選択したディレクトリ用の新しいTask Panelを開く<br>- **Archive**: ディレクトリをarchivedフォルダに移動 |
+| **Menu** | ユーザ設定を開く<br>グローバル設定を開く<br>テンプレートをカスタマイズ<br>ショートカット機能: ターミナルを開く、デフォルトブランチへ切り替え、Git pull、新しいウィンドウでワークスペースを複製 |
 
 ## 使用方法
 
@@ -144,15 +130,12 @@ created: {{datetime}}
 | `markdownList.sortOrder` | Docsのファイルのソート順序 | string | `"ascending"` | `"ascending"`: 昇順<br>`"descending"`: 降順 |
 | `editor.runCommand` | Editorビューのrunボタンで実行されるコマンドテンプレート | string | `claude "read ${filePath} and save your report to the same directory as ${filePath}"` | `${filePath}`をファイルパスのプレースホルダーとして使用 |
 | `editor.runCommandWithoutFile` | ファイル未開時にrunボタンで実行されるコマンドテンプレート | string | `claude "${editorContent}"` | `${editorContent}`をエディタ内容のプレースホルダーとして使用 |
-| `editor.useTerminalView` | Runコマンドを埋め込みTerminalビューに送信 | boolean | `true` | 有効にするとRunボタンはVSCodeの統合ターミナルではなくTerminalビューにコマンドを送信 |
 | `terminal.shell` | Terminalビューのシェル実行パス | string | `""` | 空欄の場合はシステムのデフォルトシェルを使用 |
 | `terminal.fontSize` | Terminalビューのフォントサイズ | number | `12` | 任意の正の数値 |
 | `terminal.fontFamily` | Terminalビューのフォントファミリー | string | `"monospace"` | 任意の有効なフォントファミリー |
 | `terminal.cursorStyle` | Terminalビューのカーソルスタイル | string | `"block"` | `"block"`, `"underline"`, `"bar"` |
 | `terminal.cursorBlink` | Terminalビューのカーソル点滅を有効化 | boolean | `true` | `true`または`false` |
 | `terminal.scrollback` | Terminalビューのスクロールバック行数 | number | `1000` | 任意の正の数値 |
-| `combinedPanel.enabled` | Combined Panelを有効化（ベータ版） | boolean | `false` | 有効にするとTasksビューでディレクトリを選択したときにエディタ領域でCombined Panelを開く |
-| `taskPanel.nonTaskFilePosition` | Task Panelで非タスクファイルを開く位置 | string | `"beside"` | `"below"`: Task Panelの下で開く<br>`"beside"`: Task Panelの右側で開く |
 
 ### 設定例
 
@@ -165,11 +148,8 @@ created: {{datetime}}
   "aiCodingSidebar.markdownList.sortOrder": "ascending",
   "aiCodingSidebar.editor.runCommand": "claude \"read ${filePath} and save your report to the same directory as ${filePath}\"",
   "aiCodingSidebar.editor.runCommandWithoutFile": "claude \"${editorContent}\"",
-  "aiCodingSidebar.editor.useTerminalView": true,
   "aiCodingSidebar.terminal.fontSize": 12,
-  "aiCodingSidebar.terminal.cursorStyle": "block",
-  "aiCodingSidebar.combinedPanel.enabled": true,
-  "aiCodingSidebar.taskPanel.nonTaskFilePosition": "beside"
+  "aiCodingSidebar.terminal.cursorStyle": "block"
 }
 ```
 

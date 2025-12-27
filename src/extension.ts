@@ -5489,6 +5489,41 @@ class TerminalProvider implements vscode.WebviewViewProvider {
                         this._terminalService.resize(this._currentSessionId, data.cols, data.rows);
                     }
                     break;
+                case 'openUrl':
+                    // URLをブラウザで開く
+                    if (data.url) {
+                        vscode.env.openExternal(vscode.Uri.parse(data.url));
+                    }
+                    break;
+                case 'openFile':
+                    // ファイルをエディタで開く
+                    if (data.path) {
+                        const filePath = data.path;
+                        const line = data.line;
+
+                        // 相対パスを絶対パスに変換
+                        const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+                        const absolutePath = path.isAbsolute(filePath)
+                            ? filePath
+                            : path.join(workspaceFolder?.uri.fsPath || '', filePath);
+
+                        try {
+                            const uri = vscode.Uri.file(absolutePath);
+                            vscode.workspace.fs.stat(uri).then(async () => {
+                                const document = await vscode.workspace.openTextDocument(uri);
+                                const editor = await vscode.window.showTextDocument(document);
+
+                                if (line) {
+                                    const position = new vscode.Position(line - 1, 0);
+                                    editor.selection = new vscode.Selection(position, position);
+                                    editor.revealRange(new vscode.Range(position, position));
+                                }
+                            });
+                        } catch {
+                            // ファイルが存在しない場合は何もしない
+                        }
+                    }
+                    break;
             }
         });
 
@@ -5596,6 +5631,7 @@ class TerminalProvider implements vscode.WebviewViewProvider {
         const xtermCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'xterm', 'xterm.css'));
         const xtermJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'xterm', 'xterm.js'));
         const xtermFitUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'xterm', 'xterm-addon-fit.js'));
+        const xtermWebLinksUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'xterm', 'xterm-addon-web-links.js'));
 
         // 設定を取得
         const config = vscode.workspace.getConfiguration('aiCodingSidebar');
@@ -5641,6 +5677,7 @@ class TerminalProvider implements vscode.WebviewViewProvider {
     <div id="terminal-container"></div>
     <script src="${xtermJsUri}"></script>
     <script src="${xtermFitUri}"></script>
+    <script src="${xtermWebLinksUri}"></script>
     <script>
         (function() {
             const vscode = acquireVsCodeApi();
@@ -5673,9 +5710,64 @@ class TerminalProvider implements vscode.WebviewViewProvider {
             const fitAddon = new FitAddon.FitAddon();
             term.loadAddon(fitAddon);
 
+            // Web Links Addonをロード（URLクリック用）
+            const webLinksAddon = new WebLinksAddon.WebLinksAddon((event, uri) => {
+                event.preventDefault();
+                vscode.postMessage({ type: 'openUrl', url: uri });
+            });
+            term.loadAddon(webLinksAddon);
+
             // ターミナルを開く
             term.open(terminalContainer);
             fitAddon.fit();
+
+            // カスタムリンクプロバイダー（ファイルパス用）
+            term.registerLinkProvider({
+                provideLinks: (bufferLineNumber, callback) => {
+                    const line = term.buffer.active.getLine(bufferLineNumber - 1);
+                    if (!line) {
+                        callback(undefined);
+                        return;
+                    }
+                    const text = line.translateToString();
+                    const links = [];
+
+                    // ファイルパスパターン: パス:行番号 または パス
+                    // 例: ./src/extension.ts:123, src/file.js, /absolute/path.ts, .claude/tasks/file.md
+                    const filePattern = /(?:^|[\\s'":([])(\\.?\\/|\\.\\.?\\/|\\/)?([a-zA-Z0-9_.\\-]+\\/)*[a-zA-Z0-9_.\\-]+\\.[a-zA-Z0-9]+(?::(\\d+))?/g;
+                    let match;
+
+                    while ((match = filePattern.exec(text)) !== null) {
+                        const fullMatch = match[0];
+                        // 先頭の区切り文字を除去
+                        const delimMatch = fullMatch.match(/^[\\s'":([]/);
+                        const startIndex = match.index + (delimMatch ? delimMatch[0].length : 0);
+                        const pathWithLine = delimMatch ? fullMatch.slice(delimMatch[0].length) : fullMatch;
+
+                        // 行番号の抽出
+                        const lineMatch = pathWithLine.match(/:(\\d+)$/);
+                        const filePath = lineMatch ? pathWithLine.replace(/:(\\d+)$/, '') : pathWithLine;
+                        const lineNumber = lineMatch ? parseInt(lineMatch[1]) : undefined;
+
+                        links.push({
+                            range: {
+                                start: { x: startIndex + 1, y: bufferLineNumber },
+                                end: { x: startIndex + pathWithLine.length + 1, y: bufferLineNumber }
+                            },
+                            text: pathWithLine,
+                            activate: () => {
+                                vscode.postMessage({
+                                    type: 'openFile',
+                                    path: filePath,
+                                    line: lineNumber
+                                });
+                            }
+                        });
+                    }
+
+                    callback(links.length > 0 ? links : undefined);
+                }
+            });
 
             // ユーザー入力をExtensionに送信
             term.onData(data => {

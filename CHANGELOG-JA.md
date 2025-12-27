@@ -5,6 +5,16 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.7.14] - 2025-12-27
+
+### 追加
+- **Terminal View - クリック可能リンク**: ターミナル内のURLとファイルパスがクリック可能に
+  - URLをクリックするとデフォルトブラウザで開く
+  - ファイルパス（例: `./src/file.ts:123`）をクリックするとエディタで開く
+  - ファイルパスの行番号指定に対応
+  - xterm-addon-web-linksを使用したURL検出
+  - カスタムリンクプロバイダーによるファイルパス検出
+
 ## [0.7.9] - 2025-12-27
 
 ### 変更
@@ -204,6 +214,7 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.7.14]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.11...v0.7.14
 [0.7.9]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.8...v0.7.9
 [0.7.8]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.6...v0.7.8
 [0.3.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.3.5...v0.3.6

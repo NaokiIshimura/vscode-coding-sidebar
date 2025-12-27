@@ -43,9 +43,9 @@
 
 ### tasks
 
-### docs
-
 ### editor
+
+### terminal
 
 ### active panels
 

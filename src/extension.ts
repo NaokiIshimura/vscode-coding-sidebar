@@ -1670,8 +1670,8 @@ class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDra
         // ターゲットディレクトリの決定
         let targetDir: string;
         if (!target) {
-            // ビューのルートにドロップされた場合
-            targetDir = this.rootPath!;
+            // ビューのルートにドロップされた場合は、現在開いているフォルダを使用
+            targetDir = this.activeFolderPath || this.rootPath!;
         } else if (target.isDirectory) {
             // フォルダにドロップされた場合
             targetDir = target.filePath;
@@ -1962,9 +1962,14 @@ class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDra
                         arguments: [file.path]
                     };
                 } else {
-                    // 現在Markdown Editorで編集中のファイルに「editing」表記を追加
+                    // 現在Markdown Editorで編集中のファイルに「editing」表記を追加し、ファイル名を太字で表示
                     if (currentFilePath && file.path === currentFilePath) {
                         item.description = 'editing';
+                        // TreeItemLabelのhighlightsを使用してファイル名全体を太字にする
+                        (item as vscode.TreeItem).label = {
+                            label: file.name,
+                            highlights: [[0, file.name.length]]
+                        };
                     }
                 }
 

@@ -8,7 +8,7 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 | Feature | Description |
 | --- | --- |
 | **Tasks** | Display directories and files under a specified path in a flat list view.<br>Configure a default path in settings.<br>Create new directories and files.<br>**Flat list display**: Shows contents of the current directory only (not a tree structure).<br>**Directory navigation**: Click a directory to navigate into it. Use ".." to go back to the parent directory.<br>**Path display**: Current path shown as the first item in the list.<br>Files are sorted by creation date (ascending) by default.<br>**Drag & Drop**: Copy files by dragging them within the view or from external sources.<br>**Auto-refresh**: Automatically updates when files are created, modified, or deleted.<br>**Settings icon**: Quick access to default path and sort configuration. |
-| **Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a timestamp-named Markdown file (format: `YYYY_MMDD_HHMM_TASK.md`).<br>Other Markdown files open in the standard editor.<br>Save with the Save button in the header (creates new file if none is open - saves to current Tasks directory).<br>Run task with `Cmd+R` / `Ctrl+R` to send a customizable command to terminal (auto-saves before running, works even without a file open).<br>Create new markdown file with `Cmd+M` / `Ctrl+M`.<br>**Save button**: Displays in header with color change indicating unsaved changes.<br>**Customizable run command**: Configure the command executed by the Run button in settings.<br>**Run without file**: Execute commands using editor content when no file is open.<br>**Terminal View integration**: Run commands can be sent to the embedded Terminal view (configurable).<br>Automatically switches to read-only mode when the file is active in VSCode editor.<br>Auto-saves when switching to another extension or file.<br>Restores the editing file when returning from another extension.<br>**Settings icon**: Quick access to run command configuration. |
+| **Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a timestamp-named Markdown file (format: `MMDD.HHMM.SS_PROMPT.md`).<br>Other Markdown files open in the standard editor.<br>Save with the Save button in the header (creates new file if none is open - saves to current Tasks directory).<br>Run task with `Cmd+R` / `Ctrl+R` to send a customizable command to terminal (auto-saves before running, works even without a file open).<br>Create new markdown file with `Cmd+M` / `Ctrl+M`.<br>**Save button**: Displays in header with color change indicating unsaved changes.<br>**Customizable run command**: Configure the command executed by the Run button in settings.<br>**Run without file**: Execute commands using editor content when no file is open.<br>**Terminal View integration**: Run commands can be sent to the embedded Terminal view (configurable).<br>Automatically switches to read-only mode when the file is active in VSCode editor.<br>Auto-saves when switching to another extension or file.<br>Restores the editing file when returning from another extension.<br>**Settings icon**: Quick access to run command configuration. |
 | **Terminal** | Embedded terminal in the sidebar using xterm.js.<br>Supports shell commands with full PTY support.<br>**Session persistence**: Terminal session and output history are preserved when switching views or extensions.<br>**Clickable links**: URLs open in browser, file paths (e.g., `./src/file.ts:123`) open in editor with line navigation.<br>**Configurable**: Customize shell path, font size, font family, cursor style, cursor blink, and scrollback lines.<br>**WebView header**: Displays current shell name with New, Clear, and Kill buttons.<br>**Settings icon**: Quick access to terminal settings in the title bar.<br>**Default visibility**: Collapsed (expand when needed). |
 | **Menu** | Open user or global settings.<br>Customize templates.<br>Quick shortcuts: Open terminal, Checkout default branch, Git pull, Duplicate workspace in new window. |
 
@@ -27,7 +27,7 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 1. Click the "AI Coding Panel" icon in the activity bar (or press `Cmd+Shift+A` / `Ctrl+Shift+A`).
 2. Use Tasks to create the folder you use for AI coding.
 3. Create Markdown files from the Tasks view.
-4. Click a timestamp-named Markdown file (e.g., `2025_1103_1227_TASK.md`) in Tasks to edit it in the Editor view below. Other Markdown files open in the standard editor.
+4. Click a timestamp-named Markdown file (e.g., `1229.1430.25_PROMPT.md`) in Tasks to edit it in the Editor view below. Other Markdown files open in the standard editor.
 5. Write instructions for the AI in the Editor and save with the Save button.
 6. Right-click the Markdown file in Tasks and choose "Copy Relative Path," then share it with your AI tool.
 
@@ -58,8 +58,10 @@ created: {{datetime}}
 Use the following variables inside a template:
 
 - `{{datetime}}`: Creation date and time (for example, 2025/11/3 12:27:13)
-- `{{filename}}`: Filename including extension (for example, 2025_1103_1227_TASK.md)
-- `{{timestamp}}`: Timestamp (for example, 2025_1103_1227)
+- `{{filename}}`: Filename including extension (for example, 1229.1430.25_PROMPT.md)
+- `{{timestamp}}`: Timestamp (for example, 1229.1430.25)
+- `{{filepath}}`: File path relative to workspace root (for example, .claude/tasks/1229.1430.25_PROMPT.md)
+- `{{dirpath}}`: Directory path relative to workspace root (for example, .claude/tasks)
 
 ### Template priority
 1. Workspace template `.vscode/ai-coding-sidebar/templates/task.md` (if present)
@@ -92,7 +94,7 @@ Use the following variables inside a template:
 | --- | --- |
 | New Task | Click the rocket icon in Tasks title menu.<br>Creates a new directory under the currently opened directory in Tasks View and automatically generates a timestamped Markdown file.<br>The file is selected in Tasks with "editing" label and opens in Editor View.<br>If the current path cannot be retrieved, it falls back to the default path. |
 | New Directory | Click the folder icon in Tasks.<br>Creates a new directory under the currently opened directory (without creating a Markdown file). |
-| Create a file | Click the "+" icon in Tasks.<br>A timestamped Markdown file is created (for example, `2025_1103_1227_TASK.md`) and opens in Editor View. |
+| Create a file | Click the "+" icon in Tasks.<br>A timestamped Markdown file is created (for example, `1229.1430.25_PROMPT.md`) and opens in Editor View. |
 
 ### Configure the Default Relative Path
 
@@ -126,7 +128,7 @@ If the default relative path doesn't exist, Tasks displays a "Create directory" 
 | `defaultRelativePath` | Default relative path for Tasks | string | `".claude/tasks"` | `"src"`, `.claude`, `"docs/api"` |
 | `markdownList.sortBy` | Sort files in Docs by | string | `"created"` | `"name"` (file name)<br>`"created"` (creation date)<br>`"modified"` (modified date) |
 | `markdownList.sortOrder` | Sort order for files in Docs | string | `"ascending"` | `"ascending"` (ascending)<br>`"descending"` (descending) |
-| `editor.runCommand` | Command template to execute when clicking the Run button in the Editor view | string | `claude "read ${filePath} and save your report to the same directory as ${filePath}"` | Use `${filePath}` as placeholder for the file path |
+| `editor.runCommand` | Command template to execute when clicking the Run button in the Editor view | string | `claude "${filePath}"` | Use `${filePath}` as placeholder for the file path |
 | `editor.runCommandWithoutFile` | Command template to execute when clicking the Run button without a file open | string | `claude "${editorContent}"` | Use `${editorContent}` as placeholder for the editor content |
 | `terminal.shell` | Shell executable path for Terminal view | string | `""` | Leave empty to use system default shell |
 | `terminal.fontSize` | Font size for Terminal view | number | `12` | Any positive number |
@@ -144,7 +146,7 @@ Add the following to `.vscode/settings.json`:
   "aiCodingSidebar.defaultRelativePath": ".claude",
   "aiCodingSidebar.markdownList.sortBy": "created",
   "aiCodingSidebar.markdownList.sortOrder": "ascending",
-  "aiCodingSidebar.editor.runCommand": "claude \"read ${filePath} and save your report to the same directory as ${filePath}\"",
+  "aiCodingSidebar.editor.runCommand": "claude \"${filePath}\"",
   "aiCodingSidebar.editor.runCommandWithoutFile": "claude \"${editorContent}\"",
   "aiCodingSidebar.terminal.fontSize": 12,
   "aiCodingSidebar.terminal.cursorStyle": "block"
@@ -202,14 +204,14 @@ npm run watch
 1. Download the latest VSIX file from the [GitHub Releases page](https://github.com/NaokiIshimura/vscode-panel/releases).
 2. Install via command line:
    ```bash
-   code --install-extension ai-coding-sidebar-0.7.26.vsix
+   code --install-extension ai-coding-sidebar-0.7.28.vsix
    ```
 3. Restart VS Code.
 
 #### Use a local build
 ```bash
-# Install directly from the releases directory (version 0.7.26)
-code --install-extension releases/ai-coding-sidebar-0.7.26.vsix
+# Install directly from the releases directory (version 0.7.28)
+code --install-extension releases/ai-coding-sidebar-0.7.28.vsix
 ```
 
 #### Build the package yourself
@@ -223,7 +225,7 @@ code --install-extension releases/ai-coding-sidebar-0.7.26.vsix
    ```
 3. Install the generated VSIX file:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.7.26.vsix
+   code --install-extension releases/ai-coding-sidebar-0.7.28.vsix
    ```
 4. Restart VS Code.
 

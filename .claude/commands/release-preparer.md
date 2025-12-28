@@ -17,3 +17,9 @@ Task toolを使用して、release-preparerエージェント（subagent_type: r
 7. PRを作成
 
 実行前に `npm run compile` と `npm run package` が成功することを確認してください。
+
+## 注意事項
+
+- コミットメッセージは英語で記述してください
+- PRのタイトルは英語で記述してください
+- PRのdescriptionは英語で記述してください

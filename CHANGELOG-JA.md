@@ -5,6 +5,27 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.7.24] - 2025-12-29
+
+### 追加
+- **Tasks View - Editorにパスを挿入**: ファイル/フォルダのパスをEditorビューに挿入
+  - Tasksビューでファイルやフォルダを右クリックして「Insert Path to Editor」を選択
+  - Editorビューのカーソル位置に相対パスを挿入
+  - 複数選択に対応 - 選択したすべてのパスが改行区切りで挿入される
+  - 挿入後、Editorビューに自動的にフォーカス
+- **Tasks View - Terminalにパスを挿入**: ファイル/フォルダのパスをTerminalビューに挿入
+  - Tasksビューでファイルやフォルダを右クリックして「Insert Path to Terminal」を選択
+  - Terminalビューに相対パスを挿入
+  - 複数選択に対応 - パスはスペースで区切られる
+  - ターミナルが起動していない場合は自動的に開始
+
+## [0.7.23] - 2025-12-28
+
+### 変更
+- **Tasks View - テンプレート更新**: デフォルトのタスクテンプレートを更新
+  - テンプレートにファイル名プレースホルダーを追加
+  - テンプレートからバージョンセクションを削除
+
 ## [0.7.20] - 2025-12-27
 
 ### 変更
@@ -307,6 +328,9 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.7.24]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.23...v0.7.24
+[0.7.23]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.20...v0.7.23
+[0.7.20]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.19...v0.7.20
 [0.7.19]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.18...v0.7.19
 [0.7.18]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.17...v0.7.18
 [0.7.17]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.16...v0.7.17

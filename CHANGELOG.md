@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.24] - 2025-12-29
+
+### Added
+- **Tasks View - Insert Path to Editor**: Insert file/folder paths into the Editor view
+  - Right-click files or folders in Tasks view and select "Insert Path to Editor"
+  - Inserts the relative path at the cursor position in the Editor view
+  - Supports multiple selection - all selected paths are inserted with newlines
+  - Editor view is automatically focused after insertion
+- **Tasks View - Insert Path to Terminal**: Insert file/folder paths into the Terminal view
+  - Right-click files or folders in Tasks view and select "Insert Path to Terminal"
+  - Inserts the relative path into the Terminal view
+  - Supports multiple selection - paths are separated by spaces
+  - Terminal is automatically started if not already running
+
+## [0.7.23] - 2025-12-28
+
+### Changed
+- **Tasks View - Template Update**: Updated default task template
+  - Added filename placeholder to template
+  - Removed version section from template
+
 ## [0.7.20] - 2025-12-27
 
 ### Changed
@@ -801,6 +822,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.7.24]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.23...v0.7.24
+[0.7.23]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.20...v0.7.23
+[0.7.20]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.19...v0.7.20
 [0.7.19]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.18...v0.7.19
 [0.7.18]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.17...v0.7.18
 [0.7.17]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.16...v0.7.17

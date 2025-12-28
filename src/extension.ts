@@ -1371,7 +1371,57 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openTasksSettingsCommand, openEditorSettingsCommand, openTerminalSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, newDirectoryCommand, renameDirectoryCommand, deleteDirectoryCommand, archiveDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand, navigateToDirectoryCommand);
+    // パスをEditorに挿入するコマンド（複数選択対応）
+    const insertPathToEditorCommand = vscode.commands.registerCommand('aiCodingSidebar.insertPathToEditor', async (item?: FileItem, selectedItems?: FileItem[]) => {
+        // 複数選択の場合はselectedItemsを使用、そうでなければitemを使用
+        const items = selectedItems && selectedItems.length > 0 ? selectedItems : (item ? [item] : []);
+
+        if (items.length === 0) {
+            vscode.window.showErrorMessage('No file or folder is selected');
+            return;
+        }
+
+        // ワークスペースルートを取得
+        if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
+            vscode.window.showErrorMessage('No workspace is open');
+            return;
+        }
+
+        const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
+
+        // 選択されたアイテムの相対パスを取得
+        const relativePaths = items.map(i => path.relative(workspaceRoot, i.filePath));
+
+        // Editorに挿入
+        editorProvider.insertPaths(relativePaths);
+    });
+
+    // パスをTerminalに挿入するコマンド（複数選択対応）
+    const insertPathToTerminalCommand = vscode.commands.registerCommand('aiCodingSidebar.insertPathToTerminal', async (item?: FileItem, selectedItems?: FileItem[]) => {
+        // 複数選択の場合はselectedItemsを使用、そうでなければitemを使用
+        const items = selectedItems && selectedItems.length > 0 ? selectedItems : (item ? [item] : []);
+
+        if (items.length === 0) {
+            vscode.window.showErrorMessage('No file or folder is selected');
+            return;
+        }
+
+        // ワークスペースルートを取得
+        if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
+            vscode.window.showErrorMessage('No workspace is open');
+            return;
+        }
+
+        const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
+
+        // 選択されたアイテムの相対パスを取得
+        const relativePaths = items.map(i => path.relative(workspaceRoot, i.filePath));
+
+        // Terminalに挿入
+        await terminalProvider.insertPaths(relativePaths);
+    });
+
+    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openTasksSettingsCommand, openEditorSettingsCommand, openTerminalSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, newDirectoryCommand, renameDirectoryCommand, deleteDirectoryCommand, archiveDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand, navigateToDirectoryCommand, insertPathToEditorCommand, insertPathToTerminalCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({
@@ -2842,6 +2892,26 @@ class EditorProvider implements vscode.WebviewViewProvider {
         }
     }
 
+    /**
+     * 複数のパスをエディタに挿入
+     * @param paths 挿入するパスの配列
+     */
+    public insertPaths(paths: string[]): void {
+        if (!this._view) {
+            vscode.window.showWarningMessage('Editor view is not available');
+            return;
+        }
+
+        const pathText = paths.join('\n');
+        this._view.webview.postMessage({
+            type: 'insertText',
+            text: pathText
+        });
+
+        // Editorビューをフォーカス
+        this._view.show?.(true);
+    }
+
     private _getHtmlForWebview(webview: vscode.Webview) {
         return `<!DOCTYPE html>
 <html lang="en">
@@ -3026,6 +3096,21 @@ class EditorProvider implements vscode.WebviewViewProvider {
                     readonlyIndicator.classList.remove('show');
                     editor.removeAttribute('readonly');
                     isReadOnly = false;
+                    break;
+                case 'insertText':
+                    // カーソル位置にテキストを挿入
+                    const start = editor.selectionStart;
+                    const end = editor.selectionEnd;
+                    const text = message.text;
+                    editor.value = editor.value.substring(0, start) + text + editor.value.substring(end);
+                    // カーソルを挿入テキストの後に移動
+                    editor.selectionStart = editor.selectionEnd = start + text.length;
+                    editor.focus();
+                    // 変更を通知
+                    vscode.postMessage({ type: 'contentChanged', content: editor.value });
+                    if (editor.value !== originalContent) {
+                        dirtyIndicator.classList.add('show');
+                    }
                     break;
             }
         });
@@ -3307,6 +3392,26 @@ class TerminalProvider implements vscode.WebviewViewProvider {
             const commandToSend = addNewline ? command + '\n' : command;
             this._terminalService.write(this._currentSessionId, commandToSend);
         }
+    }
+
+    /**
+     * 複数のパスをターミナルに挿入（改行なし）
+     * @param paths 挿入するパスの配列
+     */
+    public async insertPaths(paths: string[]): Promise<void> {
+        // ターミナルが開始されていない場合は開始
+        if (!this._currentSessionId) {
+            await this._startTerminal();
+        }
+
+        if (this._currentSessionId) {
+            // スペースで区切ってパスを挿入（改行なし）
+            const pathText = paths.join(' ');
+            this._terminalService.write(this._currentSessionId, pathText);
+        }
+
+        // Terminalビューをフォーカス
+        this.focus();
     }
 
     /**

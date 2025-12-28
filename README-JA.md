@@ -85,6 +85,8 @@ created: {{datetime}}
 | ドラッグ&ドロップ | Docsビュー内または外部からファイルをドラッグしてコピー。コピー成功時にメッセージを表示 |
 | アーカイブ | タスクディレクトリをアーカイブしてワークスペースを整理。Tasksビューでディレクトリを右クリックして「Archive」を選択すると、`archived`フォルダに移動されます。同名のディレクトリが既に存在する場合は、競合を避けるために自動的にタイムスタンプが追加されます。 |
 | ブランチチェックアウト | ディレクトリを右クリックして、ディレクトリ名をそのままブランチ名としてgitブランチをチェックアウト。ブランチが存在しない場合は作成し、既に存在する場合は切り替え |
+| Editorにパスを挿入 | Tasksビューでファイルやフォルダを右クリックして「Insert Path to Editor」を選択すると、Editorビューのカーソル位置に相対パスを挿入。複数選択に対応 |
+| Terminalにパスを挿入 | Tasksビューでファイルやフォルダを右クリックして「Insert Path to Terminal」を選択すると、Terminalビューに相対パスを挿入。複数選択に対応。パスはスペースで区切られます |
 
 ## その他の機能
 
@@ -204,14 +206,14 @@ npm run watch
 1. [GitHubのReleasesページ](https://github.com/NaokiIshimura/vscode-panel/releases)から最新のVSIXファイルをダウンロード
 2. コマンドラインからインストール:
    ```bash
-   code --install-extension ai-coding-sidebar-0.7.21.vsix
+   code --install-extension ai-coding-sidebar-0.7.24.vsix
    ```
 3. VS Codeを再起動
 
 #### ローカルビルド版を使用する場合:
 ```bash
-# releasesディレクトリから直接インストール（バージョン0.7.21）
-code --install-extension releases/ai-coding-sidebar-0.7.21.vsix
+# releasesディレクトリから直接インストール（バージョン0.7.24）
+code --install-extension releases/ai-coding-sidebar-0.7.24.vsix
 ```
 
 #### 自分でパッケージを作成する場合:
@@ -225,7 +227,7 @@ code --install-extension releases/ai-coding-sidebar-0.7.21.vsix
    ```
 3. 生成されたVSIXファイルをインストール:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.7.21.vsix
+   code --install-extension releases/ai-coding-sidebar-0.7.24.vsix
    ```
 4. VS Codeを再起動
 

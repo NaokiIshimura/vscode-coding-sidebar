@@ -1538,8 +1538,8 @@ class TasksWebViewProvider implements vscode.WebviewViewProvider {
             case 'refresh':
                 this.refresh();
                 break;
-            case 'moveFile':
-                await this._handleMoveFile(data.sourcePath, data.targetPath);
+            case 'copyFile':
+                await this._handleCopyFile(data.sourcePath, data.targetPath);
                 break;
             case 'externalDrop':
                 await this._handleExternalDrop(data.files, data.targetPath);
@@ -1604,7 +1604,7 @@ class TasksWebViewProvider implements vscode.WebviewViewProvider {
         );
     }
 
-    private async _handleMoveFile(sourcePath: string, targetDir: string): Promise<void> {
+    private async _handleCopyFile(sourcePath: string, targetDir: string): Promise<void> {
         const fileName = path.basename(sourcePath);
         const targetPath = path.join(targetDir, fileName);
 
@@ -1624,11 +1624,16 @@ class TasksWebViewProvider implements vscode.WebviewViewProvider {
                 }
             }
 
-            await fs.promises.rename(sourcePath, targetPath);
-            vscode.window.showInformationMessage(`Moved: ${fileName}`);
+            const stat = await fs.promises.stat(sourcePath);
+            if (stat.isDirectory()) {
+                await this._copyDirectoryRecursive(sourcePath, targetPath);
+            } else {
+                await fs.promises.copyFile(sourcePath, targetPath);
+            }
+            vscode.window.showInformationMessage(`Copied: ${fileName}`);
             this.refresh();
         } catch (error) {
-            vscode.window.showErrorMessage(`Failed to move file: ${error}`);
+            vscode.window.showErrorMessage(`Failed to copy file: ${error}`);
         }
     }
 
@@ -2157,6 +2162,10 @@ class TasksWebViewProvider implements vscode.WebviewViewProvider {
             color: var(--vscode-descriptionForeground);
         }
 
+        .file-item.editing .name {
+            font-weight: bold;
+        }
+
         .file-item.parent-item {
             opacity: 0.8;
         }
@@ -2411,10 +2420,11 @@ class TasksWebViewProvider implements vscode.WebviewViewProvider {
             // Render single item
             function renderItem(item) {
                 const isSelected = item.path === state.selectedPath;
-                const isEditing = item.path === state.editingPath;
+                const isEditing = item.isEditing === true;
                 const classes = ['file-item'];
                 if (item.isDirectory) classes.push('directory');
                 if (isSelected) classes.push('selected');
+                if (isEditing) classes.push('editing');
 
                 return \`
                     <div class="\${classes.join(' ')}"
@@ -2539,7 +2549,7 @@ class TasksWebViewProvider implements vscode.WebviewViewProvider {
                 const item = e.currentTarget;
                 state.draggedPath = item.dataset.path;
                 item.classList.add('dragging');
-                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.effectAllowed = 'copy';
                 e.dataTransfer.setData('text/plain', item.dataset.path);
             }
 
@@ -2555,7 +2565,7 @@ class TasksWebViewProvider implements vscode.WebviewViewProvider {
                 const item = e.currentTarget;
                 if (item.dataset.isDirectory === 'true' && item.dataset.path !== state.draggedPath) {
                     item.classList.add('drag-over');
-                    e.dataTransfer.dropEffect = 'move';
+                    e.dataTransfer.dropEffect = 'copy';
                 }
             }
 
@@ -2589,10 +2599,10 @@ class TasksWebViewProvider implements vscode.WebviewViewProvider {
                     return;
                 }
 
-                // Internal move
+                // Internal copy
                 if (state.draggedPath && state.draggedPath !== targetPath) {
                     vscode.postMessage({
-                        type: 'moveFile',
+                        type: 'copyFile',
                         sourcePath: state.draggedPath,
                         targetPath: targetPath
                     });

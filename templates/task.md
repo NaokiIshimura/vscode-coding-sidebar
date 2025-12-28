@@ -1,7 +1,10 @@
-file: {{filename}}
-created: {{datetime}}
+# requirement
+
+
+# acceptance criteria
+
 
 ---
 
-# task
-
+file: {{filename}}
+created: {{datetime}}

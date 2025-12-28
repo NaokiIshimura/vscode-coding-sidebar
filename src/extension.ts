@@ -2515,7 +2515,7 @@ class MenuProvider implements vscode.TreeDataProvider<MenuItem> {
                             new vscode.ThemeIcon('keyboard')
                         ),
                         new MenuItem(
-                            'Start Task',
+                            'New Task',
                             'Cmd+S (macOS) / Ctrl+S (Windows/Linux) - When sidebar is focused',
                             undefined,
                             new vscode.ThemeIcon('keyboard')
@@ -2970,13 +2970,29 @@ class EditorProvider implements vscode.WebviewViewProvider {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        .dirty-indicator {
-            margin-left: 4px;
-            color: var(--vscode-gitDecoration-modifiedResourceForeground);
-            display: none;
+        .save-button {
+            padding: 2px 8px;
+            font-size: 11px;
+            background-color: transparent;
+            color: var(--vscode-foreground);
+            border: 1px solid var(--vscode-button-border, transparent);
+            border-radius: 2px;
+            cursor: pointer;
         }
-        .dirty-indicator.show {
-            display: inline;
+        .save-button:hover {
+            background-color: var(--vscode-toolbar-hoverBackground);
+        }
+        .save-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .save-button.dirty {
+            background-color: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+            border: none;
+        }
+        .save-button.dirty:hover {
+            background-color: var(--vscode-button-hoverBackground);
         }
         .readonly-indicator {
             font-size: 11px;
@@ -3025,25 +3041,24 @@ class EditorProvider implements vscode.WebviewViewProvider {
     <div id="header">
         <div class="file-info">
             <span id="file-path"></span>
-            <span class="dirty-indicator" id="dirty-indicator">●</span>
         </div>
         <div class="header-actions">
             <span class="readonly-indicator" id="readonly-indicator">Read-only</span>
+            <button class="save-button" id="save-button" title="Save file">Save</button>
             <button class="run-button" id="run-button" title="Run task (Cmd+R / Ctrl+R)">Run</button>
         </div>
     </div>
     <div id="editor-container">
         <textarea id="editor" placeholder="Shortcuts:
   Cmd+M / Ctrl+M - Create new markdown file
-  Cmd+S / Ctrl+S - Save file
   Cmd+R / Ctrl+R - Run task"></textarea>
     </div>
     <script>
         const vscode = acquireVsCodeApi();
         const editor = document.getElementById('editor');
         const filePathElement = document.getElementById('file-path');
-        const dirtyIndicator = document.getElementById('dirty-indicator');
         const readonlyIndicator = document.getElementById('readonly-indicator');
+        const saveButton = document.getElementById('save-button');
         const runButton = document.getElementById('run-button');
         let originalContent = '';
         let currentFilePath = '';
@@ -3058,7 +3073,7 @@ class EditorProvider implements vscode.WebviewViewProvider {
                     originalContent = message.content;
                     currentFilePath = message.filePath;
                     filePathElement.textContent = message.filePath;
-                    dirtyIndicator.classList.remove('show');
+                    saveButton.classList.remove('dirty');
 
                     // Handle read-only mode
                     isReadOnly = message.isReadOnly || false;
@@ -3072,9 +3087,9 @@ class EditorProvider implements vscode.WebviewViewProvider {
                     break;
                 case 'updateDirtyState':
                     if (message.isDirty) {
-                        dirtyIndicator.classList.add('show');
+                        saveButton.classList.add('dirty');
                     } else {
-                        dirtyIndicator.classList.remove('show');
+                        saveButton.classList.remove('dirty');
                         originalContent = editor.value;
                     }
                     break;
@@ -3083,14 +3098,14 @@ class EditorProvider implements vscode.WebviewViewProvider {
                     if (isReadOnly) {
                         editor.setAttribute('readonly', 'readonly');
                         readonlyIndicator.classList.add('show');
-                        dirtyIndicator.classList.remove('show');
+                        saveButton.classList.remove('dirty');
                     } else {
                         editor.removeAttribute('readonly');
                         readonlyIndicator.classList.remove('show');
                         // Check if content is dirty when switching back to editable
                         const isDirty = editor.value !== originalContent;
                         if (isDirty) {
-                            dirtyIndicator.classList.add('show');
+                            saveButton.classList.add('dirty');
                         }
                     }
                     break;
@@ -3099,7 +3114,7 @@ class EditorProvider implements vscode.WebviewViewProvider {
                     originalContent = '';
                     currentFilePath = '';
                     filePathElement.textContent = '';
-                    dirtyIndicator.classList.remove('show');
+                    saveButton.classList.remove('dirty');
                     readonlyIndicator.classList.remove('show');
                     editor.removeAttribute('readonly');
                     isReadOnly = false;
@@ -3116,7 +3131,7 @@ class EditorProvider implements vscode.WebviewViewProvider {
                     // 変更を通知
                     vscode.postMessage({ type: 'contentChanged', content: editor.value });
                     if (editor.value !== originalContent) {
-                        dirtyIndicator.classList.add('show');
+                        saveButton.classList.add('dirty');
                     }
                     break;
             }
@@ -3129,9 +3144,9 @@ class EditorProvider implements vscode.WebviewViewProvider {
             }
             const isDirty = editor.value !== originalContent;
             if (isDirty) {
-                dirtyIndicator.classList.add('show');
+                saveButton.classList.add('dirty');
             } else {
-                dirtyIndicator.classList.remove('show');
+                saveButton.classList.remove('dirty');
             }
             vscode.postMessage({
                 type: 'contentChanged',
@@ -3158,19 +3173,8 @@ class EditorProvider implements vscode.WebviewViewProvider {
             }
         };
 
-        // Cmd+S / Ctrl+Sで保存
+        // Keyboard shortcuts
         editor.addEventListener('keydown', (e) => {
-            if ((e.metaKey || e.ctrlKey) && e.key === 's') {
-                e.preventDefault();
-                if (isReadOnly) {
-                    return;
-                }
-                vscode.postMessage({
-                    type: 'save',
-                    content: editor.value
-                });
-            }
-
             // Cmd+R / Ctrl+Rで実行
             if ((e.metaKey || e.ctrlKey) && e.key === 'r') {
                 e.preventDefault();
@@ -3184,6 +3188,17 @@ class EditorProvider implements vscode.WebviewViewProvider {
                     type: 'createMarkdownFile'
                 });
             }
+        });
+
+        // Save button click handler
+        saveButton.addEventListener('click', () => {
+            if (isReadOnly) {
+                return;
+            }
+            vscode.postMessage({
+                type: 'save',
+                content: editor.value
+            });
         });
 
         // Run button click handler

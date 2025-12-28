@@ -8,10 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.7.30] - 2025-12-29
 
 ### Changed
-- **File Naming Format**: Added year prefix to timestamp filename format for Create Markdown File
+- **File Naming Format**: Changed timestamp filename format for Create Markdown File
   - Previous format: `MMDD.HHMM.SS_PROMPT.md` (e.g., `1229.0619.38_PROMPT.md`)
-  - New format: `YYYY.MMDD.HHMM.SS_PROMPT.md` (e.g., `2025.1229.0619.38_PROMPT.md`)
-  - Provides clearer identification of file creation date
+  - New format: `YYYY_MMDD_HHMM_SS_PROMPT.md` (e.g., `2025_1229_0619_38_PROMPT.md`)
+  - Added year prefix and unified separator to underscores
 
 ## [0.7.28] - 2025-12-29
 

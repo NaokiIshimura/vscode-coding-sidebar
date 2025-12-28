@@ -295,12 +295,12 @@ export function activate(context: vscode.ExtensionContext) {
 
             // ファイルの場合（Markdownファイル）
             if (!selectedItem.isDirectory && selectedItem.filePath.endsWith('.md')) {
-                // ファイル名がYYYY.MMDD.HHMM.SS_PROMPT.md形式の場合はMarkdown Editorで開く
+                // ファイル名がYYYY_MMDD_HHMM_SS_PROMPT.md形式の場合はMarkdown Editorで開く
                 const fileName = path.basename(selectedItem.filePath);
-                const timestampPattern = /^\d{4}\.\d{4}\.\d{4}\.\d{2}_PROMPT\.md$/;
+                const timestampPattern = /^\d{4}_\d{4}_\d{4}_\d{2}_PROMPT\.md$/;
 
                 if (timestampPattern.test(fileName)) {
-                    // YYYY.MMDD.HHMM.SS_PROMPT.md形式の場合はMarkdown Editorで開く
+                    // YYYY_MMDD_HHMM_SS_PROMPT.md形式の場合はMarkdown Editorで開く
                     await editorProvider.showFile(selectedItem.filePath);
                 } else {
                     // それ以外は通常のエディタで開く
@@ -562,7 +562,7 @@ export function activate(context: vscode.ExtensionContext) {
             targetPath = currentPath;
         }
 
-        // 現在の日時を YYYY.MMDD.HHMM.SS 形式で取得
+        // 現在の日時を YYYY_MMDD_HHMM_SS 形式で取得
         const now = new Date();
         const year = String(now.getFullYear());
         const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -571,7 +571,7 @@ export function activate(context: vscode.ExtensionContext) {
         const minute = String(now.getMinutes()).padStart(2, '0');
         const second = String(now.getSeconds()).padStart(2, '0');
 
-        const timestamp = `${year}.${month}${day}.${hour}${minute}.${second}`;
+        const timestamp = `${year}_${month}${day}_${hour}${minute}_${second}`;
         const fileName = `${timestamp}_PROMPT.md`;
         const filePath = path.join(targetPath, fileName);
 
@@ -2659,7 +2659,7 @@ class EditorProvider implements vscode.WebviewViewProvider {
                         // ディレクトリが存在しない場合は作成
                         await fs.promises.mkdir(savePath, { recursive: true });
 
-                        // タイムスタンプ付きファイル名を生成 (YYYY.MMDD.HHMM.SS形式)
+                        // タイムスタンプ付きファイル名を生成 (YYYY_MMDD_HHMM_SS形式)
                         const now = new Date();
                         const year = String(now.getFullYear());
                         const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -2667,7 +2667,7 @@ class EditorProvider implements vscode.WebviewViewProvider {
                         const hour = String(now.getHours()).padStart(2, '0');
                         const minute = String(now.getMinutes()).padStart(2, '0');
                         const second = String(now.getSeconds()).padStart(2, '0');
-                        const timestamp = `${year}.${month}${day}.${hour}${minute}.${second}`;
+                        const timestamp = `${year}_${month}${day}_${hour}${minute}_${second}`;
 
                         const fileName = `${timestamp}_PROMPT.md`;
                         const filePath = path.join(savePath, fileName);

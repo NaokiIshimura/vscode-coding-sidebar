@@ -938,7 +938,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     // 新しいディレクトリを作成してMarkdownファイルも作成するコマンド（タイトルメニュー用）
     const newDirectoryCommand = vscode.commands.registerCommand('aiCodingSidebar.newDirectory', async (item?: FileItem) => {
-        // default path配下にディレクトリを作成
+        // Tasks Viewで開いているディレクトリ配下にディレクトリを作成
         const workspaceFolders = vscode.workspace.workspaceFolders;
         if (!workspaceFolders || workspaceFolders.length === 0) {
             vscode.window.showErrorMessage('No workspace folder is open');
@@ -946,14 +946,21 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const workspaceRoot = workspaceFolders[0].uri.fsPath;
-        const defaultRelativePath = configProvider.getDefaultRelativePath();
 
-        if (!defaultRelativePath || defaultRelativePath.trim() === '') {
-            vscode.window.showErrorMessage('Default relative path is not configured');
-            return;
+        // 現在開いているディレクトリを取得、取得できない場合はdefaultRelativePathを使用
+        const currentPath = tasksProvider.getCurrentPath();
+        let targetPath: string;
+
+        if (currentPath) {
+            targetPath = currentPath;
+        } else {
+            const defaultRelativePath = configProvider.getDefaultRelativePath();
+            if (!defaultRelativePath || defaultRelativePath.trim() === '') {
+                vscode.window.showErrorMessage('Default relative path is not configured');
+                return;
+            }
+            targetPath = path.join(workspaceRoot, defaultRelativePath);
         }
-
-        const targetPath = path.join(workspaceRoot, defaultRelativePath);
 
         // フォルダ名をユーザーに入力してもらう
         const folderName = await vscode.window.showInputBox({

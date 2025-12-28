@@ -5,6 +5,20 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.7.25] - 2025-12-29
+
+### 変更
+- **Tasks View - Start Task動作の変更**: Start Taskでディレクトリを作成する場所を変更
+  - 以前: 常に`defaultRelativePath`（デフォルト: `.claude/tasks`）配下に作成
+  - 変更後: Tasks Viewで現在開いているディレクトリ配下に作成
+  - フォールバック: 現在のパスが取得できない場合は従来通り`defaultRelativePath`を使用
+
+### 追加
+- **Tasks View - 新規ディレクトリボタン**: Tasks Viewヘッダーに「New Directory」ボタンを追加
+  - フォルダアイコンをクリックして現在のディレクトリ配下に新しいディレクトリを作成
+  - ディレクトリのみを作成（Markdownファイルは作成しない）
+  - ヘッダーボタンの順序: Start Task -> New Directory -> New File -> Refresh -> Settings
+
 ## [0.7.24] - 2025-12-29
 
 ### 追加
@@ -33,7 +47,7 @@
   - 設定アイコンですべてのTasks関連設定を一箇所で表示
   - タイトルメニューのアイコン数を削減してシンプルに
 - **Tasks View - メニュー順序**: タイトルメニューのアイコン順序を変更
-  - 新しい順序: Start Task → Create Markdown File → Refresh → Tasks Settings
+  - 新しい順序: Start Task -> Create Markdown File -> Refresh -> Tasks Settings
   - Create Markdown FileをStart Taskの隣に配置してアクセスしやすく
 
 ## [0.7.19] - 2025-12-27
@@ -206,7 +220,7 @@
   - "Add Directory"コマンドでディレクトリを作成すると、新しいディレクトリが即座に選択されます
   - ディレクトリ作成後の視覚的フィードバックとナビゲーションが改善されました
 - **Markdownファイルアイコン**: Markdown Listビューのファイルが開き方に応じて異なるアイコンを表示するように変更
-  - タイムスタンプ形式のファイル（形式：`YYYY_MMDD_HHMM.md`）でMarkdown Editor Viewで開かれるものはEditアイコン（✏️）を表示
+  - タイムスタンプ形式のファイル（形式：`YYYY_MMDD_HHMM.md`）でMarkdown Editor Viewで開かれるものはEditアイコンを表示
   - その他の通常のエディタで開かれるMarkdownファイルはMarkdownアイコンを表示
   - サイドバーで直接編集できるファイルと通常のエディタで開くファイルの違いがより明確になりました
 
@@ -328,6 +342,7 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.7.25]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.24...v0.7.25
 [0.7.24]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.23...v0.7.24
 [0.7.23]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.20...v0.7.23
 [0.7.20]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.19...v0.7.20

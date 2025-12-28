@@ -1544,6 +1544,9 @@ class TasksWebViewProvider implements vscode.WebviewViewProvider {
             case 'externalDrop':
                 await this._handleExternalDrop(data.files, data.targetPath);
                 break;
+            case 'externalDropWithContent':
+                await this._handleExternalDropWithContent(data.files, data.targetPath);
+                break;
         }
     }
 
@@ -1638,12 +1641,25 @@ class TasksWebViewProvider implements vscode.WebviewViewProvider {
     }
 
     private async _handleExternalDrop(files: string[], targetDir: string): Promise<void> {
+        // Fallback to active folder, root path, or project root if targetDir is null
+        const effectiveTargetDir = targetDir || this._activeFolderPath || this._rootPath || this._projectRootPath;
+
+        if (!effectiveTargetDir) {
+            vscode.window.showErrorMessage('No target directory available');
+            return;
+        }
+
         const copiedFiles: string[] = [];
 
         for (const filePath of files) {
             try {
+                if (!filePath) {
+                    console.error('Source file path is missing');
+                    continue;
+                }
+
                 const fileName = path.basename(filePath);
-                const targetPath = path.join(targetDir, fileName);
+                const targetPath = path.join(effectiveTargetDir, fileName);
 
                 if (filePath === targetPath) {
                     continue;
@@ -1676,6 +1692,54 @@ class TasksWebViewProvider implements vscode.WebviewViewProvider {
             const message = copiedFiles.length === 1
                 ? `Copied: ${copiedFiles[0]}`
                 : `Copied ${copiedFiles.length} files`;
+            vscode.window.showInformationMessage(message);
+        }
+
+        this.refresh();
+    }
+
+    private async _handleExternalDropWithContent(files: Array<{name: string, content: string}>, targetDir: string): Promise<void> {
+        // Fallback to active folder, root path, or project root if targetDir is null
+        const effectiveTargetDir = targetDir || this._activeFolderPath || this._rootPath || this._projectRootPath;
+
+        if (!effectiveTargetDir) {
+            vscode.window.showErrorMessage('No target directory available');
+            return;
+        }
+
+        const createdFiles: string[] = [];
+
+        for (const file of files) {
+            try {
+                if (!file.name) {
+                    console.error('File name is missing');
+                    continue;
+                }
+
+                const targetPath = path.join(effectiveTargetDir, file.name);
+
+                if (fs.existsSync(targetPath)) {
+                    const answer = await vscode.window.showWarningMessage(
+                        `${file.name} already exists. Overwrite?`,
+                        'Overwrite',
+                        'Skip'
+                    );
+                    if (answer !== 'Overwrite') {
+                        continue;
+                    }
+                }
+
+                await fs.promises.writeFile(targetPath, file.content, 'utf8');
+                createdFiles.push(file.name);
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to create file: ${error}`);
+            }
+        }
+
+        if (createdFiles.length > 0) {
+            const message = createdFiles.length === 1
+                ? `Copied: ${createdFiles[0]}`
+                : `Copied ${createdFiles.length} files`;
             vscode.window.showInformationMessage(message);
         }
 
@@ -2587,16 +2651,71 @@ class TasksWebViewProvider implements vscode.WebviewViewProvider {
 
                 // Check for external files
                 if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                    const files = [];
-                    for (let i = 0; i < e.dataTransfer.files.length; i++) {
-                        files.push(e.dataTransfer.files[i].path);
+                    const droppedFiles = e.dataTransfer.files;
+
+                    // Try to use file.path first (Electron/VSCode may provide it)
+                    const filesWithPath = [];
+                    for (let i = 0; i < droppedFiles.length; i++) {
+                        const filePath = droppedFiles[i].path;
+                        if (filePath && typeof filePath === 'string' && filePath.length > 0) {
+                            filesWithPath.push(filePath);
+                        }
                     }
-                    vscode.postMessage({
-                        type: 'externalDrop',
-                        files: files,
-                        targetPath: targetPath
-                    });
-                    return;
+
+                    if (filesWithPath.length > 0) {
+                        vscode.postMessage({
+                            type: 'externalDrop',
+                            files: filesWithPath,
+                            targetPath: targetPath
+                        });
+                        return;
+                    }
+
+                    // Fallback: Use FileReader API
+                    const readFilePromises = [];
+                    for (let i = 0; i < droppedFiles.length; i++) {
+                        const file = droppedFiles[i];
+                        if (file.type.startsWith('text/') ||
+                            file.name.endsWith('.md') ||
+                            file.name.endsWith('.txt') ||
+                            file.name.endsWith('.json') ||
+                            file.name.endsWith('.js') ||
+                            file.name.endsWith('.ts') ||
+                            file.name.endsWith('.css') ||
+                            file.name.endsWith('.html') ||
+                            file.name.endsWith('.yaml') ||
+                            file.name.endsWith('.yml')) {
+                            readFilePromises.push(
+                                new Promise((resolve) => {
+                                    const reader = new FileReader();
+                                    reader.onload = () => {
+                                        resolve({
+                                            name: file.name,
+                                            content: reader.result
+                                        });
+                                    };
+                                    reader.onerror = () => {
+                                        resolve(null);
+                                    };
+                                    reader.readAsText(file);
+                                })
+                            );
+                        }
+                    }
+
+                    if (readFilePromises.length > 0) {
+                        Promise.all(readFilePromises).then((results) => {
+                            const validFiles = results.filter(r => r !== null);
+                            if (validFiles.length > 0) {
+                                vscode.postMessage({
+                                    type: 'externalDropWithContent',
+                                    files: validFiles,
+                                    targetPath: targetPath
+                                });
+                            }
+                        });
+                        return;
+                    }
                 }
 
                 // Internal copy
@@ -2612,30 +2731,112 @@ class TasksWebViewProvider implements vscode.WebviewViewProvider {
             // File list drag and drop (for external files dropped on empty area)
             function handleFileListDragOver(e) {
                 e.preventDefault();
-                if (e.dataTransfer.types.includes('Files')) {
-                    fileList.classList.add('drag-over');
-                    e.dataTransfer.dropEffect = 'copy';
-                }
+                fileList.classList.add('drag-over');
+                e.dataTransfer.dropEffect = 'copy';
             }
 
             function handleFileListDragLeave(e) {
-                fileList.classList.remove('drag-over');
+                // Only remove if leaving file-list entirely
+                if (!fileList.contains(e.relatedTarget)) {
+                    fileList.classList.remove('drag-over');
+                }
             }
 
             function handleFileListDrop(e) {
                 e.preventDefault();
                 fileList.classList.remove('drag-over');
 
+                const targetPath = state.currentPath || state.rootPath;
+
+                // Ensure targetPath is valid
+                if (!targetPath) {
+                    console.error('No target path available for drop');
+                    return;
+                }
+
+                // Check for external files first
                 if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                    const files = [];
-                    for (let i = 0; i < e.dataTransfer.files.length; i++) {
-                        files.push(e.dataTransfer.files[i].path);
+                    const droppedFiles = e.dataTransfer.files;
+
+                    // Try to use file.path first (Electron/VSCode may provide it)
+                    const filesWithPath = [];
+                    for (let i = 0; i < droppedFiles.length; i++) {
+                        const filePath = droppedFiles[i].path;
+                        // Check for valid non-empty string path
+                        if (filePath && typeof filePath === 'string' && filePath.length > 0) {
+                            filesWithPath.push(filePath);
+                        }
                     }
-                    vscode.postMessage({
-                        type: 'externalDrop',
-                        files: files,
-                        targetPath: state.currentPath
-                    });
+
+                    if (filesWithPath.length > 0) {
+                        vscode.postMessage({
+                            type: 'externalDrop',
+                            files: filesWithPath,
+                            targetPath: targetPath
+                        });
+                        return;
+                    }
+
+                    // Fallback: Use FileReader API to read file contents
+                    const readFilePromises = [];
+                    for (let i = 0; i < droppedFiles.length; i++) {
+                        const file = droppedFiles[i];
+                        // Only process text-based files
+                        if (file.type.startsWith('text/') ||
+                            file.name.endsWith('.md') ||
+                            file.name.endsWith('.txt') ||
+                            file.name.endsWith('.json') ||
+                            file.name.endsWith('.js') ||
+                            file.name.endsWith('.ts') ||
+                            file.name.endsWith('.css') ||
+                            file.name.endsWith('.html') ||
+                            file.name.endsWith('.yaml') ||
+                            file.name.endsWith('.yml')) {
+                            readFilePromises.push(
+                                new Promise((resolve) => {
+                                    const reader = new FileReader();
+                                    reader.onload = () => {
+                                        resolve({
+                                            name: file.name,
+                                            content: reader.result
+                                        });
+                                    };
+                                    reader.onerror = () => {
+                                        resolve(null);
+                                    };
+                                    reader.readAsText(file);
+                                })
+                            );
+                        }
+                    }
+
+                    if (readFilePromises.length > 0) {
+                        Promise.all(readFilePromises).then((results) => {
+                            const validFiles = results.filter(r => r !== null);
+                            if (validFiles.length > 0) {
+                                vscode.postMessage({
+                                    type: 'externalDropWithContent',
+                                    files: validFiles,
+                                    targetPath: targetPath
+                                });
+                            }
+                        });
+                        return;
+                    }
+                }
+
+                // Internal file copy (from within Tasks view)
+                if (state.draggedPath && state.draggedPath !== targetPath) {
+                    // Don't copy to the same directory
+                    const draggedDir = state.draggedPath.substring(0, state.draggedPath.lastIndexOf('/')) ||
+                                       state.draggedPath.substring(0, state.draggedPath.lastIndexOf('\\\\'));
+                    if (draggedDir !== targetPath) {
+                        vscode.postMessage({
+                            type: 'copyFile',
+                            sourcePath: state.draggedPath,
+                            targetPath: targetPath
+                        });
+                    }
                 }
             }
 

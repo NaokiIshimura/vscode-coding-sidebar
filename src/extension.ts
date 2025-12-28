@@ -295,12 +295,12 @@ export function activate(context: vscode.ExtensionContext) {
 
             // ファイルの場合（Markdownファイル）
             if (!selectedItem.isDirectory && selectedItem.filePath.endsWith('.md')) {
-                // ファイル名がYYYY_MMDD_HHMM_TASK.md形式の場合はMarkdown Editorで開く
+                // ファイル名がMMDD.HHMM.SS_PROMPT.md形式の場合はMarkdown Editorで開く
                 const fileName = path.basename(selectedItem.filePath);
-                const timestampPattern = /^\d{4}_\d{4}_\d{4}_TASK\.md$/;
+                const timestampPattern = /^\d{4}\.\d{4}\.\d{2}_PROMPT\.md$/;
 
                 if (timestampPattern.test(fileName)) {
-                    // YYYY_MMDD_HHMM_TASK.md形式の場合はMarkdown Editorで開く
+                    // MMDD.HHMM.SS_PROMPT.md形式の場合はMarkdown Editorで開く
                     await editorProvider.showFile(selectedItem.filePath);
                 } else {
                     // それ以外は通常のエディタで開く
@@ -562,24 +562,31 @@ export function activate(context: vscode.ExtensionContext) {
             targetPath = currentPath;
         }
 
-        // 現在の日時を YYYY_MMDD_HHMM 形式で取得
+        // 現在の日時を MMDD.HHMM.SS 形式で取得
         const now = new Date();
-        const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const day = String(now.getDate()).padStart(2, '0');
         const hour = String(now.getHours()).padStart(2, '0');
         const minute = String(now.getMinutes()).padStart(2, '0');
+        const second = String(now.getSeconds()).padStart(2, '0');
 
-        const timestamp = `${year}_${month}${day}_${hour}${minute}`;
-        const fileName = `${timestamp}_TASK.md`;
+        const timestamp = `${month}${day}.${hour}${minute}.${second}`;
+        const fileName = `${timestamp}_PROMPT.md`;
         const filePath = path.join(targetPath, fileName);
 
         try {
             // テンプレートを使用してファイル内容を生成
+            // ワークスペースルートからの相対パスを計算
+            const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
+            const relativeFilePath = workspaceRoot ? path.relative(workspaceRoot, filePath) : filePath;
+            const relativeDirPath = workspaceRoot ? path.relative(workspaceRoot, targetPath) : targetPath;
+
             const variables = {
                 datetime: now.toLocaleString(),
                 filename: fileName,
-                timestamp: timestamp
+                timestamp: timestamp,
+                filepath: relativeFilePath,
+                dirpath: relativeDirPath
             };
 
             const content = loadTemplate(context, variables);
@@ -1000,21 +1007,28 @@ export function activate(context: vscode.ExtensionContext) {
 
             // 作成したディレクトリ内にMarkdownファイルを作成
             const now = new Date();
-            const year = now.getFullYear();
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
             const hour = String(now.getHours()).padStart(2, '0');
             const minute = String(now.getMinutes()).padStart(2, '0');
+            const second = String(now.getSeconds()).padStart(2, '0');
 
-            const timestamp = `${year}_${month}${day}_${hour}${minute}`;
-            const fileName = `${timestamp}_TASK.md`;
+            const timestamp = `${month}${day}.${hour}${minute}.${second}`;
+            const fileName = `${timestamp}_PROMPT.md`;
             const filePath = path.join(folderPath, fileName);
 
             // テンプレートを使用してファイル内容を生成
+            // ワークスペースルートからの相対パスを計算
+            const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
+            const relativeFilePath = workspaceRoot ? path.relative(workspaceRoot, filePath) : filePath;
+            const relativeDirPath = workspaceRoot ? path.relative(workspaceRoot, folderPath) : folderPath;
+
             const variables = {
                 datetime: now.toLocaleString(),
                 filename: fileName,
-                timestamp: timestamp
+                timestamp: timestamp,
+                filepath: relativeFilePath,
+                dirpath: relativeDirPath
             };
 
             const content = loadTemplate(context, variables);
@@ -2316,7 +2330,7 @@ class FileItem extends vscode.TreeItem {
 
         // Markdownファイルの場合、タイムスタンプ形式かどうかで分ける
         if (ext === '.md') {
-            const timestampPattern = /^\d{4}_\d{4}_\d{4}_TASK\.md$/;
+            const timestampPattern = /^\d{4}\.\d{4}\.\d{2}_PROMPT\.md$/;
             // タイムスタンプ形式の場合はeditアイコン（Markdown Editorで開く）
             if (timestampPattern.test(fileName)) {
                 return new vscode.ThemeIcon('edit');
@@ -2646,14 +2660,14 @@ class EditorProvider implements vscode.WebviewViewProvider {
 
                         // タイムスタンプ付きファイル名を生成
                         const now = new Date();
-                        const year = now.getFullYear();
                         const month = String(now.getMonth() + 1).padStart(2, '0');
                         const day = String(now.getDate()).padStart(2, '0');
                         const hour = String(now.getHours()).padStart(2, '0');
                         const minute = String(now.getMinutes()).padStart(2, '0');
-                        const timestamp = `${year}_${month}${day}_${hour}${minute}`;
+                        const second = String(now.getSeconds()).padStart(2, '0');
+                        const timestamp = `${month}${day}.${hour}${minute}.${second}`;
 
-                        const fileName = `${timestamp}_TASK.md`;
+                        const fileName = `${timestamp}_PROMPT.md`;
                         const filePath = path.join(savePath, fileName);
 
                         try {
@@ -2747,7 +2761,7 @@ class EditorProvider implements vscode.WebviewViewProvider {
 
                         // Get the run command template from settings
                         const config = vscode.workspace.getConfiguration('aiCodingSidebar');
-                        const commandTemplate = config.get<string>('editor.runCommand', 'claude "read ${filePath} and save your report to the same directory as ${filePath}"');
+                        const commandTemplate = config.get<string>('editor.runCommand', 'claude "${filePath}"');
 
                         // Replace ${filePath} placeholder with actual file path
                         const command = commandTemplate.replace(/\$\{filePath\}/g, relativeFilePath.trim());

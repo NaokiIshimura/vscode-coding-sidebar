@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.28] - 2025-12-29
+
+### Changed
+- **Settings - Run Command Default**: Changed default value of `editor.runCommand` setting
+  - Previous default: `claude "read ${filePath} and save your report to the same directory as ${filePath}"`
+  - New default: `claude "${filePath}"`
+- **File Naming Format**: Changed filename format for Create Markdown File
+  - Previous format: `YYYY_MMDD_HHMM_TASK.md` (e.g., `2025_1229_0619_TASK.md`)
+  - New format: `MMDD.HHMM.SS_PROMPT.md` (e.g., `1229.0619.38_PROMPT.md`)
+  - Now includes seconds for more precise timestamps
+
+### Added
+- **Template Variables**: Added new template variables for workspace-relative paths
+  - `{{filepath}}`: File path relative to workspace root (e.g., `.claude/tasks/1229.0619.38_PROMPT.md`)
+  - `{{dirpath}}`: Directory path relative to workspace root (e.g., `.claude/tasks`)
+
 ## [0.7.25] - 2025-12-29
 
 ### Changed

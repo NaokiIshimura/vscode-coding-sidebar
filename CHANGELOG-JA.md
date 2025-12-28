@@ -5,6 +5,22 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.7.28] - 2025-12-29
+
+### 変更
+- **設定 - Run Commandデフォルト値**: `editor.runCommand`設定のデフォルト値を変更
+  - 旧デフォルト値: `claude "read ${filePath} and save your report to the same directory as ${filePath}"`
+  - 新デフォルト値: `claude "${filePath}"`
+- **ファイル名形式**: Create Markdown Fileで作成されるファイル名の形式を変更
+  - 旧形式: `YYYY_MMDD_HHMM_TASK.md`（例: `2025_1229_0619_TASK.md`）
+  - 新形式: `MMDD.HHMM.SS_PROMPT.md`（例: `1229.0619.38_PROMPT.md`）
+  - より正確なタイムスタンプのため秒を追加
+
+### 追加
+- **テンプレート変数**: ワークスペース相対パス用の新しいテンプレート変数を追加
+  - `{{filepath}}`: ワークスペースルートからのファイルパス（例: `.claude/tasks/1229.0619.38_PROMPT.md`）
+  - `{{dirpath}}`: ワークスペースルートからのディレクトリパス（例: `.claude/tasks`）
+
 ## [0.7.25] - 2025-12-29
 
 ### 変更

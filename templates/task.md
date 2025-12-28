@@ -6,5 +6,6 @@
 
 ---
 
-file: {{filename}}
-created: {{datetime}}
+working dir: {{dirpath}}
+prompt file: {{filename}}
+datetime: {{datetime}}

@@ -8,7 +8,7 @@ AIコーディングツールとの連携を強化するサイドバー拡張機
 | 機能 | 説明 |
 | --- | --- |
 | **Tasks** | 指定したディレクトリ配下のフォルダとファイルをフラットリストで表示<br>settingsでデフォルトのパスを設定できる<br>ディレクトリとファイルを作成できる<br>**フラットリスト表示**: 現在のディレクトリの内容のみを表示（ツリー構造ではない）<br>**ディレクトリナビゲーション**: ディレクトリをクリックでそのディレクトリに移動。".."で親ディレクトリに戻る<br>**パス表示**: 現在のパスをリストの先頭アイテムとして表示<br>ファイルはデフォルトで作成日時の昇順でソート<br>**ドラッグ&ドロップ**: ビュー内または外部からのファイルをドラッグしてコピー<br>**自動更新**: ファイルが作成、変更、削除されたときに自動的に更新<br>**設定アイコン**: デフォルトパスとソート設定へのクイックアクセス |
-| **Editor** | サイドバー内でMarkdownファイルを直接編集可能<br>タイムスタンプ形式のMarkdownファイル（形式: `YYYY_MMDD_HHMM_TASK.md`）を選択すると自動的に表示<br>その他のMarkdownファイルは通常のエディタで開く<br>ヘッダーのSaveボタンで保存（ファイル未開時は現在のTasksディレクトリに新規作成）<br>`Cmd+R` / `Ctrl+R`でカスタマイズ可能なコマンドをターミナルに送信（実行前に自動保存、ファイル未開でも実行可能）<br>`Cmd+M` / `Ctrl+M`で新しいMarkdownファイルを作成<br>**Saveボタン**: ヘッダーに表示され、未保存の変更がある場合は色が変わる<br>**カスタマイズ可能な実行コマンド**: Runボタンで実行されるコマンドを設定でカスタマイズ可能<br>**ファイル未開でも実行可能**: ファイルを開いていない状態でもエディタの内容を使用してコマンドを実行<br>**Terminalビュー連携**: Runコマンドを埋め込みTerminalビューに送信可能（設定で変更可能）<br>VSCodeエディタでファイルがアクティブになると自動的に読み取り専用モードに切り替わる<br>別の拡張機能やファイルに切り替える際に自動保存<br>別の拡張機能から戻ってきたときに編集中のファイルを復元<br>**設定アイコン**: 実行コマンド設定へのクイックアクセス |
+| **Editor** | サイドバー内でMarkdownファイルを直接編集可能<br>タイムスタンプ形式のMarkdownファイル（形式: `MMDD.HHMM.SS_PROMPT.md`）を選択すると自動的に表示<br>その他のMarkdownファイルは通常のエディタで開く<br>ヘッダーのSaveボタンで保存（ファイル未開時は現在のTasksディレクトリに新規作成）<br>`Cmd+R` / `Ctrl+R`でカスタマイズ可能なコマンドをターミナルに送信（実行前に自動保存、ファイル未開でも実行可能）<br>`Cmd+M` / `Ctrl+M`で新しいMarkdownファイルを作成<br>**Saveボタン**: ヘッダーに表示され、未保存の変更がある場合は色が変わる<br>**カスタマイズ可能な実行コマンド**: Runボタンで実行されるコマンドを設定でカスタマイズ可能<br>**ファイル未開でも実行可能**: ファイルを開いていない状態でもエディタの内容を使用してコマンドを実行<br>**Terminalビュー連携**: Runコマンドを埋め込みTerminalビューに送信可能（設定で変更可能）<br>VSCodeエディタでファイルがアクティブになると自動的に読み取り専用モードに切り替わる<br>別の拡張機能やファイルに切り替える際に自動保存<br>別の拡張機能から戻ってきたときに編集中のファイルを復元<br>**設定アイコン**: 実行コマンド設定へのクイックアクセス |
 | **Terminal** | xterm.jsを使用したサイドバー埋め込みターミナル<br>完全なPTYサポートによるシェルコマンド実行<br>**セッション維持**: ビューや拡張機能を切り替えてもターミナルセッションと出力履歴が保持される<br>**クリック可能リンク**: URLはブラウザで開き、ファイルパス（例: `./src/file.ts:123`）はエディタで行番号指定して開く<br>**設定可能**: シェルパス、フォントサイズ、フォントファミリー、カーソルスタイル、カーソル点滅、スクロールバック行数をカスタマイズ可能<br>**WebViewヘッダー**: 現在のシェル名とNew、Clear、Killボタンを表示<br>**設定アイコン**: タイトルバーからターミナル設定へのクイックアクセス<br>**デフォルト表示**: 折りたたみ（必要に応じて展開） |
 | **Menu** | ユーザ設定を開く<br>グローバル設定を開く<br>テンプレートをカスタマイズ<br>ショートカット機能: ターミナルを開く、デフォルトブランチへ切り替え、Git pull、新しいウィンドウでワークスペースを複製 |
 
@@ -27,7 +27,7 @@ AIコーディングツールとの連携を強化するサイドバー拡張機
 1. アクティビティバーの「AI Coding Panel」アイコンをクリック（または`Cmd+Shift+A` / `Ctrl+Shift+A`を押す）
 2. TasksでAIコーディング用のディレクトリを作成
 3. Docsでmarkdownファイルを作成
-4. Docsでタイムスタンプ形式のMarkdownファイル（例: `2025_1103_1227_TASK.md`）をクリックして、下部のEditorビューで編集。その他のMarkdownファイルは通常のエディタで開く
+4. Docsでタイムスタンプ形式のMarkdownファイル（例: `1229.1430.25_PROMPT.md`）をクリックして、下部のEditorビューで編集。その他のMarkdownファイルは通常のエディタで開く
 5. EditorでAIへの指示を記述し、Saveボタンで保存
 6. Docsでファイルを右クリック -> 相対パスをコピー
 7. AIへ相対パスをペースト
@@ -61,8 +61,10 @@ created: {{datetime}}
 テンプレート内で以下の変数が使用できます：
 
 - `{{datetime}}`: 作成日時（例: 2025/11/3 12:27:13）
-- `{{filename}}`: ファイル名（拡張子を含む、例: 2025_1103_1227_TASK.md）
-- `{{timestamp}}`: タイムスタンプ（例: 2025_1103_1227）
+- `{{filename}}`: ファイル名（拡張子を含む、例: 1229.1430.25_PROMPT.md）
+- `{{timestamp}}`: タイムスタンプ（例: 1229.1430.25）
+- `{{filepath}}`: ワークスペースルートからのファイルパス（例: .claude/tasks/1229.1430.25_PROMPT.md）
+- `{{dirpath}}`: ワークスペースルートからのディレクトリパス（例: .claude/tasks）
 
 ### テンプレートの優先順位
 1. ワークスペースの `.vscode/ai-coding-sidebar/templates/task.md`（存在する場合）
@@ -96,7 +98,7 @@ created: {{datetime}}
 | --- | --- |
 | New Task | Tasksのタイトルメニューにあるロケットアイコンをクリック<br>Tasks Viewで現在開いているディレクトリ配下に新しいディレクトリを作成し、タイムスタンプ付きのMarkdownファイルを自動生成します<br>作成されたファイルはTasksで「editing」ラベルとともに選択され、Editor Viewで開かれます<br>現在のパスが取得できない場合は、デフォルトパス配下に作成されます |
 | 新規ディレクトリ | Tasksのフォルダアイコンをクリック<br>現在開いているディレクトリ配下に新しいディレクトリを作成します（Markdownファイルは作成しない） |
-| ファイル作成 | Docsの「+」アイコンをクリック<br>タイムスタンプ付きのMarkdownファイルが作成され、Editor Viewで開かれます（例: `2025_1103_1227_TASK.md`） |
+| ファイル作成 | Docsの「+」アイコンをクリック<br>タイムスタンプ付きのMarkdownファイルが作成され、Editor Viewで開かれます（例: `1229.1430.25_PROMPT.md`） |
 
 ### 相対パスの設定
 
@@ -130,7 +132,7 @@ created: {{datetime}}
 | `defaultRelativePath` | Tasksのデフォルト相対パス | string | `".claude/tasks"` | `"src"`, `".claude"`, `"docs/api"` |
 | `markdownList.sortBy` | Docsのファイルのソート基準 | string | `"created"` | `"name"`: ファイル名<br>`"created"`: 作成日時<br>`"modified"`: 更新日時 |
 | `markdownList.sortOrder` | Docsのファイルのソート順序 | string | `"ascending"` | `"ascending"`: 昇順<br>`"descending"`: 降順 |
-| `editor.runCommand` | Editorビューのrunボタンで実行されるコマンドテンプレート | string | `claude "read ${filePath} and save your report to the same directory as ${filePath}"` | `${filePath}`をファイルパスのプレースホルダーとして使用 |
+| `editor.runCommand` | Editorビューのrunボタンで実行されるコマンドテンプレート | string | `claude "${filePath}"` | `${filePath}`をファイルパスのプレースホルダーとして使用 |
 | `editor.runCommandWithoutFile` | ファイル未開時にrunボタンで実行されるコマンドテンプレート | string | `claude "${editorContent}"` | `${editorContent}`をエディタ内容のプレースホルダーとして使用 |
 | `terminal.shell` | Terminalビューのシェル実行パス | string | `""` | 空欄の場合はシステムのデフォルトシェルを使用 |
 | `terminal.fontSize` | Terminalビューのフォントサイズ | number | `12` | 任意の正の数値 |
@@ -148,7 +150,7 @@ created: {{datetime}}
   "aiCodingSidebar.defaultRelativePath": ".claude",
   "aiCodingSidebar.markdownList.sortBy": "created",
   "aiCodingSidebar.markdownList.sortOrder": "ascending",
-  "aiCodingSidebar.editor.runCommand": "claude \"read ${filePath} and save your report to the same directory as ${filePath}\"",
+  "aiCodingSidebar.editor.runCommand": "claude \"${filePath}\"",
   "aiCodingSidebar.editor.runCommandWithoutFile": "claude \"${editorContent}\"",
   "aiCodingSidebar.terminal.fontSize": 12,
   "aiCodingSidebar.terminal.cursorStyle": "block"
@@ -206,14 +208,14 @@ npm run watch
 1. [GitHubのReleasesページ](https://github.com/NaokiIshimura/vscode-panel/releases)から最新のVSIXファイルをダウンロード
 2. コマンドラインからインストール:
    ```bash
-   code --install-extension ai-coding-sidebar-0.7.26.vsix
+   code --install-extension ai-coding-sidebar-0.7.28.vsix
    ```
 3. VS Codeを再起動
 
 #### ローカルビルド版を使用する場合:
 ```bash
-# releasesディレクトリから直接インストール（バージョン0.7.26）
-code --install-extension releases/ai-coding-sidebar-0.7.26.vsix
+# releasesディレクトリから直接インストール（バージョン0.7.28）
+code --install-extension releases/ai-coding-sidebar-0.7.28.vsix
 ```
 
 #### 自分でパッケージを作成する場合:
@@ -227,7 +229,7 @@ code --install-extension releases/ai-coding-sidebar-0.7.26.vsix
    ```
 3. 生成されたVSIXファイルをインストール:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.7.26.vsix
+   code --install-extension releases/ai-coding-sidebar-0.7.28.vsix
    ```
 4. VS Codeを再起動
 

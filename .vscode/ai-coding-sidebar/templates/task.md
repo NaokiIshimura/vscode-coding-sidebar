@@ -14,5 +14,6 @@
 
 ---
 
-作成日時: {{datetime}}
-ファイル名： {{filename}}
+working dir: {{dirpath}}
+prompt file: {{filename}}
+datetime: {{datetime}}

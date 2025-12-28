@@ -4,18 +4,6 @@ description: リリース準備を実行する（ブランチ作成、README/CHA
 
 リリース準備を開始します。
 
-Task toolを使用して、release-preparerエージェント（subagent_type: release-preparer）を呼び出してリリース準備を実行してください。
-
-エージェントは以下のタスクを自動的に実行します：
-
-1. 現在のバージョンを確認
-2. リリースブランチを作成（v{バージョン}）
-3. README.md / README-JA.md を更新
-4. CHANGELOG.md / CHANGELOG-JA.md を更新
-5. 変更をコミット
-6. ブランチをプッシュ
-7. PRを作成
-
 実行前に `npm run compile` と `npm run package` が成功することを確認してください。
 
 ## 注意事項
@@ -23,3 +11,203 @@ Task toolを使用して、release-preparerエージェント（subagent_type: r
 - コミットメッセージは英語で記述してください
 - PRのタイトルは英語で記述してください
 - PRのdescriptionは英語で記述してください
+- ファイル末尾には必ず空行を含めてください
+
+---
+
+# リリース準備手順
+
+## 1. 事前確認
+
+```bash
+# 現在のブランチを確認
+git branch --show-current
+
+# package.jsonからバージョンを取得
+cat package.json | grep '"version"'
+
+# 未コミットの変更を確認
+git status
+```
+
+## 2. バージョン更新
+
+```bash
+# パッチバージョンを上げる
+npm run version:patch
+```
+
+## 3. ブランチ作成
+
+- ブランチ名: `v{バージョン}` （例: `v0.7.28`）
+- mainブランチから作成
+
+```bash
+git checkout main
+git pull origin main
+git checkout -b v{バージョン}
+```
+
+## 4. README更新
+
+対象ファイル：
+- `README.md`（英語版）
+- `README-JA.md`（日本語版）
+
+### README更新ルール
+
+**構造**（以下の順序を維持）：
+1. タイトルと概要
+2. Features（テーブル形式）
+3. Usage（Keyboard Shortcuts含む）
+4. Template Feature
+5. File Operations
+6. Other Features
+7. Settings（テーブル形式）
+8. Development & Build
+9. Debugging
+10. Installation
+11. Automated Build & Release
+12. Uninstall
+13. Requirements
+
+**更新内容**：
+- 新機能・変更をFeaturesセクションに反映
+- 設定変更をSettingsセクションに反映
+- キーボードショートカット追加をUsageセクションに反映
+- VSIXバージョン番号を更新（例: `ai-coding-sidebar-0.7.28.vsix`）
+
+**言語**：
+- README.md: 英語で記述
+- README-JA.md: 日本語で記述
+- 英語版と日本語版の内容を同期させる
+
+## 5. CHANGELOG更新
+
+対象ファイル：
+- `CHANGELOG.md`（英語版）
+- `CHANGELOG-JA.md`（日本語版）
+
+### CHANGELOG更新ルール
+
+**フォーマット**：Keep a Changelog形式に準拠
+
+**セクションの種類**：
+- **Added**: 新機能
+- **Changed**: 既存機能の変更
+- **Deprecated**: 将来削除予定の機能
+- **Removed**: 削除された機能
+- **Fixed**: バグ修正
+- **Security**: セキュリティ関連の修正
+- **Improved**: パフォーマンス改善など
+- **Technical**: 内部的な技術変更
+
+**エントリのフォーマット**：
+```markdown
+## [X.Y.Z] - YYYY-MM-DD
+
+### Added
+- **機能名**: 説明
+  - 詳細項目1
+  - 詳細項目2
+
+### Changed
+- **機能名**: 変更内容の説明
+```
+
+**記述ルール**：
+- 各エントリは「- **機能名**:」で始める
+- 説明は簡潔に（1-2文）
+- 日付は日本時間（JST）を使用（YYYY-MM-DD形式）
+
+**バージョンリンク**（ファイル末尾に追加）：
+```markdown
+[X.Y.Z]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/vX.Y.W...vX.Y.Z
+```
+
+**言語**：
+- CHANGELOG.md: 英語で記述
+- CHANGELOG-JA.md: 日本語で記述
+- 英語版と日本語版の内容を同期させる
+
+## 6. Git Commit
+
+```bash
+# 変更をステージング（.claude, .vscodeは除外）
+git add package.json package-lock.json README.md README-JA.md CHANGELOG.md CHANGELOG-JA.md
+
+# コミット（英語メッセージ）
+git commit -m "Release v{バージョン}: Update documentation"
+```
+
+## 7. Push
+
+```bash
+git push origin v{バージョン}
+```
+
+## 8. PR作成
+
+GitHub MCPまたはghコマンドを使用してPRを作成：
+
+- **base**: `main`
+- **head**: `v{バージョン}`
+- **title**: `[v{バージョン}] {変更の要約}` （英語）
+- **description**: 変更内容の要約（英語）
+
+**PR descriptionのテンプレート**：
+```markdown
+## Summary
+- Brief description of changes
+
+## Changes
+### Added
+- New features
+
+### Changed
+- Modified features
+
+### Fixed
+- Bug fixes
+
+### Removed
+- Removed features
+
+## Test Checklist
+- [ ] npm run compile succeeds
+- [ ] npm run package succeeds
+- [ ] Extension works in debug mode
+```
+
+---
+
+# 言語ルール一覧
+
+| 項目 | 言語 |
+|------|------|
+| UI表記 | 英語 |
+| commitメッセージ | 英語 |
+| PR title | 英語 |
+| PR description | 英語 |
+| README.md | 英語 |
+| README-JA.md | 日本語 |
+| CHANGELOG.md | 英語 |
+| CHANGELOG-JA.md | 日本語 |
+
+---
+
+# エラーハンドリング
+
+- ブランチが既に存在する場合: 既存ブランチにチェックアウト
+- コンフリクトが発生した場合: ユーザーに報告して手動解決を依頼
+- PR作成に失敗した場合: エラー内容を報告
+
+---
+
+# 完了報告
+
+すべての手順が完了したら、以下を報告：
+- 作成/更新したブランチ名
+- 更新したファイル一覧
+- 作成したPRのURL
+- 次のステップ（レビュー、マージ等）

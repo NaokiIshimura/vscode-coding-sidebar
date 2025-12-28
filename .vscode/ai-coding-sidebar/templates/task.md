@@ -1,8 +1,3 @@
-作成日時: {{datetime}}
-ファイル名： {{filename}}
-
----
-
 # task
 
 ## views
@@ -16,3 +11,8 @@
 ### terminal
 
 ## settings
+
+---
+
+作成日時: {{datetime}}
+ファイル名： {{filename}}

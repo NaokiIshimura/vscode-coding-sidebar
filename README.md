@@ -81,6 +81,8 @@ Use the following variables inside a template:
 | Drag & Drop | Copy files by dragging them within the Tasks view or from external sources. Displays a success message after copying. |
 | Archive | Archive task directories to keep your workspace organized. Right-click a directory in Tasks view and select "Archive" to move it to the `archived` folder. If a directory with the same name already exists, a timestamp is automatically added to avoid conflicts. |
 | Checkout Branch | Right-click a directory to checkout a git branch using the directory name. Creates the branch if it doesn't exist, or switches to it if it already exists. |
+| Insert Path to Editor | Right-click files or folders in Tasks view and select "Insert Path to Editor" to insert the relative path at the cursor position in the Editor view. Supports multiple selection. |
+| Insert Path to Terminal | Right-click files or folders in Tasks view and select "Insert Path to Terminal" to insert the relative path into the Terminal view. Supports multiple selection. Paths are separated by spaces. |
 
 ## Other Features
 
@@ -200,14 +202,14 @@ npm run watch
 1. Download the latest VSIX file from the [GitHub Releases page](https://github.com/NaokiIshimura/vscode-panel/releases).
 2. Install via command line:
    ```bash
-   code --install-extension ai-coding-sidebar-0.7.21.vsix
+   code --install-extension ai-coding-sidebar-0.7.24.vsix
    ```
 3. Restart VS Code.
 
 #### Use a local build
 ```bash
-# Install directly from the releases directory (version 0.7.21)
-code --install-extension releases/ai-coding-sidebar-0.7.21.vsix
+# Install directly from the releases directory (version 0.7.24)
+code --install-extension releases/ai-coding-sidebar-0.7.24.vsix
 ```
 
 #### Build the package yourself
@@ -221,7 +223,7 @@ code --install-extension releases/ai-coding-sidebar-0.7.21.vsix
    ```
 3. Install the generated VSIX file:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.7.21.vsix
+   code --install-extension releases/ai-coding-sidebar-0.7.24.vsix
    ```
 4. Restart VS Code.
 

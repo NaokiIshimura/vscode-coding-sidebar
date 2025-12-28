@@ -1520,8 +1520,8 @@ class TasksWebViewProvider implements vscode.WebviewViewProvider {
                     await vscode.commands.executeCommand('vscode.open', fileUri);
                 }
                 break;
-            case 'contextMenu':
-                await this._showContextMenu(data.path, data.isDirectory);
+            case 'contextMenuAction':
+                await this._handleContextMenuAction(data.action, data.path, data.isDirectory);
                 break;
             case 'createDirectory':
                 if (this._rootPath && this._pathNotFound) {
@@ -1547,85 +1547,48 @@ class TasksWebViewProvider implements vscode.WebviewViewProvider {
         }
     }
 
-    private async _showContextMenu(itemPath: string, isDirectory: boolean): Promise<void> {
-        if (isDirectory) {
-            const options = [
-                { label: '$(list-tree) Show in File List', action: 'showInPanel' },
-                { label: '$(new-file) Create Markdown File', action: 'createMarkdownFile' },
-                { label: '$(file-add) Create File', action: 'createFile' },
-                { label: '$(new-folder) New Directory', action: 'addDirectory' },
-                { label: '$(edit) Rename', action: 'rename' },
-                { label: '$(trash) Delete', action: 'delete' },
-                { label: '$(copy) Copy Relative Path', action: 'copyRelativePath' },
-                { label: '$(git-branch) Checkout Branch', action: 'checkoutBranch' },
-                { label: '$(archive) Archive', action: 'archiveDirectory' }
-            ];
+    private async _handleContextMenuAction(action: string, itemPath: string, isDirectory: boolean): Promise<void> {
+        const item = this._createFileItem(itemPath, isDirectory);
 
-            const selected = await vscode.window.showQuickPick(options, {
-                placeHolder: 'Select action'
-            });
-
-            if (selected) {
-                const item = this._createFileItem(itemPath, true);
-                switch (selected.action) {
-                    case 'showInPanel':
-                        this.setActiveFolder(itemPath);
-                        break;
-                    case 'createMarkdownFile':
-                        await vscode.commands.executeCommand('aiCodingSidebar.createMarkdownFile', item);
-                        break;
-                    case 'createFile':
-                        await vscode.commands.executeCommand('aiCodingSidebar.createFile', item);
-                        break;
-                    case 'addDirectory':
-                        await vscode.commands.executeCommand('aiCodingSidebar.addDirectory', item);
-                        break;
-                    case 'rename':
-                        await vscode.commands.executeCommand('aiCodingSidebar.rename', item);
-                        break;
-                    case 'delete':
-                        await vscode.commands.executeCommand('aiCodingSidebar.delete', item);
-                        break;
-                    case 'copyRelativePath':
-                        await vscode.commands.executeCommand('aiCodingSidebar.copyRelativePath', item);
-                        break;
-                    case 'checkoutBranch':
-                        await vscode.commands.executeCommand('aiCodingSidebar.checkoutBranch', item);
-                        break;
-                    case 'archiveDirectory':
-                        await vscode.commands.executeCommand('aiCodingSidebar.archiveDirectory', item);
-                        break;
+        switch (action) {
+            case 'showInPanel':
+                this.setActiveFolder(itemPath);
+                break;
+            case 'createMarkdownFile':
+                await vscode.commands.executeCommand('aiCodingSidebar.createMarkdownFile', item);
+                break;
+            case 'createFile':
+                await vscode.commands.executeCommand('aiCodingSidebar.createFile', item);
+                break;
+            case 'addDirectory':
+                await vscode.commands.executeCommand('aiCodingSidebar.addDirectory', item);
+                break;
+            case 'rename':
+                if (isDirectory) {
+                    await vscode.commands.executeCommand('aiCodingSidebar.renameDirectory', item);
+                } else {
+                    await vscode.commands.executeCommand('aiCodingSidebar.rename', item);
                 }
-            }
-        } else {
-            const options = [
-                { label: '$(go-to-file) Open in Editor', action: 'openInEditor' },
-                { label: '$(copy) Copy Relative Path', action: 'copyRelativePath' },
-                { label: '$(edit) Rename', action: 'rename' },
-                { label: '$(trash) Delete', action: 'delete' }
-            ];
-
-            const selected = await vscode.window.showQuickPick(options, {
-                placeHolder: 'Select action'
-            });
-
-            if (selected) {
-                const item = this._createFileItem(itemPath, false);
-                switch (selected.action) {
-                    case 'openInEditor':
-                        await vscode.commands.executeCommand('aiCodingSidebar.openInEditor', item);
-                        break;
-                    case 'copyRelativePath':
-                        await vscode.commands.executeCommand('aiCodingSidebar.copyRelativePath', item);
-                        break;
-                    case 'rename':
-                        await vscode.commands.executeCommand('aiCodingSidebar.rename', item);
-                        break;
-                    case 'delete':
-                        await vscode.commands.executeCommand('aiCodingSidebar.delete', item);
-                        break;
+                break;
+            case 'delete':
+                if (isDirectory) {
+                    await vscode.commands.executeCommand('aiCodingSidebar.deleteDirectory', item);
+                } else {
+                    await vscode.commands.executeCommand('aiCodingSidebar.delete', item);
                 }
-            }
+                break;
+            case 'copyRelativePath':
+                await vscode.commands.executeCommand('aiCodingSidebar.copyRelativePath', item);
+                break;
+            case 'checkoutBranch':
+                await vscode.commands.executeCommand('aiCodingSidebar.checkoutBranch', item);
+                break;
+            case 'archiveDirectory':
+                await vscode.commands.executeCommand('aiCodingSidebar.archiveDirectory', item);
+                break;
+            case 'openInEditor':
+                await vscode.commands.executeCommand('aiCodingSidebar.openInEditor', item);
+                break;
         }
     }
 
@@ -2060,9 +2023,57 @@ class TasksWebViewProvider implements vscode.WebviewViewProvider {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; font-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
     <title>Tasks</title>
     <style>
+        /* Codicon font */
+        @font-face {
+            font-family: "codicon";
+            font-display: block;
+            src: url('${webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'codicons', 'codicon.ttf'))}') format('truetype');
+        }
+
+        .codicon[class*='codicon-'] {
+            font: normal normal normal 16px/1 codicon;
+            display: inline-block;
+            text-decoration: none;
+            text-rendering: auto;
+            text-align: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            user-select: none;
+        }
+
+        /* Codicon icons */
+        .codicon-file:before { content: "\\ea7b" }
+        .codicon-edit:before { content: "\\ea73" }
+        .codicon-file-add:before { content: "\\ea7f" }
+        .codicon-new-file:before { content: "\\ea7f" }
+        .codicon-new-folder:before { content: "\\ea80" }
+        .codicon-trash:before { content: "\\ea81" }
+        .codicon-folder:before { content: "\\ea83" }
+        .codicon-go-to-file:before { content: "\\ea94" }
+        .codicon-archive:before { content: "\\ea98" }
+        .codicon-arrow-up:before { content: "\\eaa1" }
+        .codicon-code:before { content: "\\eac4" }
+        .codicon-folder-opened:before { content: "\\eaf7" }
+        .codicon-json:before { content: "\\eb0f" }
+        .codicon-markdown:before { content: "\\eb1d" }
+        .codicon-file-media:before { content: "\\eaea" }
+        .codicon-file-text:before { content: "\\ec5e" }
+        .codicon-file-pdf:before { content: "\\eaeb" }
+        .codicon-file-zip:before { content: "\\eaef" }
+        .codicon-settings-gear:before { content: "\\eb51" }
+        .codicon-symbol-method:before { content: "\\eb5a" }
+        .codicon-symbol-function:before { content: "\\eb58" }
+        .codicon-symbol-class:before { content: "\\eb56" }
+        .codicon-symbol-color:before { content: "\\eb57" }
+        .codicon-symbol-misc:before { content: "\\eb63" }
+        .codicon-list-tree:before { content: "\\eb86" }
+        .codicon-copy:before { content: "\\ebcc" }
+        .codicon-git-branch:before { content: "\\ec6f" }
+        .codicon-terminal:before { content: "\\ea85" }
+
         :root {
             --item-height: 22px;
             --icon-size: 16px;
@@ -2198,16 +2209,49 @@ class TasksWebViewProvider implements vscode.WebviewViewProvider {
             text-align: center;
         }
 
-        .codicon {
-            font-family: codicon;
-            font-size: 16px;
+        /* Context Menu */
+        #context-menu {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            min-width: 180px;
+            background: var(--vscode-menu-background);
+            border: 1px solid var(--vscode-menu-border);
+            box-shadow: 0 2px 8px var(--vscode-widget-shadow);
+            padding: 4px 0;
+            border-radius: 4px;
         }
 
-        /* Codicon font is loaded from VSCode */
-        @font-face {
-            font-family: 'codicon';
-            src: url('${webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'node_modules', '@vscode', 'codicons', 'dist', 'codicon.ttf'))}') format('truetype');
+        #context-menu.visible {
+            display: block;
         }
+
+        .context-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 4px 12px;
+            cursor: pointer;
+            color: var(--vscode-menu-foreground);
+            font-size: 13px;
+        }
+
+        .context-menu-item:hover {
+            background: var(--vscode-menu-selectionBackground);
+            color: var(--vscode-menu-selectionForeground);
+        }
+
+        .context-menu-item .icon {
+            margin-right: 8px;
+            width: 16px;
+            text-align: center;
+        }
+
+        .context-menu-separator {
+            height: 1px;
+            background: var(--vscode-menu-separatorBackground);
+            margin: 4px 0;
+        }
+
     </style>
 </head>
 <body>
@@ -2233,6 +2277,9 @@ class TasksWebViewProvider implements vscode.WebviewViewProvider {
         </div>
     </div>
 
+    <!-- Context Menu -->
+    <div id="context-menu"></div>
+
     <script nonce="${nonce}">
         (function() {
             const vscode = acquireVsCodeApi();
@@ -2256,6 +2303,10 @@ class TasksWebViewProvider implements vscode.WebviewViewProvider {
             const createPathDiv = document.getElementById('create-path');
             const createPathBtn = document.getElementById('create-path-btn');
             const pathNotFoundMessage = document.getElementById('path-not-found-message');
+            const contextMenu = document.getElementById('context-menu');
+
+            // Context menu state
+            let contextMenuTarget = null;
 
             // Initialize
             function init() {
@@ -2288,6 +2339,20 @@ class TasksWebViewProvider implements vscode.WebviewViewProvider {
                 fileList.addEventListener('dragover', handleFileListDragOver);
                 fileList.addEventListener('dragleave', handleFileListDragLeave);
                 fileList.addEventListener('drop', handleFileListDrop);
+
+                // Close context menu on click outside
+                document.addEventListener('click', (e) => {
+                    if (!contextMenu.contains(e.target)) {
+                        hideContextMenu();
+                    }
+                });
+
+                // Close context menu on escape key
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        hideContextMenu();
+                    }
+                });
             }
 
             // Message handler
@@ -2385,17 +2450,88 @@ class TasksWebViewProvider implements vscode.WebviewViewProvider {
             // Context menu handler
             function handleContextMenu(e) {
                 e.preventDefault();
+                e.stopPropagation();
                 const item = e.currentTarget;
                 const itemPath = item.dataset.path;
                 const isDirectory = item.dataset.isDirectory === 'true';
 
-                vscode.postMessage({
-                    type: 'contextMenu',
-                    path: itemPath,
-                    isDirectory: isDirectory,
-                    x: e.clientX,
-                    y: e.clientY
+                contextMenuTarget = { path: itemPath, isDirectory: isDirectory };
+                showContextMenu(e.clientX, e.clientY, isDirectory);
+            }
+
+            // Show context menu
+            function showContextMenu(x, y, isDirectory) {
+                const menuItems = isDirectory ? [
+                    { icon: 'list-tree', label: 'Show in File List', action: 'showInPanel' },
+                    { type: 'separator' },
+                    { icon: 'new-file', label: 'Create Markdown File', action: 'createMarkdownFile' },
+                    { icon: 'file-add', label: 'Create File', action: 'createFile' },
+                    { icon: 'new-folder', label: 'New Directory', action: 'addDirectory' },
+                    { type: 'separator' },
+                    { icon: 'edit', label: 'Rename', action: 'rename' },
+                    { icon: 'trash', label: 'Delete', action: 'delete' },
+                    { type: 'separator' },
+                    { icon: 'copy', label: 'Copy Relative Path', action: 'copyRelativePath' },
+                    { icon: 'git-branch', label: 'Checkout Branch', action: 'checkoutBranch' },
+                    { icon: 'archive', label: 'Archive', action: 'archiveDirectory' }
+                ] : [
+                    { icon: 'go-to-file', label: 'Open in Editor', action: 'openInEditor' },
+                    { type: 'separator' },
+                    { icon: 'edit', label: 'Rename', action: 'rename' },
+                    { icon: 'trash', label: 'Delete', action: 'delete' },
+                    { type: 'separator' },
+                    { icon: 'copy', label: 'Copy Relative Path', action: 'copyRelativePath' }
+                ];
+
+                contextMenu.innerHTML = menuItems.map(item => {
+                    if (item.type === 'separator') {
+                        return '<div class="context-menu-separator"></div>';
+                    }
+                    return \`<div class="context-menu-item" data-action="\${item.action}">
+                        <span class="icon codicon codicon-\${item.icon}"></span>
+                        <span class="label">\${item.label}</span>
+                    </div>\`;
+                }).join('');
+
+                // Add click handlers to menu items
+                contextMenu.querySelectorAll('.context-menu-item').forEach(menuItem => {
+                    menuItem.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const action = menuItem.dataset.action;
+                        if (contextMenuTarget) {
+                            vscode.postMessage({
+                                type: 'contextMenuAction',
+                                action: action,
+                                path: contextMenuTarget.path,
+                                isDirectory: contextMenuTarget.isDirectory
+                            });
+                        }
+                        hideContextMenu();
+                    });
                 });
+
+                // Position the menu
+                contextMenu.style.left = x + 'px';
+                contextMenu.style.top = y + 'px';
+                contextMenu.classList.add('visible');
+
+                // Adjust position if menu goes off screen
+                const rect = contextMenu.getBoundingClientRect();
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+
+                if (rect.right > viewportWidth) {
+                    contextMenu.style.left = (viewportWidth - rect.width - 5) + 'px';
+                }
+                if (rect.bottom > viewportHeight) {
+                    contextMenu.style.top = (viewportHeight - rect.height - 5) + 'px';
+                }
+            }
+
+            // Hide context menu
+            function hideContextMenu() {
+                contextMenu.classList.remove('visible');
+                contextMenuTarget = null;
             }
 
             // Drag and drop handlers

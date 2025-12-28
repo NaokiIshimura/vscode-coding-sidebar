@@ -196,6 +196,8 @@
         {
           "id": "aiCodingSidebarExplorer",
           "name": "Tasks",
+          "type": "webview",
+          "retainContextWhenHidden": true,
           "visibility": "visible"
         },
         {

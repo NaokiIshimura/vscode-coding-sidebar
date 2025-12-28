@@ -170,7 +170,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     // TreeDataProviderを作成
     const menuProvider = new MenuProvider();
-    const tasksProvider = new TasksProvider(fileWatcherService);
+    const tasksProvider = new TasksWebViewProvider(context.extensionUri, fileWatcherService);
     const editorProvider = new EditorProvider(context.extensionUri);
 
     // EditorProviderをTasksProviderに設定
@@ -217,23 +217,14 @@ export function activate(context: vscode.ExtensionContext) {
         showCollapseAll: false
     });
 
-    const treeView = vscode.window.createTreeView('aiCodingSidebarExplorer', {
-        treeDataProvider: tasksProvider,
-        showCollapseAll: true,
-        canSelectMany: false,
-        dragAndDropController: tasksProvider
-    });
-
-    // TreeViewをProviderに設定
-    tasksProvider.setTreeView(treeView);
-
-    // 初期状態でリスナーを有効化
-    tasksProvider.handleVisibilityChange(treeView.visible);
-
-    // ビューの可視性変更を監視
-    treeView.onDidChangeVisibility(() => {
-        tasksProvider.handleVisibilityChange(treeView.visible);
-    });
+    // Tasks WebView Providerを登録
+    context.subscriptions.push(
+        vscode.window.registerWebviewViewProvider(
+            TasksWebViewProvider.viewType,
+            tasksProvider,
+            { webviewOptions: { retainContextWhenHidden: true } }
+        )
+    );
 
     // Markdown Editor Viewを登録
     context.subscriptions.push(
@@ -277,39 +268,6 @@ export function activate(context: vscode.ExtensionContext) {
 
     // 初期化を実行
     initializeWithWorkspaceRoot();
-
-
-    // 初期化後にルートフォルダを選択状態にする
-    setTimeout(async () => {
-        const currentRootPath = tasksProvider.getRootPath();
-        if (currentRootPath) {
-            await selectInitialFolder(treeView, currentRootPath);
-        }
-    }, 500);
-
-    // フォルダ/ファイル選択時の処理
-    treeView.onDidChangeSelection(async (e) => {
-        if (e.selection.length > 0) {
-            const selectedItem = e.selection[0];
-            tasksProvider.setSelectedItem(selectedItem);
-
-            // ファイルの場合（Markdownファイル）
-            if (!selectedItem.isDirectory && selectedItem.filePath.endsWith('.md')) {
-                // ファイル名がYYYY_MMDD_HHMM_TASK.md形式の場合はMarkdown Editorで開く
-                const fileName = path.basename(selectedItem.filePath);
-                const timestampPattern = /^\d{4}_\d{4}_\d{4}_TASK\.md$/;
-
-                if (timestampPattern.test(fileName)) {
-                    // YYYY_MMDD_HHMM_TASK.md形式の場合はMarkdown Editorで開く
-                    await editorProvider.showFile(selectedItem.filePath);
-                } else {
-                    // それ以外は通常のエディタで開く
-                    const fileUri = vscode.Uri.file(selectedItem.filePath);
-                    await vscode.commands.executeCommand('vscode.open', fileUri);
-                }
-            }
-        }
-    });
 
     // ビューを有効化
     vscode.commands.executeCommand('setContext', 'aiCodingSidebarView:enabled', true);
@@ -427,12 +385,7 @@ export function activate(context: vscode.ExtensionContext) {
                 vscode.window.showInformationMessage('Saved to settings');
             }
 
-            // 設定したフォルダを選択状態にする（存在する場合のみ）
-            if (pathExists) {
-                setTimeout(async () => {
-                    await selectInitialFolder(treeView, targetPath);
-                }, 300);
-            }
+            // WebView版では選択状態は自動的に反映される
         }
     });
 
@@ -1354,11 +1307,6 @@ export function activate(context: vscode.ExtensionContext) {
             // ビューを更新
             tasksProvider.setRootPath(targetPath, relativePath);
 
-            // フォルダを選択状態にする
-            setTimeout(async () => {
-                await selectInitialFolder(treeView, targetPath);
-            }, 300);
-
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to create directory: ${error}`);
         }
@@ -1379,26 +1327,6 @@ export function activate(context: vscode.ExtensionContext) {
             tasksProvider.dispose();
         }
     });
-}
-
-// 初期フォルダを選択する関数
-async function selectInitialFolder(treeView: vscode.TreeView<FileItem>, rootPath: string): Promise<void> {
-    try {
-        // プロジェクトルートのFileItemを作成
-        const rootItem = new FileItem(
-            path.basename(rootPath),
-            vscode.TreeItemCollapsibleState.Expanded,
-            rootPath,
-            true,
-            0,
-            new Date()
-        );
-
-        // ルートフォルダを選択状態にする
-        await treeView.reveal(rootItem, { select: true, focus: false, expand: true });
-    } catch (error) {
-        console.log('Failed to select initial folder:', error);
-    }
 }
 
 // ファイル一覧を取得する関数
@@ -1482,44 +1410,40 @@ interface FileInfo {
     created: Date;
 }
 
-// TreeDataProvider実装（フォルダのみ表示）
-class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDragAndDropController<FileItem> {
-    private _onDidChangeTreeData: vscode.EventEmitter<FileItem | undefined | null | void> = new vscode.EventEmitter<FileItem | undefined | null | void>();
-    readonly onDidChangeTreeData: vscode.Event<FileItem | undefined | null | void> = this._onDidChangeTreeData.event;
+// WebView版Tasks Provider
+class TasksWebViewProvider implements vscode.WebviewViewProvider {
+    public static readonly viewType = 'aiCodingSidebarExplorer';
+    private _view?: vscode.WebviewView;
+    private _rootPath?: string;
+    private _projectRootPath?: string;
+    private _activeFolderPath?: string;
+    private _configuredRelativePath?: string;
+    private _pathNotFound: boolean = false;
+    private _fileWatcherService?: FileWatcherService;
+    private _editorProvider?: EditorProvider;
+    private _refreshDebounceTimer?: NodeJS.Timeout;
+    private readonly _listenerId = 'tasks-webview';
+    private _configChangeDisposable?: vscode.Disposable;
+    private _editingFilePath?: string;
+    private _selectedPath?: string;
 
-    private rootPath: string | undefined;
-    private projectRootPath: string | undefined;
-    private treeView: vscode.TreeView<FileItem> | undefined;
-    private selectedItem: FileItem | undefined;
-    private itemCache: Map<string, FileItem[]> = new Map();  // パスをキーとしたFileItemのキャッシュ
-    private activeFolderPath: string | undefined;
-    private refreshDebounceTimer: NodeJS.Timeout | undefined;
-    private readonly listenerId = 'ai-coding-sidebar';
-    private fileWatcherService: FileWatcherService | undefined;
-    private pathNotFound: boolean = false;
-    private configuredRelativePath: string | undefined;
-    private _isInitialLoad: boolean = true;
-    private editorProvider: EditorProvider | undefined;
-    private configChangeDisposable: vscode.Disposable | undefined;
-
-    // Drag & Drop support
-    readonly dragMimeTypes = ['application/vnd.code.tree.aiCodingSidebarExplorer'];
-    readonly dropMimeTypes = ['application/vnd.code.tree.aiCodingSidebarExplorer', 'text/uri-list'];
-
-    constructor(fileWatcherService?: FileWatcherService) {
-        this.fileWatcherService = fileWatcherService;
-        // プロジェクトルートパスを取得
+    constructor(
+        private readonly _extensionUri: vscode.Uri,
+        fileWatcherService?: FileWatcherService
+    ) {
+        this._fileWatcherService = fileWatcherService;
+        // Get project root path
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
-            this.projectRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+            this._projectRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
         }
-        // リスナーを事前に登録
-        if (this.fileWatcherService) {
-            this.fileWatcherService.registerListener(this.listenerId, (uri) => {
-                this.debouncedRefresh(uri.fsPath);
+        // Register listener
+        if (this._fileWatcherService) {
+            this._fileWatcherService.registerListener(this._listenerId, (uri) => {
+                this._debouncedRefresh(uri.fsPath);
             });
         }
-        // 設定変更を監視してタイトルと表示を更新
-        this.configChangeDisposable = vscode.workspace.onDidChangeConfiguration((e) => {
+        // Watch configuration changes
+        this._configChangeDisposable = vscode.workspace.onDidChangeConfiguration((e) => {
             if (e.affectsConfiguration('aiCodingSidebar.markdownList.sortBy') ||
                 e.affectsConfiguration('aiCodingSidebar.markdownList.sortOrder')) {
                 this.refresh();
@@ -1527,207 +1451,236 @@ class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDra
         });
     }
 
-    setEditorProvider(provider: EditorProvider): void {
-        this.editorProvider = provider;
-    }
+    public resolveWebviewView(
+        webviewView: vscode.WebviewView,
+        context: vscode.WebviewViewResolveContext,
+        _token: vscode.CancellationToken
+    ): void {
+        this._view = webviewView;
 
-    setTreeView(treeView: vscode.TreeView<FileItem>): void {
-        this.treeView = treeView;
-    }
+        webviewView.webview.options = {
+            enableScripts: true,
+            localResourceRoots: [this._extensionUri]
+        };
 
-    setRootPath(path: string, relativePath?: string): void {
-        this.rootPath = path;
-        this.activeFolderPath = path;
-        this.configuredRelativePath = relativePath;
+        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
-        // パスの存在確認
-        try {
-            const stat = fs.statSync(path);
-            if (!stat.isDirectory()) {
-                this.pathNotFound = true;
-            } else {
-                this.pathNotFound = false;
+        // Handle messages from WebView
+        webviewView.webview.onDidReceiveMessage(async (data) => {
+            await this._handleMessage(data);
+        });
+
+        // Handle visibility changes
+        webviewView.onDidChangeVisibility(() => {
+            this.handleVisibilityChange(webviewView.visible);
+            if (webviewView.visible) {
+                this._sendFileList();
             }
-        } catch (error) {
-            this.pathNotFound = true;
-        }
+        });
 
-        this.updateTitle();
-        this.setupFileWatcher();
-        this.refresh();
-    }
-
-    getConfiguredRelativePath(): string | undefined {
-        return this.configuredRelativePath;
-    }
-
-    private setupFileWatcher(): void {
-        // リスナーはコンストラクタで登録済み
-        // この関数は互換性のために残す
-    }
-
-    /**
-     * ビューの可視性に応じてファイルウォッチャーを制御
-     */
-    handleVisibilityChange(visible: boolean): void {
-        if (!this.fileWatcherService) {
-            return;
-        }
-
-        if (visible) {
-            this.fileWatcherService.enableListener(this.listenerId);
-        } else {
-            this.fileWatcherService.disableListener(this.listenerId);
+        // Send initial file list when view becomes ready
+        if (this._rootPath) {
+            // Delay to ensure WebView is ready
+            setTimeout(() => {
+                this._sendFileList();
+            }, 100);
         }
     }
 
-    dispose(): void {
-        if (this.fileWatcherService) {
-            this.fileWatcherService.unregisterListener(this.listenerId);
-        }
-        if (this.refreshDebounceTimer) {
-            clearTimeout(this.refreshDebounceTimer);
-            this.refreshDebounceTimer = undefined;
-        }
-        if (this.configChangeDisposable) {
-            this.configChangeDisposable.dispose();
-            this.configChangeDisposable = undefined;
-        }
-    }
-
-    private updateTitle(): void {
-        if (this.treeView) {
-            // タイトルは「TASKS」固定
-            this.treeView.title = 'TASKS';
-        }
-    }
-
-    getCurrentPath(): string | undefined {
-        return this.activeFolderPath || this.rootPath;
-    }
-
-    /**
-     * Tasks Viewで指定されたファイルを選択状態にする
-     */
-    async revealFile(filePath: string): Promise<void> {
-        if (!this.treeView || !this.rootPath) {
-            return;
-        }
-
-        try {
-            // ファイルが存在するか確認
-            if (!fs.existsSync(filePath)) {
-                return;
-            }
-
-            // ファイルが現在のrootPath配下にあるか確認
-            if (!filePath.startsWith(this.rootPath)) {
-                return;
-            }
-
-            const parentDir = path.dirname(filePath);
-            // キャッシュから該当するFileItemを探す
-            let fileItems = this.itemCache.get(parentDir);
-
-            // キャッシュになければ、getChildrenを呼んで取得
-            if (!fileItems) {
-                const parentItem = new FileItem(
-                    path.basename(parentDir),
-                    vscode.TreeItemCollapsibleState.Expanded,
-                    parentDir,
-                    true,
-                    0,
-                    new Date()
-                );
-                await this.getChildren(parentItem);
-                fileItems = this.itemCache.get(parentDir);
-            }
-
-            if (!fileItems) {
-                return;
-            }
-
-            // ファイルパスが一致するFileItemを探す
-            const fileItem = fileItems.find(item => item.filePath === filePath);
-
-            if (!fileItem) {
-                return;
-            }
-
-            // ファイルを選択状態にする（focus: falseで他のビューへの影響を最小化）
-            await this.treeView.reveal(fileItem, { select: true, focus: false, expand: false });
-        } catch (error) {
-            console.error('Failed to reveal file:', error);
+    private async _handleMessage(data: any): Promise<void> {
+        switch (data.type) {
+            case 'ready':
+                this._sendFileList();
+                break;
+            case 'navigate':
+                if (data.path) {
+                    this.navigateToDirectory(data.path);
+                }
+                break;
+            case 'selectFile':
+                if (data.path) {
+                    this._selectedPath = data.path;
+                    // Check if it's a markdown file
+                    if (data.path.endsWith('.md')) {
+                        const fileName = path.basename(data.path);
+                        const timestampPattern = /^\d{4}_\d{4}_\d{4}_TASK\.md$/;
+                        if (timestampPattern.test(fileName) && this._editorProvider) {
+                            await this._editorProvider.showFile(data.path);
+                        } else {
+                            // Open in VSCode editor
+                            const fileUri = vscode.Uri.file(data.path);
+                            await vscode.commands.executeCommand('vscode.open', fileUri);
+                        }
+                    }
+                }
+                break;
+            case 'openFile':
+                if (data.path) {
+                    const fileUri = vscode.Uri.file(data.path);
+                    await vscode.commands.executeCommand('vscode.open', fileUri);
+                }
+                break;
+            case 'contextMenu':
+                await this._showContextMenu(data.path, data.isDirectory);
+                break;
+            case 'createDirectory':
+                if (this._rootPath && this._pathNotFound) {
+                    try {
+                        await fs.promises.mkdir(this._rootPath, { recursive: true });
+                        this._pathNotFound = false;
+                        vscode.window.showInformationMessage(`Created directory: ${this._configuredRelativePath || this._rootPath}`);
+                        this.refresh();
+                    } catch (error) {
+                        vscode.window.showErrorMessage(`Failed to create directory: ${error}`);
+                    }
+                }
+                break;
+            case 'refresh':
+                this.refresh();
+                break;
+            case 'moveFile':
+                await this._handleMoveFile(data.sourcePath, data.targetPath);
+                break;
+            case 'externalDrop':
+                await this._handleExternalDrop(data.files, data.targetPath);
+                break;
         }
     }
 
-    // Drag & Drop handlers
-    handleDrag(source: readonly FileItem[], dataTransfer: vscode.DataTransfer, token: vscode.CancellationToken): void | Thenable<void> {
-        dataTransfer.set('application/vnd.code.tree.aiCodingSidebarExplorer', new vscode.DataTransferItem(source));
-    }
+    private async _showContextMenu(itemPath: string, isDirectory: boolean): Promise<void> {
+        if (isDirectory) {
+            const options = [
+                { label: '$(list-tree) Show in File List', action: 'showInPanel' },
+                { label: '$(new-file) Create Markdown File', action: 'createMarkdownFile' },
+                { label: '$(file-add) Create File', action: 'createFile' },
+                { label: '$(new-folder) New Directory', action: 'addDirectory' },
+                { label: '$(edit) Rename', action: 'rename' },
+                { label: '$(trash) Delete', action: 'delete' },
+                { label: '$(copy) Copy Relative Path', action: 'copyRelativePath' },
+                { label: '$(git-branch) Checkout Branch', action: 'checkoutBranch' },
+                { label: '$(archive) Archive', action: 'archiveDirectory' }
+            ];
 
-    handleDrop(target: FileItem | undefined, dataTransfer: vscode.DataTransfer, token: vscode.CancellationToken): void | Thenable<void> {
-        // ターゲットディレクトリの決定
-        let targetDir: string;
-        if (!target) {
-            // ビューのルートにドロップされた場合
-            targetDir = this.rootPath!;
-        } else if (target.isDirectory) {
-            // フォルダにドロップされた場合
-            targetDir = target.filePath;
-        } else {
-            // ファイルにドロップされた場合は、その親ディレクトリにコピー
-            targetDir = path.dirname(target.filePath);
-        }
-
-        // 外部からのファイルドロップをチェック（text/uri-list）
-        const uriListItem = dataTransfer.get('text/uri-list');
-        if (uriListItem) {
-            uriListItem.asString().then(uriList => {
-                const uris = uriList.split('\n').filter(uri => uri.trim() !== '');
-                this.copyExternalFiles(uris, targetDir);
+            const selected = await vscode.window.showQuickPick(options, {
+                placeHolder: 'Select action'
             });
-            return;
-        }
 
-        // ツリービュー内からのドラッグ&ドロップ
-        const transferItem = dataTransfer.get('application/vnd.code.tree.aiCodingSidebarExplorer');
-        if (!transferItem) {
-            return;
-        }
+            if (selected) {
+                const item = this._createFileItem(itemPath, true);
+                switch (selected.action) {
+                    case 'showInPanel':
+                        this.setActiveFolder(itemPath);
+                        break;
+                    case 'createMarkdownFile':
+                        await vscode.commands.executeCommand('aiCodingSidebar.createMarkdownFile', item);
+                        break;
+                    case 'createFile':
+                        await vscode.commands.executeCommand('aiCodingSidebar.createFile', item);
+                        break;
+                    case 'addDirectory':
+                        await vscode.commands.executeCommand('aiCodingSidebar.addDirectory', item);
+                        break;
+                    case 'rename':
+                        await vscode.commands.executeCommand('aiCodingSidebar.rename', item);
+                        break;
+                    case 'delete':
+                        await vscode.commands.executeCommand('aiCodingSidebar.delete', item);
+                        break;
+                    case 'copyRelativePath':
+                        await vscode.commands.executeCommand('aiCodingSidebar.copyRelativePath', item);
+                        break;
+                    case 'checkoutBranch':
+                        await vscode.commands.executeCommand('aiCodingSidebar.checkoutBranch', item);
+                        break;
+                    case 'archiveDirectory':
+                        await vscode.commands.executeCommand('aiCodingSidebar.archiveDirectory', item);
+                        break;
+                }
+            }
+        } else {
+            const options = [
+                { label: '$(go-to-file) Open in Editor', action: 'openInEditor' },
+                { label: '$(copy) Copy Relative Path', action: 'copyRelativePath' },
+                { label: '$(edit) Rename', action: 'rename' },
+                { label: '$(trash) Delete', action: 'delete' }
+            ];
 
-        const sourceItems = transferItem.value as readonly FileItem[];
-        if (!sourceItems || sourceItems.length === 0) {
-            return;
-        }
+            const selected = await vscode.window.showQuickPick(options, {
+                placeHolder: 'Select action'
+            });
 
-        // ファイルのコピー処理
-        this.copyFiles(sourceItems, targetDir);
+            if (selected) {
+                const item = this._createFileItem(itemPath, false);
+                switch (selected.action) {
+                    case 'openInEditor':
+                        await vscode.commands.executeCommand('aiCodingSidebar.openInEditor', item);
+                        break;
+                    case 'copyRelativePath':
+                        await vscode.commands.executeCommand('aiCodingSidebar.copyRelativePath', item);
+                        break;
+                    case 'rename':
+                        await vscode.commands.executeCommand('aiCodingSidebar.rename', item);
+                        break;
+                    case 'delete':
+                        await vscode.commands.executeCommand('aiCodingSidebar.delete', item);
+                        break;
+                }
+            }
+        }
     }
 
-    /**
-     * 外部からドロップされたファイルをコピー
-     */
-    private async copyExternalFiles(uris: string[], targetDir: string): Promise<void> {
+    private _createFileItem(filePath: string, isDirectory: boolean): FileItem {
+        const stat = fs.statSync(filePath);
+        return new FileItem(
+            path.basename(filePath),
+            vscode.TreeItemCollapsibleState.None,
+            filePath,
+            isDirectory,
+            isDirectory ? 0 : stat.size,
+            stat.mtime
+        );
+    }
+
+    private async _handleMoveFile(sourcePath: string, targetDir: string): Promise<void> {
+        const fileName = path.basename(sourcePath);
+        const targetPath = path.join(targetDir, fileName);
+
+        if (sourcePath === targetPath) {
+            return;
+        }
+
+        try {
+            if (fs.existsSync(targetPath)) {
+                const answer = await vscode.window.showWarningMessage(
+                    `${fileName} already exists. Overwrite?`,
+                    'Overwrite',
+                    'Skip'
+                );
+                if (answer !== 'Overwrite') {
+                    return;
+                }
+            }
+
+            await fs.promises.rename(sourcePath, targetPath);
+            vscode.window.showInformationMessage(`Moved: ${fileName}`);
+            this.refresh();
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to move file: ${error}`);
+        }
+    }
+
+    private async _handleExternalDrop(files: string[], targetDir: string): Promise<void> {
         const copiedFiles: string[] = [];
 
-        for (const uriStr of uris) {
+        for (const filePath of files) {
             try {
-                const uri = vscode.Uri.parse(uriStr);
-                if (uri.scheme !== 'file') {
-                    continue;
-                }
-
-                const sourcePath = uri.fsPath;
-                const fileName = path.basename(sourcePath);
+                const fileName = path.basename(filePath);
                 const targetPath = path.join(targetDir, fileName);
 
-                // 同じパスへのコピーは無視
-                if (sourcePath === targetPath) {
+                if (filePath === targetPath) {
                     continue;
                 }
 
-                // ファイルが既に存在するかチェック
                 if (fs.existsSync(targetPath)) {
                     const answer = await vscode.window.showWarningMessage(
                         `${fileName} already exists. Overwrite?`,
@@ -1739,15 +1692,18 @@ class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDra
                     }
                 }
 
-                // ファイルをコピー
-                fs.copyFileSync(sourcePath, targetPath);
+                const stat = await fs.promises.stat(filePath);
+                if (stat.isDirectory()) {
+                    await this._copyDirectoryRecursive(filePath, targetPath);
+                } else {
+                    await fs.promises.copyFile(filePath, targetPath);
+                }
                 copiedFiles.push(fileName);
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to copy file: ${error}`);
             }
         }
 
-        // コピー成功メッセージを表示
         if (copiedFiles.length > 0) {
             const message = copiedFiles.length === 1
                 ? `Copied: ${copiedFiles[0]}`
@@ -1755,381 +1711,81 @@ class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDra
             vscode.window.showInformationMessage(message);
         }
 
-        // ビューを更新
         this.refresh();
     }
 
-    /**
-     * ツリービュー内のファイルをコピー
-     */
-    private async copyFiles(sourceItems: readonly FileItem[], targetDir: string): Promise<void> {
-        const copiedFiles: string[] = [];
+    private async _copyDirectoryRecursive(src: string, dest: string): Promise<void> {
+        await fs.promises.mkdir(dest, { recursive: true });
+        const entries = await fs.promises.readdir(src, { withFileTypes: true });
 
-        for (const item of sourceItems) {
-            const sourcePath = item.filePath;
-            const fileName = path.basename(sourcePath);
-            const targetPath = path.join(targetDir, fileName);
+        for (const entry of entries) {
+            const srcPath = path.join(src, entry.name);
+            const destPath = path.join(dest, entry.name);
 
-            // 同じパスへのコピーは無視
-            if (sourcePath === targetPath) {
-                continue;
-            }
-
-            try {
-                // ファイルが既に存在するかチェック
-                if (fs.existsSync(targetPath)) {
-                    const answer = await vscode.window.showWarningMessage(
-                        `${fileName} already exists. Overwrite?`,
-                        'Overwrite',
-                        'Skip'
-                    );
-                    if (answer !== 'Overwrite') {
-                        continue;
-                    }
-                }
-
-                // ファイルをコピー
-                fs.copyFileSync(sourcePath, targetPath);
-                copiedFiles.push(fileName);
-            } catch (error) {
-                vscode.window.showErrorMessage(`Failed to copy ${fileName}: ${error}`);
-            }
-        }
-
-        // コピー成功メッセージを表示
-        if (copiedFiles.length > 0) {
-            const message = copiedFiles.length === 1
-                ? `Copied: ${copiedFiles[0]}`
-                : `Copied ${copiedFiles.length} files`;
-            vscode.window.showInformationMessage(message);
-        }
-
-        // ビューを更新
-        this.refresh();
-    }
-
-    getRootPath(): string | undefined {
-        return this.rootPath;
-    }
-
-    setSelectedItem(item: FileItem | undefined): void {
-        this.selectedItem = item;
-    }
-
-    getSelectedItem(): FileItem | undefined {
-        return this.selectedItem;
-    }
-
-    refresh(targetPath?: string): void {
-        if (targetPath) {
-            // 特定のパスとその親ディレクトリのキャッシュのみクリア
-            this.itemCache.delete(targetPath);
-            const parentPath = path.dirname(targetPath);
-            if (parentPath && parentPath !== targetPath) {
-                this.itemCache.delete(parentPath);
-            }
-        } else {
-            // 全体更新の場合のみ全キャッシュをクリア
-            this.itemCache.clear();
-        }
-        this._onDidChangeTreeData.fire();
-    }
-
-    private debouncedRefresh(targetPath?: string): void {
-        if (this.refreshDebounceTimer) {
-            clearTimeout(this.refreshDebounceTimer);
-        }
-        this.refreshDebounceTimer = setTimeout(() => {
-            this.refresh(targetPath);
-        }, 1500);  // 500ms → 1500msに延長
-    }
-
-    getTreeItem(element: FileItem): vscode.TreeItem {
-        return element;
-    }
-
-    async getChildren(element?: FileItem): Promise<FileItem[]> {
-        // フラットリスト表示のため、elementは常にundefined
-        // 子要素として呼ばれた場合は空を返す（ツリー展開しない）
-        if (element) {
-            return [];
-        }
-
-        // Show loader on initial load
-        if (this._isInitialLoad) {
-            this._isInitialLoad = false;
-            await new Promise(resolve => setTimeout(resolve, 300));
-        }
-
-        if (!this.rootPath) {
-            return [];
-        }
-
-        // パスが存在しない場合は、作成ボタンを表示
-        if (this.pathNotFound) {
-            const createButton = new FileItem(
-                `Create directory: ${this.configuredRelativePath || this.rootPath}`,
-                vscode.TreeItemCollapsibleState.None,
-                this.rootPath,
-                false,
-                0,
-                new Date()
-            );
-            createButton.contextValue = 'createDirectoryButton';
-            createButton.iconPath = new vscode.ThemeIcon('new-folder');
-            createButton.command = {
-                command: 'aiCodingSidebar.createDefaultPath',
-                title: 'Create Directory',
-                arguments: [this.rootPath, this.configuredRelativePath]
-            };
-            createButton.tooltip = `Click to create directory: ${this.configuredRelativePath || this.rootPath}`;
-            return [createButton];
-        }
-
-        // 現在表示するディレクトリパス
-        const currentPath = this.activeFolderPath || this.rootPath;
-        const items: FileItem[] = [];
-
-        // パス表示アイテム（最上部に表示）
-        // ルートディレクトリの場合のみプロジェクトルートからのパスを表示
-        let displayPath: string;
-        if (currentPath === this.rootPath && this.projectRootPath) {
-            displayPath = path.relative(this.projectRootPath, this.rootPath);
-        } else {
-            displayPath = path.relative(this.rootPath, currentPath);
-        }
-        const pathItem = new FileItem(
-            displayPath || '.',
-            vscode.TreeItemCollapsibleState.None,
-            currentPath,
-            true,
-            0,
-            new Date()
-        );
-        pathItem.contextValue = 'pathDisplay';
-        pathItem.iconPath = new vscode.ThemeIcon('folder-opened');
-        pathItem.tooltip = currentPath;
-        items.push(pathItem);
-
-        // 親ディレクトリへ戻るアイテム（ルートより上には戻れない）
-        if (currentPath !== this.rootPath) {
-            const parentPath = path.dirname(currentPath);
-            const parentItem = new FileItem(
-                '..',
-                vscode.TreeItemCollapsibleState.None,
-                parentPath,
-                true,
-                0,
-                new Date()
-            );
-            parentItem.contextValue = 'parentDirectory';
-            parentItem.iconPath = new vscode.ThemeIcon('arrow-up');
-            parentItem.command = {
-                command: 'aiCodingSidebar.navigateToDirectory',
-                title: 'Go to Parent Directory',
-                arguments: [parentPath]
-            };
-            parentItem.tooltip = 'Go to parent directory';
-            items.push(parentItem);
-        }
-
-        // キャッシュに存在する場合は返す
-        if (this.itemCache.has(currentPath)) {
-            const cachedItems = this.itemCache.get(currentPath)!;
-            return [...items, ...cachedItems];
-        }
-
-        try {
-            const files = this.getFilesInDirectory(currentPath);
-            const currentFilePath = this.editorProvider?.getCurrentFilePath();
-            const fileItems = files.map(file => {
-                const isDirectory = file.isDirectory;
-                // フラットリスト表示のため、すべてCollapsibleState.None
-                const item = new FileItem(
-                    file.name,
-                    vscode.TreeItemCollapsibleState.None,
-                    file.path,
-                    isDirectory,
-                    file.size,
-                    file.modified
-                );
-
-                // ディレクトリの場合、クリックでディレクトリ移動
-                if (isDirectory) {
-                    item.command = {
-                        command: 'aiCodingSidebar.navigateToDirectory',
-                        title: 'Navigate to Directory',
-                        arguments: [file.path]
-                    };
-                } else {
-                    // 現在Markdown Editorで編集中のファイルに「editing」表記を追加
-                    if (currentFilePath && file.path === currentFilePath) {
-                        item.description = 'editing';
-                    }
-                }
-
-                return item;
-            });
-
-            // キャッシュに保存
-            this.itemCache.set(currentPath, fileItems);
-            return [...items, ...fileItems];
-        } catch (error) {
-            vscode.window.showErrorMessage(`Failed to read directory: ${error}`);
-            return items;
-        }
-    }
-
-    setActiveFolder(path: string | undefined, force: boolean = false): void {
-        if (path && this.rootPath && !path.startsWith(this.rootPath)) {
-            return;
-        }
-
-        if (!force && this.activeFolderPath === path) {
-            return;
-        }
-
-        this.activeFolderPath = path;
-        this.refresh();
-        void this.revealActiveFolder();
-    }
-
-    /**
-     * 指定されたディレクトリに移動する（フラットリスト表示用）
-     */
-    navigateToDirectory(targetPath: string): void {
-        if (!targetPath || !fs.existsSync(targetPath)) {
-            return;
-        }
-
-        // rootPath の範囲内かチェック
-        if (this.rootPath && !targetPath.startsWith(this.rootPath)) {
-            return;
-        }
-
-        this.activeFolderPath = targetPath;
-        this.updateTitle();
-        this.refresh();
-    }
-
-    async getParent(element: FileItem): Promise<FileItem | undefined> {
-        if (!element || !element.isDirectory || !this.rootPath) {
-            return undefined;
-        }
-
-        // rootItem自体の親はundefined
-        if (element.filePath === this.rootPath) {
-            return undefined;
-        }
-
-        const parentPath = path.dirname(element.filePath);
-
-        if (!parentPath || parentPath === element.filePath) {
-            return undefined;
-        }
-
-        // 親がrootPathの場合、rootPath自体を表すFileItemを返す
-        if (parentPath === this.rootPath) {
-            const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-            let displayName: string;
-
-            if (workspaceRoot) {
-                const relativePath = path.relative(workspaceRoot, this.rootPath);
-                displayName = relativePath === '' ? path.basename(this.rootPath) : relativePath;
+            if (entry.isDirectory()) {
+                await this._copyDirectoryRecursive(srcPath, destPath);
             } else {
-                displayName = path.basename(this.rootPath);
+                await fs.promises.copyFile(srcPath, destPath);
+            }
+        }
+    }
+
+    private _sendFileList(): void {
+        if (!this._view) {
+            return;
+        }
+
+        // Path not found case
+        if (this._pathNotFound) {
+            this._view.webview.postMessage({
+                type: 'showPathNotFound',
+                path: this._rootPath,
+                relativePath: this._configuredRelativePath || this._rootPath
+            });
+            return;
+        }
+
+        const currentPath = this._activeFolderPath || this._rootPath;
+        if (!currentPath) {
+            return;
+        }
+
+        try {
+            const files = this._getFilesInDirectory(currentPath);
+            const items = files.map(file => ({
+                name: file.name,
+                path: file.path,
+                isDirectory: file.isDirectory,
+                size: file.size,
+                modified: file.modified.toISOString(),
+                isEditing: this._editingFilePath === file.path,
+                icon: this._getFileIcon(file.name, file.isDirectory)
+            }));
+
+            // Calculate display path
+            let displayPath: string;
+            if (currentPath === this._rootPath && this._projectRootPath) {
+                displayPath = path.relative(this._projectRootPath, this._rootPath);
+            } else if (this._rootPath) {
+                displayPath = path.relative(this._rootPath, currentPath);
+            } else {
+                displayPath = '.';
             }
 
-            return new FileItem(
-                displayName,
-                vscode.TreeItemCollapsibleState.Expanded,
-                this.rootPath,
-                true,
-                0,
-                new Date()
-            );
-        }
-
-        if (!parentPath.startsWith(this.rootPath)) {
-            return undefined;
-        }
-
-        try {
-            const stat = fs.statSync(parentPath);
-            return new FileItem(
-                path.basename(parentPath),
-                vscode.TreeItemCollapsibleState.Collapsed,
-                parentPath,
-                true,
-                0,
-                stat.mtime
-            );
+            this._view.webview.postMessage({
+                type: 'updateFileList',
+                items: items,
+                currentPath: currentPath,
+                rootPath: this._rootPath,
+                displayPath: displayPath || '.',
+                canGoUp: currentPath !== this._rootPath
+            });
         } catch (error) {
-            console.error('Failed to get parent folder:', error);
-            return undefined;
+            console.error('Failed to get files:', error);
         }
     }
 
-    private async revealActiveFolder(): Promise<void> {
-        if (!this.treeView || !this.activeFolderPath) {
-            return;
-        }
-
-        try {
-            const stat = fs.statSync(this.activeFolderPath);
-            const item = new FileItem(
-                path.basename(this.activeFolderPath),
-                this.activeFolderPath === this.rootPath
-                    ? vscode.TreeItemCollapsibleState.Expanded
-                    : vscode.TreeItemCollapsibleState.Collapsed,
-                this.activeFolderPath,
-                stat.isDirectory(),
-                stat.isDirectory() ? 0 : stat.size,
-                stat.mtime
-            );
-
-            await this.treeView.reveal(item, { select: true, focus: false, expand: true });
-        } catch (error) {
-            console.error('Failed to show folder selection:', error);
-        }
-    }
-
-    resetActiveFolder(): void {
-        if (!this.rootPath) {
-            this.setActiveFolder(undefined, true);
-            return;
-        }
-
-        this.setActiveFolder(this.rootPath, true);
-    }
-
-    async revealDirectory(directoryPath: string): Promise<void> {
-        if (!this.treeView) {
-            return;
-        }
-
-        try {
-            const stat = fs.statSync(directoryPath);
-            if (!stat.isDirectory()) {
-                return;
-            }
-
-            const item = new FileItem(
-                path.basename(directoryPath),
-                vscode.TreeItemCollapsibleState.Collapsed,
-                directoryPath,
-                true,
-                0,
-                stat.mtime
-            );
-
-            await this.treeView.reveal(item, { select: true, focus: false, expand: false });
-        } catch (error) {
-            console.error('Failed to reveal directory:', error);
-        }
-    }
-
-    private getFilesInDirectory(dirPath: string): FileInfo[] {
+    private _getFilesInDirectory(dirPath: string): FileInfo[] {
         const directories: FileInfo[] = [];
         const files: FileInfo[] = [];
 
@@ -2161,10 +1817,10 @@ class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDra
                 }
             }
 
-            // ディレクトリを名前順でソート
+            // Sort directories by name
             directories.sort((a, b) => a.name.localeCompare(b.name));
 
-            // ファイルをソート設定に基づいてソート
+            // Sort files based on settings
             const config = vscode.workspace.getConfiguration('aiCodingSidebar.markdownList');
             const sortBy = config.get<string>('sortBy', 'created');
             const sortOrder = config.get<string>('sortOrder', 'ascending');
@@ -2189,7 +1845,6 @@ class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDra
                 return sortOrder === 'descending' ? -comparison : comparison;
             });
 
-            // ディレクトリを先に、その後ファイルを返す
             return [...directories, ...files];
 
         } catch (error) {
@@ -2201,6 +1856,733 @@ class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDra
             const message = err && err.message ? err.message : String(error);
             throw new Error(`Failed to read directory: ${message}`);
         }
+    }
+
+    private _getFileIcon(fileName: string, isDirectory: boolean): string {
+        if (isDirectory) {
+            return 'folder';
+        }
+
+        const ext = path.extname(fileName).toLowerCase();
+
+        // Special handling for markdown files
+        if (ext === '.md') {
+            const timestampPattern = /^\d{4}_\d{4}_\d{4}_TASK\.md$/;
+            if (timestampPattern.test(fileName)) {
+                return 'edit';
+            }
+            return 'markdown';
+        }
+
+        const iconMap: { [key: string]: string } = {
+            '.ts': 'symbol-method',
+            '.tsx': 'symbol-method',
+            '.js': 'symbol-function',
+            '.jsx': 'symbol-function',
+            '.json': 'json',
+            '.txt': 'file-text',
+            '.py': 'symbol-class',
+            '.java': 'symbol-class',
+            '.cpp': 'symbol-class',
+            '.c': 'symbol-class',
+            '.h': 'symbol-class',
+            '.css': 'symbol-color',
+            '.scss': 'symbol-color',
+            '.html': 'symbol-misc',
+            '.xml': 'symbol-misc',
+            '.yml': 'settings-gear',
+            '.yaml': 'settings-gear',
+            '.sh': 'terminal',
+            '.bat': 'terminal',
+            '.png': 'file-media',
+            '.jpg': 'file-media',
+            '.jpeg': 'file-media',
+            '.gif': 'file-media',
+            '.svg': 'file-media',
+            '.pdf': 'file-pdf',
+            '.zip': 'file-zip',
+            '.git': 'git-branch',
+            '.gitignore': 'git-branch'
+        };
+
+        return iconMap[ext] || 'file';
+    }
+
+    private _debouncedRefresh(targetPath?: string): void {
+        if (this._refreshDebounceTimer) {
+            clearTimeout(this._refreshDebounceTimer);
+        }
+        this._refreshDebounceTimer = setTimeout(() => {
+            this.refresh(targetPath);
+        }, 1500);
+    }
+
+    setEditorProvider(provider: EditorProvider): void {
+        this._editorProvider = provider;
+    }
+
+    setRootPath(rootPath: string, relativePath?: string): void {
+        this._rootPath = rootPath;
+        this._activeFolderPath = rootPath;
+        this._configuredRelativePath = relativePath;
+
+        // Check if path exists
+        try {
+            const stat = fs.statSync(rootPath);
+            if (!stat.isDirectory()) {
+                this._pathNotFound = true;
+            } else {
+                this._pathNotFound = false;
+            }
+        } catch (error) {
+            this._pathNotFound = true;
+        }
+
+        this.refresh();
+    }
+
+    getCurrentPath(): string | undefined {
+        return this._activeFolderPath || this._rootPath;
+    }
+
+    getRootPath(): string | undefined {
+        return this._rootPath;
+    }
+
+    getConfiguredRelativePath(): string | undefined {
+        return this._configuredRelativePath;
+    }
+
+    navigateToDirectory(targetPath: string): void {
+        if (!targetPath || !fs.existsSync(targetPath)) {
+            return;
+        }
+
+        if (this._rootPath && !targetPath.startsWith(this._rootPath)) {
+            return;
+        }
+
+        this._activeFolderPath = targetPath;
+        this._sendFileList();
+    }
+
+    setActiveFolder(folderPath: string | undefined, force: boolean = false): void {
+        if (folderPath && this._rootPath && !folderPath.startsWith(this._rootPath)) {
+            return;
+        }
+
+        if (!force && this._activeFolderPath === folderPath) {
+            return;
+        }
+
+        this._activeFolderPath = folderPath;
+        this._sendFileList();
+    }
+
+    resetActiveFolder(): void {
+        if (!this._rootPath) {
+            this.setActiveFolder(undefined, true);
+            return;
+        }
+        this.setActiveFolder(this._rootPath, true);
+    }
+
+    getSelectedItem(): FileItem | undefined {
+        if (this._selectedPath) {
+            try {
+                const stat = fs.statSync(this._selectedPath);
+                return new FileItem(
+                    path.basename(this._selectedPath),
+                    vscode.TreeItemCollapsibleState.None,
+                    this._selectedPath,
+                    stat.isDirectory(),
+                    stat.isDirectory() ? 0 : stat.size,
+                    stat.mtime
+                );
+            } catch {
+                return undefined;
+            }
+        }
+        return undefined;
+    }
+
+    refresh(targetPath?: string): void {
+        this._sendFileList();
+    }
+
+    updateEditingFile(filePath: string | undefined): void {
+        this._editingFilePath = filePath;
+        this._sendFileList();
+    }
+
+    async revealFile(filePath: string): Promise<void> {
+        // WebView doesn't support reveal like TreeView
+        // Just ensure the file list is updated
+        this._sendFileList();
+    }
+
+    async revealDirectory(directoryPath: string): Promise<void> {
+        // Navigate to the directory
+        this.navigateToDirectory(directoryPath);
+    }
+
+    handleVisibilityChange(visible: boolean): void {
+        if (!this._fileWatcherService) {
+            return;
+        }
+
+        if (visible) {
+            this._fileWatcherService.enableListener(this._listenerId);
+        } else {
+            this._fileWatcherService.disableListener(this._listenerId);
+        }
+    }
+
+    dispose(): void {
+        if (this._fileWatcherService) {
+            this._fileWatcherService.unregisterListener(this._listenerId);
+        }
+        if (this._refreshDebounceTimer) {
+            clearTimeout(this._refreshDebounceTimer);
+            this._refreshDebounceTimer = undefined;
+        }
+        if (this._configChangeDisposable) {
+            this._configChangeDisposable.dispose();
+            this._configChangeDisposable = undefined;
+        }
+    }
+
+    private _getHtmlForWebview(webview: vscode.Webview): string {
+        const nonce = this._getNonce();
+
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}';">
+    <title>Tasks</title>
+    <style>
+        :root {
+            --item-height: 22px;
+            --icon-size: 16px;
+            --padding-horizontal: 8px;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--vscode-sideBar-background);
+            color: var(--vscode-sideBar-foreground);
+            font-family: var(--vscode-font-family);
+            font-size: var(--vscode-font-size);
+            overflow-x: hidden;
+        }
+
+        #tasks-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .path-item {
+            display: flex;
+            align-items: center;
+            height: var(--item-height);
+            padding: 2px var(--padding-horizontal);
+            color: var(--vscode-foreground);
+            font-size: 11px;
+            opacity: 0.8;
+            border-bottom: 1px solid var(--vscode-panel-border);
+        }
+
+        .path-item .icon {
+            margin-right: 4px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            height: var(--item-height);
+            padding: 0 var(--padding-horizontal);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .file-item:hover {
+            background: var(--vscode-list-hoverBackground);
+        }
+
+        .file-item.selected {
+            background: var(--vscode-list-activeSelectionBackground);
+            color: var(--vscode-list-activeSelectionForeground);
+        }
+
+        .file-item:focus {
+            outline: 1px solid var(--vscode-focusBorder);
+            outline-offset: -1px;
+        }
+
+        .file-item .icon {
+            width: var(--icon-size);
+            height: var(--icon-size);
+            margin-right: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .file-item .name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-item .label {
+            font-size: 0.85em;
+            opacity: 0.7;
+            margin-left: 8px;
+            color: var(--vscode-descriptionForeground);
+        }
+
+        .file-item.parent-item {
+            opacity: 0.8;
+        }
+
+        .file-item.drag-over {
+            background: var(--vscode-list-dropBackground);
+        }
+
+        .file-item.dragging {
+            opacity: 0.5;
+        }
+
+        #file-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        #file-list.drag-over {
+            background: var(--vscode-list-dropBackground);
+        }
+
+        #create-path {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        #create-path-btn {
+            padding: 8px 16px;
+            background-color: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #create-path-btn:hover {
+            background-color: var(--vscode-button-hoverBackground);
+        }
+
+        #path-not-found-message {
+            color: var(--vscode-descriptionForeground);
+            font-size: 12px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .codicon {
+            font-family: codicon;
+            font-size: 16px;
+        }
+
+        /* Codicon font is loaded from VSCode */
+        @font-face {
+            font-family: 'codicon';
+            src: url('${webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'node_modules', '@vscode', 'codicons', 'dist', 'codicon.ttf'))}') format('truetype');
+        }
+    </style>
+</head>
+<body>
+    <div id="tasks-container">
+        <div id="path-display" class="path-item">
+            <span class="icon codicon codicon-folder-opened"></span>
+            <span id="path-text"></span>
+        </div>
+
+        <div id="parent-nav" class="file-item parent-item" style="display: none;" tabindex="0">
+            <span class="icon codicon codicon-arrow-up"></span>
+            <span class="name">..</span>
+        </div>
+
+        <div id="file-list"></div>
+
+        <div id="create-path" style="display: none;">
+            <div id="path-not-found-message"></div>
+            <button id="create-path-btn">
+                <span class="codicon codicon-new-folder"></span>
+                Create directory
+            </button>
+        </div>
+    </div>
+
+    <script nonce="${nonce}">
+        (function() {
+            const vscode = acquireVsCodeApi();
+
+            // State management
+            let state = {
+                currentPath: '',
+                rootPath: '',
+                items: [],
+                selectedPath: null,
+                editingPath: null,
+                draggedPath: null,
+                lastRenderedHtml: ''
+            };
+
+            // DOM elements
+            const pathDisplay = document.getElementById('path-display');
+            const pathText = document.getElementById('path-text');
+            const parentNav = document.getElementById('parent-nav');
+            const fileList = document.getElementById('file-list');
+            const createPathDiv = document.getElementById('create-path');
+            const createPathBtn = document.getElementById('create-path-btn');
+            const pathNotFoundMessage = document.getElementById('path-not-found-message');
+
+            // Initialize
+            function init() {
+                setupEventListeners();
+                vscode.postMessage({ type: 'ready' });
+            }
+
+            // Event listeners
+            function setupEventListeners() {
+                // Parent navigation click
+                parentNav.addEventListener('click', () => {
+                    if (state.currentPath && state.rootPath && state.currentPath !== state.rootPath) {
+                        const parentPath = state.currentPath.substring(0, state.currentPath.lastIndexOf('/')) ||
+                                          state.currentPath.substring(0, state.currentPath.lastIndexOf('\\\\'));
+                        if (parentPath && parentPath.startsWith(state.rootPath)) {
+                            vscode.postMessage({ type: 'navigate', path: parentPath });
+                        }
+                    }
+                });
+
+                // Create directory button
+                createPathBtn.addEventListener('click', () => {
+                    vscode.postMessage({ type: 'createDirectory' });
+                });
+
+                // Keyboard navigation
+                document.addEventListener('keydown', handleKeyboard);
+
+                // File list drag and drop for external files
+                fileList.addEventListener('dragover', handleFileListDragOver);
+                fileList.addEventListener('dragleave', handleFileListDragLeave);
+                fileList.addEventListener('drop', handleFileListDrop);
+            }
+
+            // Message handler
+            window.addEventListener('message', event => {
+                const message = event.data;
+                switch (message.type) {
+                    case 'updateFileList':
+                        state.items = message.items;
+                        state.currentPath = message.currentPath;
+                        state.rootPath = message.rootPath;
+                        pathText.textContent = message.displayPath;
+                        parentNav.style.display = message.canGoUp ? 'flex' : 'none';
+                        createPathDiv.style.display = 'none';
+                        fileList.style.display = 'block';
+                        render(true);
+                        break;
+                    case 'showPathNotFound':
+                        pathText.textContent = message.relativePath;
+                        parentNav.style.display = 'none';
+                        fileList.style.display = 'none';
+                        createPathDiv.style.display = 'flex';
+                        pathNotFoundMessage.textContent = 'Directory not found: ' + message.relativePath;
+                        break;
+                    case 'updateEditingFile':
+                        state.editingPath = message.path;
+                        render(true);
+                        break;
+                }
+            });
+
+            // Render file list
+            function render(forceRender = false) {
+                const html = state.items.map(item => renderItem(item)).join('');
+
+                // Skip if content hasn't changed (performance optimization)
+                if (!forceRender && html === state.lastRenderedHtml) {
+                    return;
+                }
+
+                state.lastRenderedHtml = html;
+                fileList.innerHTML = html;
+
+                // Attach event listeners to items
+                const items = fileList.querySelectorAll('.file-item');
+                items.forEach(item => {
+                    item.addEventListener('click', handleClick);
+                    item.addEventListener('contextmenu', handleContextMenu);
+                    item.addEventListener('dragstart', handleDragStart);
+                    item.addEventListener('dragend', handleDragEnd);
+                    item.addEventListener('dragover', handleDragOver);
+                    item.addEventListener('dragleave', handleDragLeave);
+                    item.addEventListener('drop', handleDrop);
+                });
+            }
+
+            // Render single item
+            function renderItem(item) {
+                const isSelected = item.path === state.selectedPath;
+                const isEditing = item.path === state.editingPath;
+                const classes = ['file-item'];
+                if (item.isDirectory) classes.push('directory');
+                if (isSelected) classes.push('selected');
+
+                return \`
+                    <div class="\${classes.join(' ')}"
+                         data-path="\${escapeHtml(item.path)}"
+                         data-is-directory="\${item.isDirectory}"
+                         tabindex="0"
+                         draggable="true">
+                        <span class="icon codicon codicon-\${item.icon}"></span>
+                        <span class="name">\${escapeHtml(item.name)}</span>
+                        \${isEditing ? '<span class="label">editing</span>' : ''}
+                    </div>
+                \`;
+            }
+
+            // Click handler
+            function handleClick(e) {
+                const item = e.currentTarget;
+                const itemPath = item.dataset.path;
+                const isDirectory = item.dataset.isDirectory === 'true';
+
+                // Update selection
+                state.selectedPath = itemPath;
+                document.querySelectorAll('.file-item.selected').forEach(el => el.classList.remove('selected'));
+                item.classList.add('selected');
+
+                if (isDirectory) {
+                    vscode.postMessage({ type: 'navigate', path: itemPath });
+                } else {
+                    vscode.postMessage({ type: 'selectFile', path: itemPath });
+                }
+            }
+
+            // Context menu handler
+            function handleContextMenu(e) {
+                e.preventDefault();
+                const item = e.currentTarget;
+                const itemPath = item.dataset.path;
+                const isDirectory = item.dataset.isDirectory === 'true';
+
+                vscode.postMessage({
+                    type: 'contextMenu',
+                    path: itemPath,
+                    isDirectory: isDirectory,
+                    x: e.clientX,
+                    y: e.clientY
+                });
+            }
+
+            // Drag and drop handlers
+            function handleDragStart(e) {
+                const item = e.currentTarget;
+                state.draggedPath = item.dataset.path;
+                item.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', item.dataset.path);
+            }
+
+            function handleDragEnd(e) {
+                const item = e.currentTarget;
+                item.classList.remove('dragging');
+                state.draggedPath = null;
+                document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            }
+
+            function handleDragOver(e) {
+                e.preventDefault();
+                const item = e.currentTarget;
+                if (item.dataset.isDirectory === 'true' && item.dataset.path !== state.draggedPath) {
+                    item.classList.add('drag-over');
+                    e.dataTransfer.dropEffect = 'move';
+                }
+            }
+
+            function handleDragLeave(e) {
+                const item = e.currentTarget;
+                item.classList.remove('drag-over');
+            }
+
+            function handleDrop(e) {
+                e.preventDefault();
+                const item = e.currentTarget;
+                item.classList.remove('drag-over');
+
+                if (item.dataset.isDirectory !== 'true') {
+                    return;
+                }
+
+                const targetPath = item.dataset.path;
+
+                // Check for external files
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    const files = [];
+                    for (let i = 0; i < e.dataTransfer.files.length; i++) {
+                        files.push(e.dataTransfer.files[i].path);
+                    }
+                    vscode.postMessage({
+                        type: 'externalDrop',
+                        files: files,
+                        targetPath: targetPath
+                    });
+                    return;
+                }
+
+                // Internal move
+                if (state.draggedPath && state.draggedPath !== targetPath) {
+                    vscode.postMessage({
+                        type: 'moveFile',
+                        sourcePath: state.draggedPath,
+                        targetPath: targetPath
+                    });
+                }
+            }
+
+            // File list drag and drop (for external files dropped on empty area)
+            function handleFileListDragOver(e) {
+                e.preventDefault();
+                if (e.dataTransfer.types.includes('Files')) {
+                    fileList.classList.add('drag-over');
+                    e.dataTransfer.dropEffect = 'copy';
+                }
+            }
+
+            function handleFileListDragLeave(e) {
+                fileList.classList.remove('drag-over');
+            }
+
+            function handleFileListDrop(e) {
+                e.preventDefault();
+                fileList.classList.remove('drag-over');
+
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    const files = [];
+                    for (let i = 0; i < e.dataTransfer.files.length; i++) {
+                        files.push(e.dataTransfer.files[i].path);
+                    }
+                    vscode.postMessage({
+                        type: 'externalDrop',
+                        files: files,
+                        targetPath: state.currentPath
+                    });
+                }
+            }
+
+            // Keyboard handler
+            function handleKeyboard(e) {
+                const items = Array.from(fileList.querySelectorAll('.file-item'));
+                if (items.length === 0) return;
+
+                const currentIndex = items.findIndex(item => item.classList.contains('selected'));
+
+                switch (e.key) {
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        if (currentIndex > 0) {
+                            selectItem(items[currentIndex - 1]);
+                        } else if (currentIndex === -1 && items.length > 0) {
+                            selectItem(items[items.length - 1]);
+                        }
+                        break;
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        if (currentIndex < items.length - 1) {
+                            selectItem(items[currentIndex + 1]);
+                        } else if (currentIndex === -1 && items.length > 0) {
+                            selectItem(items[0]);
+                        }
+                        break;
+                    case 'Enter':
+                        if (currentIndex >= 0) {
+                            items[currentIndex].click();
+                        }
+                        break;
+                    case 'Escape':
+                        state.selectedPath = null;
+                        items.forEach(item => item.classList.remove('selected'));
+                        break;
+                    case 'Delete':
+                    case 'Backspace':
+                        if (currentIndex >= 0) {
+                            const item = items[currentIndex];
+                            vscode.postMessage({
+                                type: 'contextMenu',
+                                path: item.dataset.path,
+                                isDirectory: item.dataset.isDirectory === 'true',
+                                action: 'delete'
+                            });
+                        }
+                        break;
+                    case 'Tab':
+                        // Handle Tab/Shift+Tab for focus cycling
+                        if (e.shiftKey) {
+                            if (currentIndex > 0) {
+                                e.preventDefault();
+                                selectItem(items[currentIndex - 1]);
+                            }
+                        } else {
+                            if (currentIndex < items.length - 1) {
+                                e.preventDefault();
+                                selectItem(items[currentIndex + 1]);
+                            }
+                        }
+                        break;
+                }
+            }
+
+            function selectItem(item) {
+                state.selectedPath = item.dataset.path;
+                document.querySelectorAll('.file-item.selected').forEach(el => el.classList.remove('selected'));
+                item.classList.add('selected');
+                item.focus();
+            }
+
+            // Utility: escape HTML
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>`;
+    }
+
+    private _getNonce(): string {
+        let text = '';
+        const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        for (let i = 0; i < 32; i++) {
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+        }
+        return text;
     }
 }
 
@@ -2483,8 +2865,8 @@ class EditorProvider implements vscode.WebviewViewProvider {
     private _currentContent?: string;
     private _pendingContent?: string;
     private _isDirty: boolean = false;
-    private _detailsProvider?: TasksProvider;
-    private _tasksProvider?: TasksProvider;
+    private _detailsProvider?: TasksWebViewProvider;
+    private _tasksProvider?: TasksWebViewProvider;
     private _terminalProvider?: TerminalProvider;
     private _pendingFileToRestore?: string;
 
@@ -2801,7 +3183,10 @@ class EditorProvider implements vscode.WebviewViewProvider {
 
             // Markdown Listをリフレッシュして「editing」表記を更新
             if (this._detailsProvider) {
-                this._detailsProvider.refresh();
+                this._detailsProvider.updateEditingFile(filePath);
+            }
+            if (this._tasksProvider) {
+                this._tasksProvider.updateEditingFile(filePath);
             }
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to read file: ${error}`);
@@ -2812,11 +3197,11 @@ class EditorProvider implements vscode.WebviewViewProvider {
         return this._currentFilePath;
     }
 
-    public setDetailsProvider(provider: TasksProvider): void {
+    public setDetailsProvider(provider: TasksWebViewProvider): void {
         this._detailsProvider = provider;
     }
 
-    public setTasksProvider(provider: TasksProvider): void {
+    public setTasksProvider(provider: TasksWebViewProvider): void {
         this._tasksProvider = provider;
     }
 

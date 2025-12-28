@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.25] - 2025-12-29
+
+### Changed
+- **Tasks View - Start Task Behavior**: Changed directory creation location for Start Task
+  - Previously: Always created under `defaultRelativePath` (default: `.claude/tasks`)
+  - Now: Creates under the currently opened directory in Tasks View
+  - Fallback: If current path cannot be retrieved, uses `defaultRelativePath` as before
+
+### Added
+- **Tasks View - New Directory Button**: Added "New Directory" button to Tasks View header
+  - Click the folder icon to create a new directory under the current directory
+  - Creates directory only (without Markdown file)
+  - Header button order: Start Task -> New Directory -> New File -> Refresh -> Settings
+
 ## [0.7.24] - 2025-12-29
 
 ### Added
@@ -33,7 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Settings icon now opens all Tasks-related settings in one view
   - Simplified title menu with fewer icons
 - **Tasks View - Menu Order**: Changed the order of title menu icons
-  - New order: Start Task → Create Markdown File → Refresh → Tasks Settings
+  - New order: Start Task -> Create Markdown File -> Refresh -> Tasks Settings
   - Create Markdown File is now positioned next to Start Task for easier access
 
 ## [0.7.19] - 2025-12-27
@@ -244,9 +258,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Rename**: Combined Panel renamed to Task Panel
-  - `aiCodingSidebar.combinedPanel.enabled` → `aiCodingSidebar.taskPanel.enabled`
-  - "Open Combined Panel" → "Open Task Panel"
-  - "Combined Panel Settings" → "Task Panel Settings"
+  - `aiCodingSidebar.combinedPanel.enabled` -> `aiCodingSidebar.taskPanel.enabled`
+  - "Open Combined Panel" -> "Open Task Panel"
+  - "Combined Panel Settings" -> "Task Panel Settings"
 
 ### Fixed
 - **Task Panel - Terminal Reuse**: Run button now reuses existing terminals instead of creating new ones each time
@@ -361,10 +375,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Docs View - Settings Icon**: Added settings icon to Docs view title for quick access to sort configuration
-  - Click the settings icon to open `Ai Coding Sidebar › Markdown List: Sort By` and `Ai Coding Sidebar › Markdown List: Sort Order` settings
+  - Click the settings icon to open `Ai Coding Sidebar > Markdown List: Sort By` and `Ai Coding Sidebar > Markdown List: Sort Order` settings
   - Provides convenient access to customize file sorting preferences
 - **Editor View - Settings Icon**: Added settings icon to Editor view title for quick access to run command configuration
-  - Click the settings icon to open `Ai Coding Sidebar › Editor: Run Command` setting
+  - Click the settings icon to open `Ai Coding Sidebar > Editor: Run Command` setting
   - Allows easy customization of the command executed by the Run button
 
 ## [0.5.7] - 2025-11-22
@@ -453,10 +467,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **View Names**: Renamed all views for better clarity and consistency
-  - "Settings" → "Menu": More accurately reflects the menu-style navigation
-  - "Directory List" → "Tasks": Better represents the task-oriented workflow
-  - "Markdown List" → "Docs": Clearer indication of documentation/file management
-  - "Markdown Editor" → "Editor": Simplified and more concise
+  - "Settings" -> "Menu": More accurately reflects the menu-style navigation
+  - "Directory List" -> "Tasks": Better represents the task-oriented workflow
+  - "Markdown List" -> "Docs": Clearer indication of documentation/file management
+  - "Markdown Editor" -> "Editor": Simplified and more concise
 - **Docs View - File Display**: Removed markdown-only filter to display all file types
   - Previously only showed `.md` files
   - Now displays all files in the selected directory
@@ -479,10 +493,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Technical
 - Renamed all provider classes and variables for consistency with new view names
-  - `WorkspaceSettingsProvider` → `MenuProvider`
-  - `AiCodingSidebarProvider` → `TasksProvider`
-  - `AiCodingSidebarDetailsProvider` → `DocsProvider`
-  - `MarkdownEditorProvider` → `EditorProvider`
+  - `WorkspaceSettingsProvider` -> `MenuProvider`
+  - `AiCodingSidebarProvider` -> `TasksProvider`
+  - `AiCodingSidebarDetailsProvider` -> `DocsProvider`
+  - `MarkdownEditorProvider` -> `EditorProvider`
 
 ## [0.4.9] - 2025-11-10
 
@@ -525,7 +539,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.4.8] - 2025-11-10
 
 ### Changed
-- **Start Task Command**: Renamed "Create Task" to "Start Task" and changed icon to rocket (🚀)
+- **Start Task Command**: Renamed "Create Task" to "Start Task" and changed icon to rocket
   - Creates a new directory under the default path and automatically generates a timestamped Markdown file
   - The created file is automatically selected in Markdown List with "editing" label
   - The file opens in Markdown Editor View for immediate editing
@@ -542,7 +556,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - New setting `aiCodingSidebar.markdownList.sortOrder`: Choose sort direction (ascending, descending)
   - Settings changes are reflected in real-time without requiring refresh
 - **Markdown List - Sort Order Display**: Current sort order is now displayed in the view title
-  - Shows sort criteria and direction (e.g., "Markdown List (Created ↑)")
+  - Shows sort criteria and direction (e.g., "Markdown List (Created )")
   - Updates automatically when settings change
   - Makes it clear how files are currently sorted
 
@@ -596,7 +610,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - When creating a directory via "Add Directory" command, the new directory is immediately selected
   - Provides better visual feedback and easier navigation after directory creation
 - **Markdown File Icon**: Markdown files in Markdown List view now display different icons based on how they open
-  - Timestamp-named files (format: `YYYY_MMDD_HHMM.md`) that open in Markdown Editor View display edit icon (✏️)
+  - Timestamp-named files (format: `YYYY_MMDD_HHMM.md`) that open in Markdown Editor View display edit icon
   - Other markdown files that open in standard editor display markdown icon
   - Makes it clearer which files can be edited directly in the sidebar versus standard editor
 
@@ -627,8 +641,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Terminology Update**: Updated all "Folder" references to "Directory" for consistency
-  - Command names: `addFolder` → `addDirectory`, `deleteFolder` → `deleteDirectory`
-  - Menu labels: "Add Folder" → "Add Directory", "Delete Folder" → "Delete Directory"
+  - Command names: `addFolder` -> `addDirectory`, `deleteFolder` -> `deleteDirectory`
+  - Menu labels: "Add Folder" -> "Add Directory", "Delete Folder" -> "Delete Directory"
   - Function names and internal references updated throughout the codebase
 
 ## [0.3.7] - 2025-11-08
@@ -645,7 +659,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Prevents conflicts between simultaneous edits in editor and sidebar
     - Displays "Read-only" indicator when the file is active in VSCode editor
     - Dynamically toggles between editable and read-only based on active editor state
-    - Shows unsaved changes indicator (●) when content is modified
+    - Shows unsaved changes indicator when content is modified
     - Displays relative path from project root for context
   - **Context Menu Integration**: Added context menu items for enhanced workflow
     - "Open in Editor" menu item in Markdown List view to open files in VSCode editor
@@ -707,7 +721,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Directory List View Enhancement**: The opened directory is now displayed as a root node in the tree view
   - Previously: Only the contents of the directory were shown (e.g., `commands`, `tasks`)
-  - Now: The directory itself is shown as a parent node with its contents nested underneath (e.g., `.claude` → `commands`, `tasks`)
+  - Now: The directory itself is shown as a parent node with its contents nested underneath (e.g., `.claude` -> `commands`, `tasks`)
   - Provides better visual context and hierarchy understanding
   - The root node displays the project-relative path and is expanded by default
 
@@ -822,6 +836,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.7.25]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.24...v0.7.25
 [0.7.24]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.23...v0.7.24
 [0.7.23]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.20...v0.7.23
 [0.7.20]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.19...v0.7.20

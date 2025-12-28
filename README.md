@@ -90,8 +90,8 @@ Use the following variables inside a template:
 
 | Item | Steps |
 | --- | --- |
-| Start Task | Click the rocket icon in Tasks title menu.<br>Creates a new directory under the default path and automatically generates a timestamped Markdown file.<br>The file is selected in Tasks with "editing" label and opens in Editor View. |
-| New Directory | Click the folder icon in Tasks.<br>Creates a new directory under the currently selected directory. |
+| Start Task | Click the rocket icon in Tasks title menu.<br>Creates a new directory under the currently opened directory in Tasks View and automatically generates a timestamped Markdown file.<br>The file is selected in Tasks with "editing" label and opens in Editor View.<br>If the current path cannot be retrieved, it falls back to the default path. |
+| New Directory | Click the folder icon in Tasks.<br>Creates a new directory under the currently opened directory (without creating a Markdown file). |
 | Create a file | Click the "+" icon in Tasks.<br>A timestamped Markdown file is created (for example, `2025_1103_1227_TASK.md`) and opens in Editor View. |
 
 ### Configure the Default Relative Path
@@ -202,14 +202,14 @@ npm run watch
 1. Download the latest VSIX file from the [GitHub Releases page](https://github.com/NaokiIshimura/vscode-panel/releases).
 2. Install via command line:
    ```bash
-   code --install-extension ai-coding-sidebar-0.7.24.vsix
+   code --install-extension ai-coding-sidebar-0.7.25.vsix
    ```
 3. Restart VS Code.
 
 #### Use a local build
 ```bash
-# Install directly from the releases directory (version 0.7.24)
-code --install-extension releases/ai-coding-sidebar-0.7.24.vsix
+# Install directly from the releases directory (version 0.7.25)
+code --install-extension releases/ai-coding-sidebar-0.7.25.vsix
 ```
 
 #### Build the package yourself
@@ -223,7 +223,7 @@ code --install-extension releases/ai-coding-sidebar-0.7.24.vsix
    ```
 3. Install the generated VSIX file:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.7.24.vsix
+   code --install-extension releases/ai-coding-sidebar-0.7.25.vsix
    ```
 4. Restart VS Code.
 

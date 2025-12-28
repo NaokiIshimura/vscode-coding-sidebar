@@ -94,8 +94,8 @@ created: {{datetime}}
 
 | 項目 | 手順 |
 | --- | --- |
-| Start Task | Tasksのタイトルメニューにあるロケットアイコンをクリック<br>デフォルトパス配下に新しいディレクトリを作成し、タイムスタンプ付きのMarkdownファイルを自動生成します<br>作成されたファイルはDocsで「editing」ラベルとともに選択され、Editor Viewで開かれます |
-| 新規ディレクトリ | Tasksのフォルダアイコンをクリック<br>現在選択中のディレクトリ配下に新しいディレクトリを作成します |
+| Start Task | Tasksのタイトルメニューにあるロケットアイコンをクリック<br>Tasks Viewで現在開いているディレクトリ配下に新しいディレクトリを作成し、タイムスタンプ付きのMarkdownファイルを自動生成します<br>作成されたファイルはTasksで「editing」ラベルとともに選択され、Editor Viewで開かれます<br>現在のパスが取得できない場合は、デフォルトパス配下に作成されます |
+| 新規ディレクトリ | Tasksのフォルダアイコンをクリック<br>現在開いているディレクトリ配下に新しいディレクトリを作成します（Markdownファイルは作成しない） |
 | ファイル作成 | Docsの「+」アイコンをクリック<br>タイムスタンプ付きのMarkdownファイルが作成され、Editor Viewで開かれます（例: `2025_1103_1227_TASK.md`） |
 
 ### 相対パスの設定
@@ -206,14 +206,14 @@ npm run watch
 1. [GitHubのReleasesページ](https://github.com/NaokiIshimura/vscode-panel/releases)から最新のVSIXファイルをダウンロード
 2. コマンドラインからインストール:
    ```bash
-   code --install-extension ai-coding-sidebar-0.7.24.vsix
+   code --install-extension ai-coding-sidebar-0.7.25.vsix
    ```
 3. VS Codeを再起動
 
 #### ローカルビルド版を使用する場合:
 ```bash
-# releasesディレクトリから直接インストール（バージョン0.7.24）
-code --install-extension releases/ai-coding-sidebar-0.7.24.vsix
+# releasesディレクトリから直接インストール（バージョン0.7.25）
+code --install-extension releases/ai-coding-sidebar-0.7.25.vsix
 ```
 
 #### 自分でパッケージを作成する場合:
@@ -227,7 +227,7 @@ code --install-extension releases/ai-coding-sidebar-0.7.24.vsix
    ```
 3. 生成されたVSIXファイルをインストール:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.7.24.vsix
+   code --install-extension releases/ai-coding-sidebar-0.7.25.vsix
    ```
 4. VS Codeを再起動
 

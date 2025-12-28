@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.30] - 2025-12-29
+
+### Changed
+- **File Naming Format**: Added year prefix to timestamp filename format for Create Markdown File
+  - Previous format: `MMDD.HHMM.SS_PROMPT.md` (e.g., `1229.0619.38_PROMPT.md`)
+  - New format: `YYYY.MMDD.HHMM.SS_PROMPT.md` (e.g., `2025.1229.0619.38_PROMPT.md`)
+  - Provides clearer identification of file creation date
+
 ## [0.7.28] - 2025-12-29
 
 ### Changed
@@ -852,6 +860,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.7.30]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.28...v0.7.30
+[0.7.28]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.25...v0.7.28
 [0.7.25]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.24...v0.7.25
 [0.7.24]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.23...v0.7.24
 [0.7.23]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.20...v0.7.23

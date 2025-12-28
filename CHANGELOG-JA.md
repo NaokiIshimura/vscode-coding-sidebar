@@ -5,6 +5,14 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.7.30] - 2025-12-29
+
+### 変更
+- **ファイル名形式**: Create Markdown Fileで作成されるファイル名の形式に年プレフィックスを追加
+  - 旧形式: `MMDD.HHMM.SS_PROMPT.md`（例: `1229.0619.38_PROMPT.md`）
+  - 新形式: `YYYY.MMDD.HHMM.SS_PROMPT.md`（例: `2025.1229.0619.38_PROMPT.md`）
+  - ファイル作成日をより明確に識別可能に
+
 ## [0.7.28] - 2025-12-29
 
 ### 変更
@@ -358,6 +366,8 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.7.30]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.28...v0.7.30
+[0.7.28]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.25...v0.7.28
 [0.7.25]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.24...v0.7.25
 [0.7.24]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.23...v0.7.24
 [0.7.23]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.20...v0.7.23

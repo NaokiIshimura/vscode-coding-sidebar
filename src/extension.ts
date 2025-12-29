@@ -1008,13 +1008,14 @@ export function activate(context: vscode.ExtensionContext) {
 
             // 作成したディレクトリ内にMarkdownファイルを作成
             const now = new Date();
+            const year = String(now.getFullYear());
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
             const hour = String(now.getHours()).padStart(2, '0');
             const minute = String(now.getMinutes()).padStart(2, '0');
             const second = String(now.getSeconds()).padStart(2, '0');
 
-            const timestamp = `${month}${day}.${hour}${minute}.${second}`;
+            const timestamp = `${year}_${month}${day}_${hour}${minute}_${second}`;
             const fileName = `${timestamp}_PROMPT.md`;
             const filePath = path.join(folderPath, fileName);
 

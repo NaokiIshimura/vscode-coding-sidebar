@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.31] - 2025-12-29
+
+### Fixed
+- **Start Task - File Naming Format**: Fixed filename format not matching the new format when creating files via Start Task
+  - Start Task command was still using the old format `MMDD.HHMM.SS_PROMPT.md`
+  - Now correctly uses the new format `YYYY_MMDD_HHMM_SS_PROMPT.md`
+  - Unified file naming format across all file creation methods (Create Markdown File and Start Task)
+
 ## [0.7.30] - 2025-12-29
 
 ### Changed
@@ -860,6 +868,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.7.31]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.30...v0.7.31
 [0.7.30]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.28...v0.7.30
 [0.7.28]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.25...v0.7.28
 [0.7.25]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.24...v0.7.25

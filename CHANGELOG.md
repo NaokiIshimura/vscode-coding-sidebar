@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.34] - 2025-12-29
+
+### Added
+- **Tasks View - Show in File List Button**: Restored "Show in File List" inline button for directories
+  - Click to navigate to the directory and display its contents
+  - Button displayed before the Archive button in the inline button group
+
+### Changed
+- **Editor View - Button Label**: Simplified "Create Markdown File" button label to "New .md"
+  - More concise and technical label for markdown file creation
+
 ## [0.7.33] - 2025-12-29
 
 ### Fixed
@@ -884,6 +895,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.7.34]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.33...v0.7.34
 [0.7.33]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.32...v0.7.33
 [0.7.32]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.31...v0.7.32
 [0.7.31]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.30...v0.7.31

@@ -5,6 +5,17 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.7.34] - 2025-12-29
+
+### 追加
+- **Tasks View - Show in File Listボタン**: ディレクトリの「Show in File List」インラインボタンを復活
+  - クリックでそのディレクトリに移動し、内容を表示
+  - Archiveボタンの前にインラインボタンとして表示
+
+### 変更
+- **Editor View - ボタンラベル**: 「Create Markdown File」ボタンのラベルを「New .md」に簡略化
+  - Markdownファイル作成用のより簡潔で技術的なラベルに変更
+
 ## [0.7.33] - 2025-12-29
 
 ### 修正
@@ -390,6 +401,7 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.7.34]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.33...v0.7.34
 [0.7.33]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.32...v0.7.33
 [0.7.32]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.31...v0.7.32
 [0.7.31]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.30...v0.7.31

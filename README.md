@@ -81,7 +81,7 @@ Use the following variables inside a template:
 | Delete | Delete files and folders (moved to trash). |
 | Copy / Cut / Paste | Perform standard clipboard operations. |
 | Drag & Drop | Copy files by dragging them within the Tasks view or from external sources. Displays a success message after copying. |
-| Archive | Archive task directories to keep your workspace organized. Right-click a directory in Tasks view and select "Archive" to move it to the `archived` folder. If a directory with the same name already exists, a timestamp is automatically added to avoid conflicts. |
+| Archive | Archive task directories to keep your workspace organized. Click the archive icon (inline button) on a directory row, or right-click and select "Archive" to move it to the `archived` folder. If a directory with the same name already exists, a timestamp is automatically added to avoid conflicts. |
 | Checkout Branch | Right-click a directory to checkout a git branch using the directory name. Creates the branch if it doesn't exist, or switches to it if it already exists. |
 | Insert Path to Editor | Right-click files in Tasks view and select "Insert Path to Editor" to insert the relative path at the cursor position in the Editor view. Supports multiple selection. |
 | Insert Path to Terminal | Right-click files in Tasks view and select "Insert Path to Terminal" to insert the relative path into the Terminal view. Supports multiple selection. Paths are separated by spaces. |

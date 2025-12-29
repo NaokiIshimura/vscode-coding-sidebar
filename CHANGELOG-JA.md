@@ -5,6 +5,14 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.7.31] - 2025-12-29
+
+### 修正
+- **Start Task - ファイル名形式**: Start Taskでファイル作成時に新しい形式が適用されていなかった問題を修正
+  - Start Taskコマンドが旧形式 `MMDD.HHMM.SS_PROMPT.md` を使用していた
+  - 新形式 `YYYY_MMDD_HHMM_SS_PROMPT.md` を正しく使用するように修正
+  - すべてのファイル作成方法（Create Markdown FileとStart Task）でファイル名形式を統一
+
 ## [0.7.30] - 2025-12-29
 
 ### 変更
@@ -366,6 +374,7 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.7.31]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.30...v0.7.31
 [0.7.30]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.28...v0.7.30
 [0.7.28]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.25...v0.7.28
 [0.7.25]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.24...v0.7.25

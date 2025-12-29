@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.33] - 2025-12-29
+
+### Fixed
+- **Terminal View - Scroll Position on Resize**: Fixed scroll position jumping to top when view is resized
+  - Previously, resizing the terminal view would move scroll position to the top
+  - Now always scrolls to the bottom after resize for better user experience
+  - Ensures latest terminal output is always visible after resizing
+
 ## [0.7.32] - 2025-12-29
 
 ### Added
@@ -876,6 +884,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.7.33]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.32...v0.7.33
+[0.7.32]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.31...v0.7.32
 [0.7.31]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.30...v0.7.31
 [0.7.30]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.28...v0.7.30
 [0.7.28]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.25...v0.7.28

@@ -204,14 +204,14 @@ npm run watch
 1. Download the latest VSIX file from the [GitHub Releases page](https://github.com/NaokiIshimura/vscode-panel/releases).
 2. Install via command line:
    ```bash
-   code --install-extension ai-coding-sidebar-0.7.31.vsix
+   code --install-extension ai-coding-sidebar-0.7.33.vsix
    ```
 3. Restart VS Code.
 
 #### Use a local build
 ```bash
-# Install directly from the releases directory (version 0.7.31)
-code --install-extension releases/ai-coding-sidebar-0.7.31.vsix
+# Install directly from the releases directory (version 0.7.33)
+code --install-extension releases/ai-coding-sidebar-0.7.33.vsix
 ```
 
 #### Build the package yourself
@@ -225,7 +225,7 @@ code --install-extension releases/ai-coding-sidebar-0.7.31.vsix
    ```
 3. Install the generated VSIX file:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.7.31.vsix
+   code --install-extension releases/ai-coding-sidebar-0.7.33.vsix
    ```
 4. Restart VS Code.
 

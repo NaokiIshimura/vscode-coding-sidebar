@@ -5,6 +5,14 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.7.33] - 2025-12-29
+
+### 修正
+- **Terminal View - リサイズ時のスクロール位置**: ビューのサイズ変更時にスクロール位置が最上部に移動してしまう問題を修正
+  - 以前はターミナルビューをリサイズするとスクロール位置が最上部に移動していた
+  - リサイズ後は常に最下部にスクロールするように変更し、ユーザー体験を改善
+  - リサイズ後も常に最新のターミナル出力が表示されるようになりました
+
 ## [0.7.32] - 2025-12-29
 
 ### 追加
@@ -382,6 +390,8 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.7.33]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.32...v0.7.33
+[0.7.32]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.31...v0.7.32
 [0.7.31]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.30...v0.7.31
 [0.7.30]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.28...v0.7.30
 [0.7.28]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.25...v0.7.28

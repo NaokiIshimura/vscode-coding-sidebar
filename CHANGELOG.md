@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Terminal View - Auto-create Tab**: Automatically creates a new terminal tab when the last tab is closed
   - Ensures the terminal is always available by maintaining at least one tab
   - Provides seamless user experience without manually creating a new tab
+- **Terminal View - Scroll to Bottom Button**: Added a floating button to scroll to the bottom of the terminal
+  - Button appears in the bottom-right corner when scrolled up from the bottom
+  - Clicking the button scrolls to the latest output and focuses the terminal
+  - Button automatically hides when at the bottom of the terminal
 
 ## [0.8.1] - 2025-12-30
 

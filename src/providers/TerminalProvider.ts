@@ -357,6 +357,7 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
             width: 100%;
             overflow: hidden;
             background: var(--vscode-terminal-background, #1e1e1e);
+            position: relative;
         }
         #header {
             height: 33px;
@@ -470,6 +471,16 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
             height: calc(100% - 33px);
             width: 100%;
             position: relative;
+            overflow: hidden;
+        }
+        #terminal-overlay {
+            position: absolute;
+            top: 33px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 9999;
         }
         .terminal-wrapper {
             position: absolute;
@@ -483,6 +494,10 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
         .terminal-wrapper.active {
             display: block;
         }
+        .terminal-wrapper .xterm {
+            position: relative;
+            z-index: 1;
+        }
         #error-message {
             color: var(--vscode-errorForeground, #f44747);
             padding: 10px;
@@ -494,6 +509,34 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
         }
         .xterm-viewport, .xterm-screen {
             width: 100% !important;
+        }
+        .scroll-to-bottom-button {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: var(--vscode-button-background, #0e639c);
+            color: var(--vscode-button-foreground, #ffffff);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            pointer-events: auto;
+            opacity: 1;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        .scroll-to-bottom-button:hover {
+            transform: scale(1.1);
+            background-color: var(--vscode-button-hoverBackground, #1177bb);
+        }
+        .scroll-to-bottom-button.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -508,6 +551,9 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
     </div>
     <div id="error-message"></div>
     <div id="terminals-container"></div>
+    <div id="terminal-overlay">
+        <button class="scroll-to-bottom-button hidden" id="scroll-to-bottom-btn" title="Scroll to bottom">↓</button>
+    </div>
     <script src="${xtermJsUri}"></script>
     <script src="${xtermFitUri}"></script>
     <script src="${xtermWebLinksUri}"></script>
@@ -518,9 +564,10 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
             const tabBar = document.getElementById('tab-bar');
             const terminalsContainer = document.getElementById('terminals-container');
             const errorMessage = document.getElementById('error-message');
+            const scrollToBottomBtn = document.getElementById('scroll-to-bottom-btn');
 
             // タブとターミナルの管理
-            const tabs = new Map(); // tabId -> { tabEl, wrapperEl, term, fitAddon, isAtBottom }
+            const tabs = new Map(); // tabId -> { tabEl, wrapperEl, term, fitAddon }
             let activeTabId = null;
 
             // CSS変数から色を取得するヘルパー関数
@@ -606,6 +653,40 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
 
                 // ターミナルを開く
                 term.open(wrapperEl);
+
+                // スクロール位置を監視してボタンの表示/非表示を切り替え
+                function updateScrollButtonVisibility() {
+                    if (activeTabId !== tabId) return;
+                    const buffer = term.buffer.active;
+                    const baseY = buffer.baseY;
+                    const viewportY = buffer.viewportY;
+                    // 最下部にいるかどうかを判定（スクロール可能なコンテンツがある場合のみ）
+                    // baseY > 0: スクロールバックバッファがある
+                    // viewportY < baseY: 最下部より上にスクロールしている
+                    const hasScrollback = baseY > 0;
+                    const isScrolledUp = viewportY < baseY;
+
+                    if (hasScrollback && isScrolledUp) {
+                        scrollToBottomBtn.classList.remove('hidden');
+                    } else {
+                        scrollToBottomBtn.classList.add('hidden');
+                    }
+                }
+
+                // xterm.jsのonScrollイベントを監視
+                term.onScroll(() => {
+                    updateScrollButtonVisibility();
+                });
+
+                // xterm-viewportのネイティブスクロールイベントも監視（DOM構築後に設定）
+                requestAnimationFrame(() => {
+                    const viewport = wrapperEl.querySelector('.xterm-viewport');
+                    if (viewport) {
+                        viewport.addEventListener('scroll', () => {
+                            updateScrollButtonVisibility();
+                        }, { passive: true });
+                    }
+                });
 
                 // カスタムリンクプロバイダー（ファイルパス用）
                 term.registerLinkProvider({
@@ -702,6 +783,16 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                 tabInfo.wrapperEl.classList.add('active');
                 activeTabId = tabId;
 
+                // スクロールボタンの表示状態を更新
+                const buffer = tabInfo.term.buffer.active;
+                const hasScrollback = buffer.baseY > 0;
+                const isScrolledUp = buffer.viewportY < buffer.baseY;
+                if (hasScrollback && isScrolledUp) {
+                    scrollToBottomBtn.classList.remove('hidden');
+                } else {
+                    scrollToBottomBtn.classList.add('hidden');
+                }
+
                 // フィット調整とリサイズ通知（DOMレンダリング後に実行）
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
@@ -782,6 +873,18 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
             });
             document.getElementById('kill-button')?.addEventListener('click', () => {
                 vscode.postMessage({ type: 'killTerminal' });
+            });
+
+            // スクロールボタンのイベントハンドラ
+            scrollToBottomBtn?.addEventListener('click', () => {
+                if (activeTabId) {
+                    const tabInfo = tabs.get(activeTabId);
+                    if (tabInfo) {
+                        tabInfo.term.scrollToBottom();
+                        scrollToBottomBtn.classList.add('hidden');
+                        tabInfo.term.focus();
+                    }
+                }
             });
 
             // 準備完了を通知

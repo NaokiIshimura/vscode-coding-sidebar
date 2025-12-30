@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.39] - 2025-12-30
+
+### Technical
+- **Code Refactoring**: Split extension.ts into modular files for better maintainability
+  - Created `src/providers/` directory with TasksProvider, EditorProvider, TerminalProvider, MenuProvider
+  - Created `src/providers/items/` directory with FileItem, MenuItem TreeItem classes
+  - Created `src/utils/` directory with fileUtils, templateUtils, workspaceSetup utilities
+  - Reduced extension.ts from ~4,077 lines to ~1,377 lines
+  - Used interface-based dependency injection (IEditorProvider, ITerminalProvider) to avoid circular references
+
+### Changed
+- **CLAUDE.md**: Updated documentation to reflect new modular architecture
+
 ## [0.7.38] - 2025-12-30
 
 ### Added
@@ -937,6 +950,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.7.39]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.38...v0.7.39
 [0.7.38]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.37...v0.7.38
 [0.7.37]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.36...v0.7.37
 [0.7.36]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.35...v0.7.36

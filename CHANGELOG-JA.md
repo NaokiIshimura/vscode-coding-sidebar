@@ -5,6 +5,19 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.7.39] - 2025-12-30
+
+### 技術的変更
+- **コードリファクタリング**: extension.tsをモジュラーファイルに分割し、保守性を向上
+  - `src/providers/`ディレクトリを作成（TasksProvider, EditorProvider, TerminalProvider, MenuProvider）
+  - `src/providers/items/`ディレクトリを作成（FileItem, MenuItem TreeItemクラス）
+  - `src/utils/`ディレクトリを作成（fileUtils, templateUtils, workspaceSetupユーティリティ）
+  - extension.tsを約4,077行から約1,377行に削減
+  - 循環参照を避けるためインターフェースベースの依存性注入（IEditorProvider, ITerminalProvider）を使用
+
+### 変更
+- **CLAUDE.md**: 新しいモジュラーアーキテクチャを反映してドキュメントを更新
+
 ## [0.7.38] - 2025-12-30
 
 ### 追加
@@ -443,6 +456,7 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.7.39]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.38...v0.7.39
 [0.7.38]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.37...v0.7.38
 [0.7.37]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.36...v0.7.37
 [0.7.36]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.35...v0.7.36

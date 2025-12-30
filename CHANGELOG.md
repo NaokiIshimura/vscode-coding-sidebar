@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.35] - 2025-12-30
+
+### Changed
+- **Editor View - Clear on Directory Navigation**: Editor view now clears file selection when navigating to a different directory in Tasks view
+  - Previously, the selected file remained displayed even after moving to another directory
+  - Now, the editor returns to unselected state when directory navigation occurs
+  - Provides clearer user experience when browsing different directories
+
 ## [0.7.34] - 2025-12-29
 
 ### Added
@@ -895,6 +903,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.7.35]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.34...v0.7.35
 [0.7.34]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.33...v0.7.34
 [0.7.33]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.32...v0.7.33
 [0.7.32]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.31...v0.7.32

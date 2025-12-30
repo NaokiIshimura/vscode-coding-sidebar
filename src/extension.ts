@@ -2088,6 +2088,9 @@ class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDra
         this.activeFolderPath = targetPath;
         this.updateTitle();
         this.refresh();
+
+        // ディレクトリ移動時にEditorのファイル選択をクリア
+        this.editorProvider?.clearFile();
     }
 
     async getParent(element: FileItem): Promise<FileItem | undefined> {
@@ -3678,12 +3681,26 @@ class TerminalProvider implements vscode.WebviewViewProvider {
             });
             resizeObserver.observe(terminalContainer);
 
+            // ユーザーが最下部にスクロールしているかどうかを追跡
+            let isAtBottom = true;
+
+            // スクロールイベントを監視
+            term.onScroll(() => {
+                // viewportY + rows >= baseY + rows の場合、最下部にいる
+                const buffer = term.buffer.active;
+                isAtBottom = buffer.viewportY >= buffer.baseY;
+            });
+
             // Extensionからのメッセージを処理
             window.addEventListener('message', event => {
                 const message = event.data;
                 switch (message.type) {
                     case 'output':
                         term.write(message.data);
+                        // ユーザーが最下部にいる場合のみ自動スクロール
+                        if (isAtBottom) {
+                            term.scrollToBottom();
+                        }
                         break;
                     case 'clear':
                         term.clear();

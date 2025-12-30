@@ -5,6 +5,14 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.7.35] - 2025-12-30
+
+### 変更
+- **Editor View - ディレクトリ移動時のクリア**: Tasks viewでディレクトリを移動した際にEditor viewのファイル選択をクリアするように変更
+  - 以前は別のディレクトリに移動しても選択中のファイルが表示されたままだった
+  - ディレクトリ移動時にエディタが未選択状態に戻るようになりました
+  - 異なるディレクトリを閲覧する際のユーザー体験が向上
+
 ## [0.7.34] - 2025-12-29
 
 ### 追加
@@ -401,6 +409,7 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.7.35]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.34...v0.7.35
 [0.7.34]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.33...v0.7.34
 [0.7.33]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.32...v0.7.33
 [0.7.32]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.31...v0.7.32

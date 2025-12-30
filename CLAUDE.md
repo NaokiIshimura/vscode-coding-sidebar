@@ -48,7 +48,8 @@ src/
 │   ├── IClipboardManager.ts
 │   ├── IExplorerManager.ts
 │   ├── IFileWatcherService.ts
-│   └── IMultiSelectionManager.ts
+│   ├── IMultiSelectionManager.ts
+│   └── ITerminalService.ts
 └── services/              # ビジネスロジック
     ├── FileOperationService.ts   # ファイル操作（作成・削除・コピー等）
     ├── ClipboardManager.ts       # クリップボード操作
@@ -60,7 +61,8 @@ src/
     ├── ContextMenuManager.ts     # コンテキストメニュー
     ├── KeyboardShortcutHandler.ts# キーボードショートカット
     ├── MultiSelectionManager.ts  # 複数選択管理
-    └── GitignoreParser.ts        # .gitignore解析
+    ├── GitignoreParser.ts        # .gitignore解析
+    └── TerminalService.ts        # ターミナルセッション管理
 ```
 
 ### 主要コンポーネント（extension.ts内）
@@ -68,18 +70,17 @@ src/
 extension.tsには以下のProviderクラスが定義されている：
 
 - **MenuProvider**: Menuビューを管理（設定へのアクセス、テンプレート管理等）
-- **TasksProvider**: Tasksビュー（ディレクトリツリー表示）を管理
-- **DocsProvider**: Docsビュー（ファイル一覧表示）を管理、ドラッグ&ドロップ対応
+- **TasksProvider**: Tasksビュー（フラットリスト表示）を管理、ドラッグ&ドロップ対応
 - **EditorProvider**: Markdown EditorのWebViewを管理
-- **TaskPanelManager**: Task Panel（エディタ領域に表示するDocs＋Editor統合パネル）を管理
-- **OpenPanelsProvider**: アクティブなTask Panelの一覧を管理
+- **TerminalProvider**: 埋め込みターミナル（xterm.js）のWebViewを管理
 
 ### データフロー
 
-1. TasksProviderでディレクトリを選択
-2. DocsProviderにパスが渡され、ファイル一覧を更新
-3. Markdownファイル選択時、EditorProviderにファイルパスが渡される
+1. TasksProviderでディレクトリ/ファイルを選択（フラットリスト形式）
+2. ディレクトリクリックでそのディレクトリ内に移動、".."で親に移動
+3. タイムスタンプ形式のMarkdownファイル選択時、EditorProviderにファイルパスが渡される
 4. FileWatcherServiceがファイル変更を監視し、各Providerに通知
+5. EditorのRunボタンでTerminalProviderにコマンドを送信
 
 ### 設定項目（package.json）
 
@@ -88,8 +89,7 @@ extension.tsには以下のProviderクラスが定義されている：
 - `aiCodingSidebar.markdownList.sortOrder`: ソート順（ascending/descending）
 - `aiCodingSidebar.editor.runCommand`: Runボタン実行コマンド
 - `aiCodingSidebar.editor.runCommandWithoutFile`: ファイルなし時のRunコマンド
-- `aiCodingSidebar.taskPanel.enabled`: Task Panel有効化
-- `aiCodingSidebar.taskPanel.nonTaskFilePosition`: 非タスクファイルの表示位置
+- `aiCodingSidebar.terminal.*`: ターミナル設定（shell, fontSize, fontFamily, cursorStyle, cursorBlink, scrollback）
 
 ## 開発ワークフロー
 

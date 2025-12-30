@@ -1079,28 +1079,45 @@ export function activate(context: vscode.ExtensionContext) {
 
     // アーカイブコマンドを登録
     const archiveDirectoryCommand = vscode.commands.registerCommand('aiCodingSidebar.archiveDirectory', async (item?: FileItem) => {
-        // 2.2 入力検証ロジック
-        if (!item || !item.isDirectory) {
-            vscode.window.showErrorMessage('選択されたアイテムはディレクトリではありません');
-            return;
+        // アーカイブ対象のパスを決定
+        let targetPath: string;
+        let isCurrentDirectory = false;  // 現在表示中のディレクトリをアーカイブする場合
+
+        if (item && item.isDirectory) {
+            // 通常のディレクトリアイテムからの呼び出し
+            targetPath = item.filePath;
+            // pathDisplayNonRootからの呼び出し（現在のディレクトリをアーカイブ）
+            if (item.contextValue === 'pathDisplayNonRoot') {
+                isCurrentDirectory = true;
+            }
+        } else {
+            // itemがない場合は現在のactiveFolderPathを使用
+            const activePath = tasksProvider.getActiveFolderPath();
+            const rootPath = tasksProvider.getRootPath();
+            if (!activePath || activePath === rootPath) {
+                vscode.window.showErrorMessage('Cannot archive root directory');
+                return;
+            }
+            targetPath = activePath;
+            isCurrentDirectory = true;
         }
 
         const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
         if (!workspaceRoot) {
-            vscode.window.showErrorMessage('ワークスペースが開かれていません');
+            vscode.window.showErrorMessage('No workspace is open');
             return;
         }
 
         const defaultRelativePath = configProvider.getDefaultRelativePath();
         if (!defaultRelativePath) {
-            vscode.window.showErrorMessage('デフォルトタスクパスが設定されていません');
+            vscode.window.showErrorMessage('Default task path is not configured');
             return;
         }
 
         // 2.3 archivedディレクトリの作成ロジック
         const defaultTasksPath = path.join(workspaceRoot, defaultRelativePath);
         const archivedDirPath = path.join(defaultTasksPath, 'archived');
-        const originalName = path.basename(item.filePath);
+        const originalName = path.basename(targetPath);
 
         try {
             if (!fs.existsSync(archivedDirPath)) {
@@ -1110,7 +1127,7 @@ export function activate(context: vscode.ExtensionContext) {
                 }
             }
         } catch (error) {
-            vscode.window.showErrorMessage(`archivedディレクトリの作成に失敗しました: ${error}`);
+            vscode.window.showErrorMessage(`Failed to create archived directory: ${error}`);
             return;
         }
 
@@ -1135,9 +1152,17 @@ export function activate(context: vscode.ExtensionContext) {
 
         // 2.5 ディレクトリ移動とビュー更新
         try {
-            const result = await fileOperationService.moveFile(item.filePath, destPath);
+            const result = await fileOperationService.moveFile(targetPath, destPath);
             if (!result.success) {
                 throw result.error || new Error('Failed to move directory');
+            }
+
+            // 現在のディレクトリをアーカイブした場合はルートディレクトリに戻る
+            if (isCurrentDirectory) {
+                const rootPath = tasksProvider.getRootPath();
+                if (rootPath) {
+                    tasksProvider.navigateToDirectory(rootPath);
+                }
             }
 
             // ビューを更新
@@ -1146,15 +1171,15 @@ export function activate(context: vscode.ExtensionContext) {
             // 2.6 ユーザーフィードバック
             if (hasConflict) {
                 vscode.window.showInformationMessage(
-                    `ディレクトリをアーカイブしました（名前の競合により "${finalName}" に変更）`
+                    `Directory archived (renamed to "${finalName}" due to conflict)`
                 );
             } else {
                 vscode.window.showInformationMessage(
-                    `ディレクトリ "${originalName}" をアーカイブしました`
+                    `Directory "${originalName}" archived`
                 );
             }
         } catch (error) {
-            vscode.window.showErrorMessage(`ディレクトリのアーカイブに失敗しました: ${error}`);
+            vscode.window.showErrorMessage(`Failed to archive directory: ${error}`);
         }
     });
 
@@ -1885,6 +1910,10 @@ class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDra
         return this.rootPath;
     }
 
+    getActiveFolderPath(): string | undefined {
+        return this.activeFolderPath;
+    }
+
     setSelectedItem(item: FileItem | undefined): void {
         this.selectedItem = item;
     }
@@ -1979,7 +2008,8 @@ class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDra
             0,
             new Date()
         );
-        pathItem.contextValue = 'pathDisplay';
+        // ルートディレクトリ以外の場合はarchiveボタンを表示するためにcontextValueを変更
+        pathItem.contextValue = currentPath === this.rootPath ? 'pathDisplay' : 'pathDisplayNonRoot';
         pathItem.iconPath = new vscode.ThemeIcon('folder-opened');
         pathItem.tooltip = currentPath;
         items.push(pathItem);

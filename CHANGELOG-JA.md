@@ -5,6 +5,17 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.7.38] - 2025-12-30
+
+### 追加
+- **Editor View - ショートカットオーバーレイ**: エディタに常時表示のキーボードショートカット案内を追加
+  - 「Cmd+M / Ctrl+M - Create new markdown file」「Cmd+R / Ctrl+R - Run task in terminal」を表示
+  - 右下に半透明のオーバーレイとして表示
+  - 編集中も常に表示（テキスト入力を妨げない）
+
+### 変更
+- **Editor View - プレースホルダー**: プレースホルダーテキストを「Enter prompt here...」に変更し、用途を明確化
+
 ## [0.7.37] - 2025-12-30
 
 ### 追加
@@ -432,6 +443,9 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.7.38]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.37...v0.7.38
+[0.7.37]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.36...v0.7.37
+[0.7.36]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.35...v0.7.36
 [0.7.35]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.34...v0.7.35
 [0.7.34]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.33...v0.7.34
 [0.7.33]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.32...v0.7.33

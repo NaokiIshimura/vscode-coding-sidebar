@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **CLAUDE.md**: Updated documentation to reflect new modular architecture
+- **README**: Reorganized documentation structure
+  - Split Features section into summary table and detailed Feature Details section
+  - Updated description to highlight benefits of the extension
+  - Converted feature details to table format for better readability
 
 ## [0.7.38] - 2025-12-30
 

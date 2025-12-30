@@ -9,7 +9,7 @@ Browse and manage files and folders efficiently to keep coding with AI smooth.
 | --- | --- |
 | **Tasks** | Display directories and files under a specified path in a flat list view.<br>Configure a default path in settings.<br>Create new directories and files.<br>**Flat list display**: Shows contents of the current directory only (not a tree structure).<br>**Directory navigation**: Click a directory to navigate into it. Use ".." to go back to the parent directory.<br>**Path display**: Current path shown as the first item in the list.<br>Files are sorted by creation date (ascending) by default.<br>**Drag & Drop**: Copy files by dragging them within the view or from external sources.<br>**Auto-refresh**: Automatically updates when files are created, modified, or deleted.<br>**Settings icon**: Quick access to default path and sort configuration. |
 | **Editor** | Edit Markdown files directly in the sidebar.<br>Auto-displays when selecting a timestamp-named Markdown file (format: `YYYY_MMDD_HHMM_SS_PROMPT.md`).<br>Other Markdown files open in the standard editor.<br>Save with the Save button in the header (creates new file if none is open - saves to current Tasks directory).<br>Run task with `Cmd+R` / `Ctrl+R` to send a customizable command to terminal (auto-saves before running, works even without a file open).<br>Create new markdown file with `Cmd+M` / `Ctrl+M`.<br>**Save button**: Displays in header with color change indicating unsaved changes.<br>**Customizable run command**: Configure the command executed by the Run button in settings.<br>**Run without file**: Execute commands using editor content when no file is open.<br>**Terminal View integration**: Run commands can be sent to the embedded Terminal view (configurable).<br>Automatically switches to read-only mode when the file is active in VSCode editor.<br>Auto-saves when switching to another extension or file.<br>Restores the editing file when returning from another extension.<br>**Settings icon**: Quick access to run command configuration. |
-| **Terminal** | Embedded terminal in the sidebar using xterm.js.<br>Supports shell commands with full PTY support.<br>**Session persistence**: Terminal session and output history are preserved when switching views or extensions.<br>**Clickable links**: URLs open in browser, file paths (e.g., `./src/file.ts:123`) open in editor with line navigation.<br>**Configurable**: Customize shell path, font size, font family, cursor style, cursor blink, and scrollback lines.<br>**WebView header**: Displays current shell name with New, Clear, and Kill buttons.<br>**Settings icon**: Quick access to terminal settings in the title bar.<br>**Default visibility**: Collapsed (expand when needed). |
+| **Terminal** | Embedded terminal in the sidebar using xterm.js.<br>Supports shell commands with full PTY support.<br>**Multiple tabs**: Create up to 5 terminal tabs, each with its own independent session. Click the "+" button to add a new tab, click a tab to switch, and click "×" to close.<br>**Session persistence**: Terminal session and output history are preserved when switching views or extensions.<br>**Clickable links**: URLs open in browser, file paths (e.g., `./src/file.ts:123`) open in editor with line navigation.<br>**Configurable**: Customize shell path, font size, font family, cursor style, cursor blink, and scrollback lines.<br>**WebView header**: Tab bar with shell names, plus Clear and Kill buttons for the active tab.<br>**Settings icon**: Quick access to terminal settings in the title bar.<br>**Default visibility**: Collapsed (expand when needed). |
 | **Menu** | Open user or global settings.<br>Customize templates.<br>Quick shortcuts: Open terminal, Checkout default branch, Git pull, Duplicate workspace in new window. |
 
 ## Usage
@@ -204,14 +204,14 @@ npm run watch
 1. Download the latest VSIX file from the [GitHub Releases page](https://github.com/NaokiIshimura/vscode-panel/releases).
 2. Install via command line:
    ```bash
-   code --install-extension ai-coding-sidebar-0.7.36.vsix
+   code --install-extension ai-coding-sidebar-0.7.37.vsix
    ```
 3. Restart VS Code.
 
 #### Use a local build
 ```bash
 # Install directly from the releases directory
-code --install-extension releases/ai-coding-sidebar-0.7.36.vsix
+code --install-extension releases/ai-coding-sidebar-0.7.37.vsix
 ```
 
 #### Build the package yourself
@@ -225,7 +225,7 @@ code --install-extension releases/ai-coding-sidebar-0.7.36.vsix
    ```
 3. Install the generated VSIX file:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.7.36.vsix
+   code --install-extension releases/ai-coding-sidebar-0.7.37.vsix
    ```
 4. Restart VS Code.
 

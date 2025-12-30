@@ -329,6 +329,7 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
         const xtermJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'xterm', 'xterm.js'));
         const xtermFitUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'xterm', 'xterm-addon-fit.js'));
         const xtermWebLinksUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'xterm', 'xterm-addon-web-links.js'));
+        const xtermUnicode11Uri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'xterm', 'xterm-addon-unicode11.js'));
 
         // 設定を取得
         const config = vscode.workspace.getConfiguration('aiCodingSidebar');
@@ -475,6 +476,7 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
             right: 0;
             bottom: 0;
             display: none;
+            background: var(--vscode-terminal-background, #1e1e1e);
         }
         .terminal-wrapper.active {
             display: block;
@@ -486,6 +488,10 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
         }
         .xterm {
             height: 100%;
+            width: 100%;
+        }
+        .xterm-viewport, .xterm-screen {
+            width: 100% !important;
         }
     </style>
 </head>
@@ -503,6 +509,7 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
     <script src="${xtermJsUri}"></script>
     <script src="${xtermFitUri}"></script>
     <script src="${xtermWebLinksUri}"></script>
+    <script src="${xtermUnicode11Uri}"></script>
     <script>
         (function() {
             const vscode = acquireVsCodeApi();
@@ -555,9 +562,9 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
 
                 tabBar.appendChild(tabEl);
 
-                // ターミナルラッパーを作成
+                // ターミナルラッパーを作成（activeで作成してサイズ計算を可能に）
                 const wrapperEl = document.createElement('div');
-                wrapperEl.className = 'terminal-wrapper';
+                wrapperEl.className = 'terminal-wrapper active';
                 wrapperEl.dataset.tabId = tabId;
                 terminalsContainer.appendChild(wrapperEl);
 
@@ -576,6 +583,17 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                 // Fit Addonをロード
                 const fitAddon = new FitAddon.FitAddon();
                 term.loadAddon(fitAddon);
+
+                // Unicode11 Addonをロード（日本語などのCJK文字の幅を正しく計算）
+                try {
+                    if (typeof Unicode11Addon !== 'undefined' && Unicode11Addon.Unicode11Addon) {
+                        const unicode11Addon = new Unicode11Addon.Unicode11Addon();
+                        term.loadAddon(unicode11Addon);
+                        term.unicode.activeVersion = '11';
+                    }
+                } catch (e) {
+                    console.warn('Failed to load Unicode11 addon:', e);
+                }
 
                 // Web Links Addonをロード
                 const webLinksAddon = new WebLinksAddon.WebLinksAddon((event, uri) => {
@@ -641,23 +659,15 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                     tabEl: tabEl,
                     wrapperEl: wrapperEl,
                     term: term,
-                    fitAddon: fitAddon,
-                    isAtBottom: true
+                    fitAddon: fitAddon
                 };
                 tabs.set(tabId, tabInfo);
-
-                // スクロールイベントを監視
-                term.onScroll(() => {
-                    const buffer = term.buffer.active;
-                    tabInfo.isAtBottom = buffer.viewportY >= buffer.baseY;
-                });
 
                 // リサイズを監視
                 const resizeObserver = new ResizeObserver(() => {
                     if (wrapperEl.classList.contains('active')) {
                         try {
                             fitAddon.fit();
-                            term.scrollToBottom();
                             vscode.postMessage({
                                 type: 'resize',
                                 tabId: tabId,
@@ -690,17 +700,19 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                 tabInfo.wrapperEl.classList.add('active');
                 activeTabId = tabId;
 
-                // フィット調整とリサイズ通知
-                setTimeout(() => {
-                    tabInfo.fitAddon.fit();
-                    vscode.postMessage({
-                        type: 'resize',
-                        tabId: tabId,
-                        cols: tabInfo.term.cols,
-                        rows: tabInfo.term.rows
+                // フィット調整とリサイズ通知（DOMレンダリング後に実行）
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        tabInfo.fitAddon.fit();
+                        vscode.postMessage({
+                            type: 'resize',
+                            tabId: tabId,
+                            cols: tabInfo.term.cols,
+                            rows: tabInfo.term.rows
+                        });
+                        tabInfo.term.focus();
                     });
-                    tabInfo.term.focus();
-                }, 0);
+                });
             }
 
             // タブを閉じる
@@ -733,9 +745,6 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                             const tabInfo = tabs.get(message.tabId);
                             if (tabInfo) {
                                 tabInfo.term.write(message.data);
-                                if (tabInfo.isAtBottom) {
-                                    tabInfo.term.scrollToBottom();
-                                }
                             }
                         }
                         break;

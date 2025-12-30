@@ -58,6 +58,7 @@ Embedded terminal in the panel using xterm.js with full PTY support.
 | Multiple tabs | Create up to 5 terminal tabs, each with its own independent session. Click the "+" button to add a new tab, click a tab to switch, and click "×" to close |
 | Session persistence | Terminal session and output history are preserved when switching views or extensions |
 | Clickable links | URLs open in browser, file paths (e.g., `./src/file.ts:123`) open in editor with line navigation |
+| Unicode support | Full support for CJK characters and other Unicode characters with proper width calculation |
 | Configurable | Customize shell path, font size, font family, cursor style, cursor blink, and scrollback lines |
 | WebView header | Tab bar with shell names, plus Clear and Kill buttons for the active tab |
 | Settings icon | Quick access to terminal settings in the title bar |
@@ -265,14 +266,14 @@ npm run watch
 1. Download the latest VSIX file from the [GitHub Releases page](https://github.com/NaokiIshimura/vscode-panel/releases).
 2. Install via command line:
    ```bash
-   code --install-extension ai-coding-sidebar-0.8.0.vsix
+   code --install-extension ai-coding-sidebar-0.8.1.vsix
    ```
 3. Restart VS Code.
 
 #### Use a local build
 ```bash
 # Install directly from the releases directory
-code --install-extension releases/ai-coding-sidebar-0.8.0.vsix
+code --install-extension releases/ai-coding-sidebar-0.8.1.vsix
 ```
 
 #### Build the package yourself
@@ -286,7 +287,7 @@ code --install-extension releases/ai-coding-sidebar-0.8.0.vsix
    ```
 3. Install the generated VSIX file:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.8.0.vsix
+   code --install-extension releases/ai-coding-sidebar-0.8.1.vsix
    ```
 4. Restart VS Code.
 

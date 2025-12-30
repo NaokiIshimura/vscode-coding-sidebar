@@ -58,6 +58,7 @@ xterm.jsを使用した完全なPTYサポートを備えた埋め込みターミ
 | 複数タブ | 最大5つのターミナルタブを作成可能。各タブは独立したセッションを持つ。「+」ボタンで新規タブ追加、タブクリックで切り替え、「×」で閉じる |
 | セッション維持 | ビューや拡張機能を切り替えてもターミナルセッションと出力履歴が保持される |
 | クリック可能リンク | URLはブラウザで開き、ファイルパス（例: `./src/file.ts:123`）はエディタで行番号指定して開く |
+| Unicode対応 | CJK文字やその他のUnicode文字を適切な幅で正しく表示 |
 | 設定可能 | シェルパス、フォントサイズ、フォントファミリー、カーソルスタイル、カーソル点滅、スクロールバック行数をカスタマイズ可能 |
 | WebViewヘッダー | タブバーにシェル名を表示、アクティブタブ用のClear、Killボタン |
 | 設定アイコン | タイトルバーからターミナル設定へのクイックアクセス |
@@ -267,14 +268,14 @@ npm run watch
 1. [GitHubのReleasesページ](https://github.com/NaokiIshimura/vscode-panel/releases)から最新のVSIXファイルをダウンロード
 2. コマンドラインからインストール:
    ```bash
-   code --install-extension ai-coding-sidebar-0.8.0.vsix
+   code --install-extension ai-coding-sidebar-0.8.1.vsix
    ```
 3. VS Codeを再起動
 
 #### ローカルビルド版を使用する場合:
 ```bash
 # releasesディレクトリから直接インストール
-code --install-extension releases/ai-coding-sidebar-0.8.0.vsix
+code --install-extension releases/ai-coding-sidebar-0.8.1.vsix
 ```
 
 #### 自分でパッケージを作成する場合:
@@ -288,7 +289,7 @@ code --install-extension releases/ai-coding-sidebar-0.8.0.vsix
    ```
 3. 生成されたVSIXファイルをインストール:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.8.0.vsix
+   code --install-extension releases/ai-coding-sidebar-0.8.1.vsix
    ```
 4. VS Codeを再起動
 

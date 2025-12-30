@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.1] - 2025-12-30
+
+### Added
+- **Terminal View - Unicode Support**: Added xterm-addon-unicode11 for proper CJK character width calculation
+  - Japanese, Chinese, Korean and other Unicode characters now display correctly
+  - Fixed character alignment issues in terminal output
+
+### Improved
+- **Terminal View - Layout**: Improved terminal sizing and fit behavior
+  - Terminal now properly fills the view width
+  - Fixed gap at bottom of terminal view
+  - Improved initial terminal size calculation
+
+### Changed
+- **Terminal View - Scroll Behavior**: Removed auto-scroll to bottom feature
+  - Terminal no longer auto-scrolls to bottom on new output
+  - Users have full control over scroll position
+
 ## [0.8.0] - 2025-12-30
 
 ### Technical
@@ -954,6 +972,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.8.1]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.38...v0.8.0
 [0.7.38]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.37...v0.7.38
 [0.7.37]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.36...v0.7.37

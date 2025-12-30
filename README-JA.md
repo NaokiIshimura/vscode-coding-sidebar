@@ -268,14 +268,14 @@ npm run watch
 1. [GitHubのReleasesページ](https://github.com/NaokiIshimura/vscode-panel/releases)から最新のVSIXファイルをダウンロード
 2. コマンドラインからインストール:
    ```bash
-   code --install-extension ai-coding-sidebar-0.8.1.vsix
+   code --install-extension ai-coding-sidebar-0.8.2.vsix
    ```
 3. VS Codeを再起動
 
 #### ローカルビルド版を使用する場合:
 ```bash
 # releasesディレクトリから直接インストール
-code --install-extension releases/ai-coding-sidebar-0.8.1.vsix
+code --install-extension releases/ai-coding-sidebar-0.8.2.vsix
 ```
 
 #### 自分でパッケージを作成する場合:
@@ -289,7 +289,7 @@ code --install-extension releases/ai-coding-sidebar-0.8.1.vsix
    ```
 3. 生成されたVSIXファイルをインストール:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.8.1.vsix
+   code --install-extension releases/ai-coding-sidebar-0.8.2.vsix
    ```
 4. VS Codeを再起動
 

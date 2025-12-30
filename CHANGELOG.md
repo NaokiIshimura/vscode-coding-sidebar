@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.37] - 2025-12-30
+
+### Added
+- **Terminal View - Multiple Tabs**: Added support for multiple terminal tabs
+  - Create up to 5 terminal tabs, each with its own independent PTY session
+  - Tab bar UI showing shell names with close buttons
+  - "+" button to create new tabs
+  - Click tabs to switch between sessions
+  - "×" button to close individual tabs
+  - Clear and Kill buttons operate on the active tab
+
 ## [0.7.36] - 2025-12-30
 
 ### Added

@@ -5,6 +5,13 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.2] - 2025-12-30
+
+### 追加
+- **Terminal View - タブ自動作成**: 最後のタブが閉じられた際に自動的に新しいターミナルタブを作成
+  - 少なくとも1つのタブを維持することで、ターミナルが常に利用可能な状態を確保
+  - 手動で新しいタブを作成する手間なくシームレスなユーザー体験を提供
+
 ## [0.8.1] - 2025-12-30
 
 ### 追加
@@ -478,6 +485,7 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.8.2]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.1...v0.8.2
 [0.8.1]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.38...v0.8.0
 [0.7.38]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.37...v0.7.38

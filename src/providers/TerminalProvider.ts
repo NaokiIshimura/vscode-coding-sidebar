@@ -233,6 +233,8 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                 this._activateTab(this._tabs[newActiveIndex].id);
             } else {
                 this._activeTabId = undefined;
+                // タブが0件になったら自動で1件作成
+                this._createTab();
             }
         }
     }

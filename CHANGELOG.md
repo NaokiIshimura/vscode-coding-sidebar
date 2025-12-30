@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.38] - 2025-12-30
+
+### Added
+- **Editor View - Shortcuts Overlay**: Added persistent keyboard shortcuts display in the editor
+  - Shows "Cmd+M / Ctrl+M - Create new markdown file" and "Cmd+R / Ctrl+R - Run task in terminal"
+  - Displayed in bottom-right corner with semi-transparent overlay
+  - Always visible during editing (does not interfere with text input)
+
+### Changed
+- **Editor View - Placeholder**: Changed placeholder text to "Enter prompt here..." for clearer purpose indication
+
 ## [0.7.37] - 2025-12-30
 
 ### Added
@@ -926,6 +937,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.7.38]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.37...v0.7.38
+[0.7.37]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.36...v0.7.37
+[0.7.36]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.35...v0.7.36
 [0.7.35]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.34...v0.7.35
 [0.7.34]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.33...v0.7.34
 [0.7.33]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.32...v0.7.33

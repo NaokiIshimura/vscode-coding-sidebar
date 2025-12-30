@@ -3056,6 +3056,7 @@ class EditorProvider implements vscode.WebviewViewProvider {
             flex: 1;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
         #editor {
             flex: 1;
@@ -3085,6 +3086,18 @@ class EditorProvider implements vscode.WebviewViewProvider {
             color: var(--vscode-descriptionForeground);
             font-size: 14px;
         }
+        #shortcuts-overlay {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            opacity: 0.4;
+            pointer-events: none;
+            font-size: 11px;
+            color: var(--vscode-descriptionForeground);
+            white-space: pre-line;
+            text-align: left;
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
@@ -3099,9 +3112,9 @@ class EditorProvider implements vscode.WebviewViewProvider {
         </div>
     </div>
     <div id="editor-container">
-        <textarea id="editor" placeholder="Shortcuts:
-  Cmd+M / Ctrl+M - Create new markdown file
-  Cmd+R / Ctrl+R - Run task"></textarea>
+        <textarea id="editor" placeholder="Enter prompt here..."></textarea>
+        <div id="shortcuts-overlay">Cmd+M / Ctrl+M - Create new markdown file
+Cmd+R / Ctrl+R - Run task in terminal</div>
     </div>
     <script>
         const vscode = acquireVsCodeApi();

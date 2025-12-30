@@ -5,6 +5,18 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.7.36] - 2025-12-30
+
+### 追加
+- **Tasks View - パスヘッダーのArchiveボタン**: ルートディレクトリ以外にいる場合、パス表示ヘッダーにArchiveボタンを追加
+  - クリックで現在のディレクトリをアーカイブし、自動的にルートに戻る
+  - 他のディレクトリに移動せずにアーカイブ機能へ素早くアクセス可能
+
+### 変更
+- **UIメッセージ - 英語化**: すべてのユーザー向けメッセージを英語に変更
+  - エラーメッセージ、成功通知、ダイアログのプロンプトが英語になりました
+  - 対象ファイル: extension.ts, FileOperationService.ts, ContextMenuManager.ts, DragDropHandler.ts, ClipboardManager.ts, ExplorerManager.ts, SearchService.ts
+
 ## [0.7.35] - 2025-12-30
 
 ### 変更

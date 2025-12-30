@@ -45,10 +45,10 @@ export class ContextMenuManager {
      * メニュー項目を初期化
      */
     private initializeMenuItems(): void {
-        // コピー
+        // Copy
         this.menuItems.set(MenuItemType.Copy, {
             type: MenuItemType.Copy,
-            label: 'コピー',
+            label: 'Copy',
             icon: '$(copy)',
             enabled: true,
             visible: true,
@@ -57,10 +57,10 @@ export class ContextMenuManager {
             }
         });
 
-        // 切り取り
+        // Cut
         this.menuItems.set(MenuItemType.Cut, {
             type: MenuItemType.Cut,
-            label: '切り取り',
+            label: 'Cut',
             icon: '$(scissors)',
             enabled: true,
             visible: true,
@@ -69,22 +69,22 @@ export class ContextMenuManager {
             }
         });
 
-        // 貼り付け
+        // Paste
         this.menuItems.set(MenuItemType.Paste, {
             type: MenuItemType.Paste,
-            label: '貼り付け',
+            label: 'Paste',
             icon: '$(clippy)',
-            enabled: false, // クリップボードにデータがある場合のみ有効
+            enabled: false, // Only enabled when clipboard has data
             visible: true,
             handler: async () => {
-                // 貼り付けロジックは呼び出し側で実装
+                // Paste logic is implemented by the caller
             }
         });
 
-        // 削除
+        // Delete
         this.menuItems.set(MenuItemType.Delete, {
             type: MenuItemType.Delete,
-            label: '削除',
+            label: 'Delete',
             icon: '$(trash)',
             enabled: true,
             visible: true,
@@ -93,63 +93,63 @@ export class ContextMenuManager {
             }
         });
 
-        // リネーム
+        // Rename
         this.menuItems.set(MenuItemType.Rename, {
             type: MenuItemType.Rename,
-            label: '名前の変更',
+            label: 'Rename',
             icon: '$(edit)',
             enabled: true,
             visible: true,
             handler: async () => {
-                // リネームロジックは呼び出し側で実装
+                // Rename logic is implemented by the caller
             }
         });
 
-        // 新規ファイル
+        // New File
         this.menuItems.set(MenuItemType.NewFile, {
             type: MenuItemType.NewFile,
-            label: 'ファイルを作成',
+            label: 'New File',
             icon: '$(new-file)',
             enabled: true,
             visible: true,
             handler: async () => {
-                // 新規ファイル作成ロジックは呼び出し側で実装
+                // New file creation logic is implemented by the caller
             }
         });
 
-        // 新規フォルダ
+        // New Folder
         this.menuItems.set(MenuItemType.NewFolder, {
             type: MenuItemType.NewFolder,
-            label: 'フォルダを作成',
+            label: 'New Folder',
             icon: '$(new-folder)',
             enabled: true,
             visible: true,
             handler: async () => {
-                // 新規フォルダ作成ロジックは呼び出し側で実装
+                // New folder creation logic is implemented by the caller
             }
         });
 
-        // パスをコピー
+        // Copy Path
         this.menuItems.set(MenuItemType.CopyPath, {
             type: MenuItemType.CopyPath,
-            label: 'パスをコピー',
+            label: 'Copy Path',
             icon: '$(copy)',
             enabled: true,
             visible: true,
             handler: async () => {
-                // パスコピーロジックは呼び出し側で実装
+                // Copy path logic is implemented by the caller
             }
         });
 
-        // 相対パスをコピー
+        // Copy Relative Path
         this.menuItems.set(MenuItemType.CopyRelativePath, {
             type: MenuItemType.CopyRelativePath,
-            label: '相対パスをコピー',
+            label: 'Copy Relative Path',
             icon: '$(copy)',
             enabled: true,
             visible: true,
             handler: async () => {
-                // 相対パスコピーロジックは呼び出し側で実装
+                // Copy relative path logic is implemented by the caller
             }
         });
     }

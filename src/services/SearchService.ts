@@ -25,7 +25,7 @@ export class SearchService {
         try {
             await this.searchRecursive(dirPath, options, results);
         } catch (error) {
-            console.error('検索エラー:', error);
+            console.error('Search error:', error);
         }
 
         return results;

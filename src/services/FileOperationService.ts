@@ -41,13 +41,13 @@ export class FileOperationService implements IFileOperationService {
 
             return {
                 success: true,
-                message: `ファイルを作成しました: ${path.basename(filePath)}`
+                message: `File created: ${path.basename(filePath)}`
             };
         } catch (error) {
             return {
                 success: false,
                 error: error as Error,
-                message: `ファイルの作成に失敗しました: ${error}`
+                message: `Failed to create file: ${error}`
             };
         }
     }
@@ -72,13 +72,13 @@ export class FileOperationService implements IFileOperationService {
 
             return {
                 success: true,
-                message: `フォルダを作成しました: ${path.basename(dirPath)}`
+                message: `Folder created: ${path.basename(dirPath)}`
             };
         } catch (error) {
             return {
                 success: false,
                 error: error as Error,
-                message: `フォルダの作成に失敗しました: ${error}`
+                message: `Failed to create folder: ${error}`
             };
         }
     }
@@ -110,13 +110,13 @@ export class FileOperationService implements IFileOperationService {
 
             return {
                 success: true,
-                message: `ファイルを保存しました: ${path.basename(filePath)}`
+                message: `File saved: ${path.basename(filePath)}`
             };
         } catch (error) {
             return {
                 success: false,
                 error: error as Error,
-                message: `ファイルの保存に失敗しました: ${error}`
+                message: `Failed to save file: ${error}`
             };
         }
     }
@@ -134,13 +134,13 @@ export class FileOperationService implements IFileOperationService {
 
             return {
                 success: true,
-                message: `ファイルを削除しました: ${path.basename(filePath)}`
+                message: `File deleted: ${path.basename(filePath)}`
             };
         } catch (error) {
             return {
                 success: false,
                 error: error as Error,
-                message: `ファイルの削除に失敗しました: ${error}`
+                message: `Failed to delete file: ${error}`
             };
         }
     }
@@ -158,13 +158,13 @@ export class FileOperationService implements IFileOperationService {
 
             return {
                 success: true,
-                message: `フォルダを削除しました: ${path.basename(dirPath)}`
+                message: `Folder deleted: ${path.basename(dirPath)}`
             };
         } catch (error) {
             return {
                 success: false,
                 error: error as Error,
-                message: `フォルダの削除に失敗しました: ${error}`
+                message: `Failed to delete folder: ${error}`
             };
         }
     }
@@ -186,13 +186,13 @@ export class FileOperationService implements IFileOperationService {
 
             return {
                 success: true,
-                message: `名前を変更しました: ${path.basename(newPath)}`
+                message: `Renamed to: ${path.basename(newPath)}`
             };
         } catch (error) {
             return {
                 success: false,
                 error: error as Error,
-                message: `名前の変更に失敗しました: ${error}`
+                message: `Failed to rename: ${error}`
             };
         }
     }
@@ -222,13 +222,13 @@ export class FileOperationService implements IFileOperationService {
 
             return {
                 success: true,
-                message: `コピーしました: ${path.basename(destPath)}`
+                message: `Copied: ${path.basename(destPath)}`
             };
         } catch (error) {
             return {
                 success: false,
                 error: error as Error,
-                message: `コピーに失敗しました: ${error}`
+                message: `Failed to copy: ${error}`
             };
         }
     }
@@ -256,13 +256,13 @@ export class FileOperationService implements IFileOperationService {
 
             return {
                 success: true,
-                message: `フォルダをコピーしました: ${path.basename(destPath)}`
+                message: `Folder copied: ${path.basename(destPath)}`
             };
         } catch (error) {
             return {
                 success: false,
                 error: error as Error,
-                message: `フォルダのコピーに失敗しました: ${error}`
+                message: `Failed to copy folder: ${error}`
             };
         }
     }
@@ -286,13 +286,13 @@ export class FileOperationService implements IFileOperationService {
 
             return {
                 success: true,
-                message: `移動しました: ${path.basename(destPath)}`
+                message: `Moved: ${path.basename(destPath)}`
             };
         } catch (error) {
             return {
                 success: false,
                 error: error as Error,
-                message: `移動に失敗しました: ${error}`
+                message: `Failed to move: ${error}`
             };
         }
     }

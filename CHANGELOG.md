@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.36] - 2025-12-30
+
+### Added
+- **Tasks View - Path Header Archive Button**: Added archive button to the path display header when inside a non-root directory
+  - Click to archive the current directory and automatically return to root
+  - Provides quick access to archive functionality without navigating away
+
+### Changed
+- **UI Messages - English Localization**: Changed all user-facing messages to English
+  - Error messages, success notifications, and dialog prompts are now in English
+  - Affected files: extension.ts, FileOperationService.ts, ContextMenuManager.ts, DragDropHandler.ts, ClipboardManager.ts, ExplorerManager.ts, SearchService.ts
+
 ## [0.7.35] - 2025-12-30
 
 ### Changed

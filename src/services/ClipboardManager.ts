@@ -69,11 +69,11 @@ export class ClipboardManager implements IClipboardManager {
      */
     async paste(targetDir: string): Promise<void> {
         if (!this.clipboardData) {
-            throw new Error('クリップボードが空です');
+            throw new Error('Clipboard is empty');
         }
 
         if (!this.canPaste(targetDir)) {
-            throw new Error('この場所に貼り付けできません');
+            throw new Error('Cannot paste to this location');
         }
 
         const sources = this.clipboardData.items.map(item => item.path);
@@ -134,7 +134,7 @@ export class ClipboardManager implements IClipboardManager {
         const text = await vscode.env.clipboard.readText();
 
         if (!text) {
-            throw new Error('クリップボードが空です');
+            throw new Error('Clipboard is empty');
         }
 
         // 改行で分割してパスのリストを作成
@@ -149,7 +149,7 @@ export class ClipboardManager implements IClipboardManager {
         }
 
         if (validPaths.length === 0) {
-            throw new Error('有効なパスが見つかりませんでした');
+            throw new Error('No valid paths found');
         }
 
         // コピー操作として貼り付け

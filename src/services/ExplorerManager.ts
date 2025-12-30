@@ -68,7 +68,7 @@ export class ExplorerManager implements IExplorerManager {
     async copySelected(): Promise<void> {
         const selectedPaths = this.selectionManager.getSelectedPaths();
         if (selectedPaths.length === 0) {
-            throw new Error('アイテムが選択されていません');
+            throw new Error('No item is selected');
         }
         await this.clipboardManager.copy(selectedPaths);
     }
@@ -79,7 +79,7 @@ export class ExplorerManager implements IExplorerManager {
     async cutSelected(): Promise<void> {
         const selectedPaths = this.selectionManager.getSelectedPaths();
         if (selectedPaths.length === 0) {
-            throw new Error('アイテムが選択されていません');
+            throw new Error('No item is selected');
         }
         await this.clipboardManager.cut(selectedPaths);
     }
@@ -90,7 +90,7 @@ export class ExplorerManager implements IExplorerManager {
     async deleteSelected(): Promise<void> {
         const selectedPaths = this.selectionManager.getSelectedPaths();
         if (selectedPaths.length === 0) {
-            throw new Error('アイテムが選択されていません');
+            throw new Error('No item is selected');
         }
         await this.fileOperationService.deleteFiles(selectedPaths);
         this.selectionManager.clearSelection();

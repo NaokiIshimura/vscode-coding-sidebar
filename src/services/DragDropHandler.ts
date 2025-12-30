@@ -102,11 +102,11 @@ export class DragDropHandler<T extends vscode.TreeItem> {
                 // ファイルが既に存在するかチェック
                 if (await this.fileOperationService.exists(targetPath)) {
                     const answer = await vscode.window.showWarningMessage(
-                        `${fileName} は既に存在します。上書きしますか？`,
-                        '上書き',
-                        'スキップ'
+                        `${fileName} already exists. Overwrite?`,
+                        'Overwrite',
+                        'Skip'
                     );
-                    if (answer !== '上書き') {
+                    if (answer !== 'Overwrite') {
                         continue;
                     }
                 }
@@ -160,20 +160,20 @@ export class DragDropHandler<T extends vscode.TreeItem> {
     ): { message?: string; icon?: vscode.ThemeIcon } {
         if (!target) {
             return {
-                message: 'ルートフォルダに移動',
+                message: 'Move to root folder',
                 icon: new vscode.ThemeIcon('folder')
             };
         }
 
         if (isDirectory(target)) {
             return {
-                message: 'フォルダに移動',
+                message: 'Move to folder',
                 icon: new vscode.ThemeIcon('folder')
             };
         }
 
         return {
-            message: '親フォルダに移動',
+            message: 'Move to parent folder',
             icon: new vscode.ThemeIcon('folder')
         };
     }

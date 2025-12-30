@@ -2088,6 +2088,9 @@ class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDra
         this.activeFolderPath = targetPath;
         this.updateTitle();
         this.refresh();
+
+        // ディレクトリ移動時にEditorのファイル選択をクリア
+        this.editorProvider?.clearFile();
     }
 
     async getParent(element: FileItem): Promise<FileItem | undefined> {

@@ -73,107 +73,17 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
                     }
                     break;
                 case 'save':
-                    if (this._currentFilePath) {
-                        // 優先度1: 既存ファイルへの上書き保存
-                        try {
-                            await fs.promises.writeFile(this._currentFilePath, data.content, 'utf8');
-                            vscode.window.showInformationMessage('File saved successfully');
-                            this._currentContent = data.content;
-                            this._pendingContent = undefined;
-                            this._isDirty = false;
-                            // 保存後に未保存状態をクリア
-                            this._view?.webview.postMessage({
-                                type: 'updateDirtyState',
-                                isDirty: false
-                            });
-                        } catch (error) {
-                            vscode.window.showErrorMessage(`Failed to save file: ${error}`);
-                        }
-                    } else if (data.content && data.content.trim()) {
-                        // ファイル未開時 - 新規ファイルとして保存
-                        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-                        if (!workspaceRoot) {
-                            vscode.window.showErrorMessage('No workspace folder is open');
-                            break;
-                        }
-
-                        let savePath: string;
-
-                        // 優先度2: Docs viewで開いているディレクトリ
-                        const docsCurrentPath = this._detailsProvider?.getCurrentPath();
-                        // 優先度3: Tasks viewで選択しているディレクトリ
-                        const tasksRootPath = this._tasksProvider?.getRootPath();
-
-                        if (docsCurrentPath) {
-                            savePath = docsCurrentPath;
-                        } else if (tasksRootPath) {
-                            savePath = tasksRootPath;
-                        } else {
-                            // 優先度4: デフォルトパス
-                            const config = vscode.workspace.getConfiguration('aiCodingSidebar');
-                            const defaultRelativePath = config.get<string>('defaultRelativePath', '.claude/tasks');
-                            savePath = path.join(workspaceRoot, defaultRelativePath);
-                        }
-
-                        // ディレクトリが存在しない場合は作成
-                        await fs.promises.mkdir(savePath, { recursive: true });
-
-                        // タイムスタンプ付きファイル名を生成 (YYYY_MMDD_HHMM_SS形式)
-                        const now = new Date();
-                        const year = String(now.getFullYear());
-                        const month = String(now.getMonth() + 1).padStart(2, '0');
-                        const day = String(now.getDate()).padStart(2, '0');
-                        const hour = String(now.getHours()).padStart(2, '0');
-                        const minute = String(now.getMinutes()).padStart(2, '0');
-                        const second = String(now.getSeconds()).padStart(2, '0');
-                        const timestamp = `${year}_${month}${day}_${hour}${minute}_${second}`;
-
-                        const fileName = `${timestamp}_PROMPT.md`;
-                        const filePath = path.join(savePath, fileName);
-
-                        try {
-                            await fs.promises.writeFile(filePath, data.content, 'utf8');
+                    const hadFilePath = !!this._currentFilePath;
+                    const savedPath = await this._saveCurrentContent(data.content);
+                    if (savedPath) {
+                        if (!hadFilePath) {
+                            // 新規ファイル作成の場合はファイル名を表示
+                            const fileName = path.basename(savedPath);
                             vscode.window.showInformationMessage(`File saved: ${fileName}`);
-
-                            // 保存したファイルをエディタで開く
-                            this._currentFilePath = filePath;
-                            this._currentContent = data.content;
-                            this._pendingContent = undefined;
-                            this._isDirty = false;
-
-                            // ファイルパスをWebviewに反映（ファイル名のみ表示）
-                            const displayPath = path.basename(filePath);
-                            this._view?.webview.postMessage({
-                                type: 'showContent',
-                                content: data.content,
-                                filePath: displayPath,
-                                isReadOnly: false
-                            });
-
-                            // ツリービューを更新
-                            this._tasksProvider?.refresh();
-                            this._detailsProvider?.refresh();
-
-                            // 保存したディレクトリに移動してファイルを選択
-                            setTimeout(async () => {
-                                // Tasks viewでディレクトリを表示
-                                await this._tasksProvider?.revealDirectory(savePath);
-                                // Tasks viewでファイルを選択
-                                // アクティブフォルダが異なる場合は更新が必要
-                                const currentActivePath = this._detailsProvider?.getCurrentPath();
-                                if (currentActivePath !== savePath) {
-                                    // アクティブフォルダを変更
-                                    this._detailsProvider?.setActiveFolder(savePath);
-                                    // ファイルを再度開く
-                                    await this.showFile(filePath);
-                                }
-                                await this._detailsProvider?.revealFile(filePath);
-                            }, 100);
-                        } catch (error) {
-                            vscode.window.showErrorMessage(`Failed to save file: ${error}`);
+                        } else {
+                            // 既存ファイルの上書き保存
+                            vscode.window.showInformationMessage('File saved successfully');
                         }
-                    } else {
-                        vscode.window.showWarningMessage('Please enter some text before saving.');
                     }
                     break;
                 case 'contentChanged':
@@ -193,25 +103,15 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
                     break;
                 case 'planTask':
                     // Plan button clicked - save file if needed, then send plan command to terminal
-                    if (this._currentFilePath) {
-                        // Save file first if content is provided
-                        if (data.content) {
-                            try {
-                                await fs.promises.writeFile(this._currentFilePath, data.content, 'utf8');
-                                this._currentContent = data.content;
-                                this._pendingContent = undefined;
-                                this._isDirty = false;
-                                // Update dirty state in webview
-                                this._view?.webview.postMessage({
-                                    type: 'updateDirtyState',
-                                    isDirty: false
-                                });
-                            } catch (error) {
-                                vscode.window.showErrorMessage(`Failed to save file: ${error}`);
-                                return;
-                            }
+                    // ファイルが未作成 or 未保存の場合、先に保存
+                    if (data.content && data.content.trim()) {
+                        const planSavedPath = await this._saveCurrentContent(data.content);
+                        if (!planSavedPath) {
+                            return; // 保存失敗
                         }
+                    }
 
+                    if (this._currentFilePath) {
                         const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
                         let relativeFilePath: string;
 
@@ -225,7 +125,7 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
 
                         // Get the plan command template from settings
                         const config = vscode.workspace.getConfiguration('aiCodingSidebar');
-                        const commandTemplate = config.get<string>('editor.planCommand', 'claude "Review the file at ${filePath} and create an implementation plan (plan.md)."');
+                        const commandTemplate = config.get<string>('editor.planCommand', 'claude "Review the file at ${filePath} and create an implementation plan. Save it as a timestamped file (format: YYYY_MMDD_HHMM_SS_plan.md) in the same directory as ${filePath}."');
 
                         // Replace ${filePath} placeholder with actual file path
                         const command = commandTemplate.replace(/\$\{filePath\}/g, relativeFilePath.trim());
@@ -239,25 +139,15 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
                     break;
                 case 'specTask':
                     // Spec button clicked - save file if needed, then send spec command to terminal
-                    if (this._currentFilePath) {
-                        // Save file first if content is provided
-                        if (data.content) {
-                            try {
-                                await fs.promises.writeFile(this._currentFilePath, data.content, 'utf8');
-                                this._currentContent = data.content;
-                                this._pendingContent = undefined;
-                                this._isDirty = false;
-                                // Update dirty state in webview
-                                this._view?.webview.postMessage({
-                                    type: 'updateDirtyState',
-                                    isDirty: false
-                                });
-                            } catch (error) {
-                                vscode.window.showErrorMessage(`Failed to save file: ${error}`);
-                                return;
-                            }
+                    // ファイルが未作成 or 未保存の場合、先に保存
+                    if (data.content && data.content.trim()) {
+                        const specSavedPath = await this._saveCurrentContent(data.content);
+                        if (!specSavedPath) {
+                            return; // 保存失敗
                         }
+                    }
 
+                    if (this._currentFilePath) {
                         const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
                         let relativeFilePath: string;
 
@@ -271,7 +161,7 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
 
                         // Get the spec command template from settings
                         const config = vscode.workspace.getConfiguration('aiCodingSidebar');
-                        const commandTemplate = config.get<string>('editor.specCommand', 'claude "Review the file at ${filePath} and create specification documents (requirements.md, design.md, tasks.md)."');
+                        const commandTemplate = config.get<string>('editor.specCommand', 'claude "Review the file at ${filePath} and create specification documents. Save them as timestamped files (format: YYYY_MMDD_HHMM_SS_requirements.md, YYYY_MMDD_HHMM_SS_design.md, YYYY_MMDD_HHMM_SS_tasks.md) in the same directory as ${filePath}."');
 
                         // Replace ${filePath} placeholder with actual file path
                         const command = commandTemplate.replace(/\$\{filePath\}/g, relativeFilePath.trim());
@@ -529,6 +419,128 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
             } catch (error) {
                 console.error(`Failed to save file on deactivation: ${error}`);
             }
+        }
+    }
+
+    /**
+     * ファイル保存の共通処理
+     * @param content 保存する内容
+     * @returns 保存成功時はファイルパス、失敗時はnull
+     */
+    private async _saveCurrentContent(content: string): Promise<string | null> {
+        if (this._currentFilePath) {
+            // 優先度1: 既存ファイルへの上書き保存
+            try {
+                await fs.promises.writeFile(this._currentFilePath, content, 'utf8');
+                this._currentContent = content;
+                this._pendingContent = undefined;
+                this._isDirty = false;
+                // 保存後に未保存状態をクリア
+                this._view?.webview.postMessage({
+                    type: 'updateDirtyState',
+                    isDirty: false
+                });
+                return this._currentFilePath;
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to save file: ${error}`);
+                return null;
+            }
+        } else if (content && content.trim()) {
+            // ファイル未開時 - 新規ファイルとして保存
+            const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+            if (!workspaceRoot) {
+                vscode.window.showErrorMessage('No workspace folder is open');
+                return null;
+            }
+
+            let savePath: string;
+
+            // 優先度2: Docs viewで開いているディレクトリ
+            const docsCurrentPath = this._detailsProvider?.getCurrentPath();
+            // 優先度3: Tasks viewで選択しているディレクトリ
+            const tasksRootPath = this._tasksProvider?.getRootPath();
+
+            if (docsCurrentPath) {
+                savePath = docsCurrentPath;
+            } else if (tasksRootPath) {
+                savePath = tasksRootPath;
+            } else {
+                // 優先度4: デフォルトパス
+                const config = vscode.workspace.getConfiguration('aiCodingSidebar');
+                const defaultRelativePath = config.get<string>('defaultRelativePath', '.claude/tasks');
+                savePath = path.join(workspaceRoot, defaultRelativePath);
+            }
+
+            // ディレクトリが存在しない場合は作成
+            await fs.promises.mkdir(savePath, { recursive: true });
+
+            // タイムスタンプ付きファイル名を生成 (YYYY_MMDD_HHMM_SS形式)
+            const now = new Date();
+            const year = String(now.getFullYear());
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hour = String(now.getHours()).padStart(2, '0');
+            const minute = String(now.getMinutes()).padStart(2, '0');
+            const second = String(now.getSeconds()).padStart(2, '0');
+            const timestamp = `${year}_${month}${day}_${hour}${minute}_${second}`;
+
+            const fileName = `${timestamp}_PROMPT.md`;
+            const filePath = path.join(savePath, fileName);
+
+            try {
+                // メタ情報フッターを作成
+                const relativeDirPath = workspaceRoot ? path.relative(workspaceRoot, savePath) : savePath;
+                const datetime = `${year}/${month}/${day} ${hour}:${minute}:${second}`;
+                const footer = `\n\n---\n\nworking dir: ${relativeDirPath}\nprompt file: ${fileName}\ndatetime   : ${datetime}\n`;
+
+                // コンテンツの末尾にフッターを追加
+                const contentWithFooter = content + footer;
+
+                await fs.promises.writeFile(filePath, contentWithFooter, 'utf8');
+
+                // 保存したファイルをエディタで開く
+                this._currentFilePath = filePath;
+                this._currentContent = contentWithFooter;
+                this._pendingContent = undefined;
+                this._isDirty = false;
+
+                // ファイルパスをWebviewに反映（ファイル名のみ表示）
+                const displayPath = path.basename(filePath);
+                this._view?.webview.postMessage({
+                    type: 'showContent',
+                    content: contentWithFooter,
+                    filePath: displayPath,
+                    isReadOnly: false
+                });
+
+                // ツリービューを更新
+                this._tasksProvider?.refresh();
+                this._detailsProvider?.refresh();
+
+                // 保存したディレクトリに移動してファイルを選択
+                setTimeout(async () => {
+                    // Tasks viewでディレクトリを表示
+                    await this._tasksProvider?.revealDirectory(savePath);
+                    // Tasks viewでファイルを選択
+                    // アクティブフォルダが異なる場合は更新が必要
+                    const currentActivePath = this._detailsProvider?.getCurrentPath();
+                    if (currentActivePath !== savePath) {
+                        // アクティブフォルダを変更
+                        this._detailsProvider?.setActiveFolder(savePath);
+                        // ファイルを再度開く
+                        await this.showFile(filePath);
+                    }
+                    await this._detailsProvider?.revealFile(filePath);
+                }, 100);
+
+                return filePath;
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to save file: ${error}`);
+                return null;
+            }
+        } else {
+            vscode.window.showWarningMessage('Please enter some text before saving.');
+            return null;
         }
     }
 
@@ -889,40 +901,22 @@ Cmd+R / Ctrl+R - Run task in terminal</div>
 
         // Plan button click handler
         planButton.addEventListener('click', () => {
-            if (currentFilePath) {
-                // File is open - use the file-based plan task
-                const isDirty = editor.value !== originalContent;
-                vscode.postMessage({
-                    type: 'planTask',
-                    filePath: currentFilePath,
-                    content: isDirty && !isReadOnly ? editor.value : null
-                });
-            } else {
-                // No file open - show warning
-                vscode.postMessage({
-                    type: 'showWarning',
-                    message: 'Please open a file to create an implementation plan.'
-                });
-            }
+            const isDirty = editor.value !== originalContent;
+            vscode.postMessage({
+                type: 'planTask',
+                filePath: currentFilePath,
+                content: (currentFilePath && isDirty && !isReadOnly) || !currentFilePath ? editor.value : null
+            });
         });
 
         // Spec button click handler
         specButton.addEventListener('click', () => {
-            if (currentFilePath) {
-                // File is open - use the file-based spec task
-                const isDirty = editor.value !== originalContent;
-                vscode.postMessage({
-                    type: 'specTask',
-                    filePath: currentFilePath,
-                    content: isDirty && !isReadOnly ? editor.value : null
-                });
-            } else {
-                // No file open - show warning
-                vscode.postMessage({
-                    type: 'showWarning',
-                    message: 'Please open a file to create specification documents.'
-                });
-            }
+            const isDirty = editor.value !== originalContent;
+            vscode.postMessage({
+                type: 'specTask',
+                filePath: currentFilePath,
+                content: (currentFilePath && isDirty && !isReadOnly) || !currentFilePath ? editor.value : null
+            });
         });
 
         // Notify extension that webview is ready

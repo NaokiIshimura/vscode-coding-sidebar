@@ -171,12 +171,12 @@ export function activate(context: vscode.ExtensionContext) {
 
             // ファイルの場合（Markdownファイル）
             if (!selectedItem.isDirectory && selectedItem.filePath.endsWith('.md')) {
-                // ファイル名がYYYY_MMDD_HHMM_SS_PROMPT.md形式の場合はMarkdown Editorで開く
+                // ファイル名がYYYY_MMDD_HHMM_SS_(PROMPT|TASK|SPEC).md形式の場合はMarkdown Editorで開く
                 const fileName = path.basename(selectedItem.filePath);
-                const timestampPattern = /^\d{4}_\d{4}_\d{4}_\d{2}_PROMPT\.md$/;
+                const timestampPattern = /^\d{4}_\d{4}_\d{4}_\d{2}_(PROMPT|TASK|SPEC)\.md$/;
 
                 if (timestampPattern.test(fileName)) {
-                    // YYYY_MMDD_HHMM_SS_PROMPT.md形式の場合はMarkdown Editorで開く
+                    // タイムスタンプ形式の場合はMarkdown Editorで開く
                     await editorProvider.showFile(selectedItem.filePath);
                 } else {
                     // それ以外は通常のエディタで開く
@@ -466,7 +466,8 @@ export function activate(context: vscode.ExtensionContext) {
                 dirpath: relativeDirPath
             };
 
-            const content = loadTemplate(context, variables);
+            // promptテンプレートを使用
+            const content = loadTemplate(context, variables, 'prompt');
 
             // FileOperationServiceを使用してファイル作成
             const result = await fileOperationService.createFile(filePath, content);
@@ -897,7 +898,7 @@ export function activate(context: vscode.ExtensionContext) {
             const second = String(now.getSeconds()).padStart(2, '0');
 
             const timestamp = `${year}_${month}${day}_${hour}${minute}_${second}`;
-            const fileName = `${timestamp}_PROMPT.md`;
+            const fileName = `${timestamp}_TASK.md`;
             const filePath = path.join(folderPath, fileName);
 
             // テンプレートを使用してファイル内容を生成
@@ -913,7 +914,8 @@ export function activate(context: vscode.ExtensionContext) {
                 dirpath: relativeDirPath
             };
 
-            const content = loadTemplate(context, variables);
+            // taskテンプレートを使用
+            const content = loadTemplate(context, variables, 'task');
 
             // FileOperationServiceを使用してファイル作成
             const result = await fileOperationService.createFile(filePath, content);
@@ -931,6 +933,119 @@ export function activate(context: vscode.ExtensionContext) {
                 vscode.window.showInformationMessage(`Created markdown file ${fileName} in "${trimmedFolderName}"`);
             } else {
                 vscode.window.showWarningMessage(`Folder created but failed to create markdown file: ${result.error}`);
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to create folder: ${error}`);
+        }
+    });
+
+    // 新しいSpecディレクトリを作成してMarkdownファイルも作成するコマンド（タイトルメニュー用）
+    const newSpecCommand = vscode.commands.registerCommand('aiCodingSidebar.newSpec', async (item?: FileItem) => {
+        // Tasks Viewで開いているディレクトリ配下にディレクトリを作成
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (!workspaceFolders || workspaceFolders.length === 0) {
+            vscode.window.showErrorMessage('No workspace folder is open');
+            return;
+        }
+
+        const workspaceRoot = workspaceFolders[0].uri.fsPath;
+
+        // 現在開いているディレクトリを取得、取得できない場合はdefaultRelativePathを使用
+        const currentPath = tasksProvider.getCurrentPath();
+        let targetPath: string;
+
+        if (currentPath) {
+            targetPath = currentPath;
+        } else {
+            const defaultRelativePath = configProvider.getDefaultRelativePath();
+            if (!defaultRelativePath || defaultRelativePath.trim() === '') {
+                vscode.window.showErrorMessage('Default relative path is not configured');
+                return;
+            }
+            targetPath = path.join(workspaceRoot, defaultRelativePath);
+        }
+
+        // フォルダ名をユーザーに入力してもらう
+        const folderName = await vscode.window.showInputBox({
+            prompt: 'Enter new folder name',
+            placeHolder: 'Folder name',
+            validateInput: (value) => {
+                if (!value || value.trim() === '') {
+                    return 'Please enter a folder name';
+                }
+                // 不正な文字をチェック
+                if (value.match(/[<>:"|?*\/\\]/)) {
+                    return 'Contains invalid characters: < > : " | ? * / \\';
+                }
+                // 既存フォルダとの重複チェック
+                const folderPath = path.join(targetPath, value.trim());
+                if (fs.existsSync(folderPath)) {
+                    return `Folder "${value.trim()}" already exists`;
+                }
+                return null;
+            }
+        });
+
+        if (!folderName || folderName.trim() === '') {
+            return;
+        }
+
+        const trimmedFolderName = folderName.trim();
+        const folderPath = path.join(targetPath, trimmedFolderName);
+
+        try {
+            // フォルダを作成
+            fs.mkdirSync(folderPath, { recursive: true });
+            vscode.window.showInformationMessage(`Created folder "${trimmedFolderName}"`);
+
+            // 作成したディレクトリに移動
+            tasksProvider.navigateToDirectory(folderPath);
+
+            // 作成したディレクトリ内にMarkdownファイルを作成
+            const now = new Date();
+            const year = String(now.getFullYear());
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hour = String(now.getHours()).padStart(2, '0');
+            const minute = String(now.getMinutes()).padStart(2, '0');
+            const second = String(now.getSeconds()).padStart(2, '0');
+
+            const timestamp = `${year}_${month}${day}_${hour}${minute}_${second}`;
+            const fileName = `${timestamp}_SPEC.md`;
+            const filePath = path.join(folderPath, fileName);
+
+            // テンプレートを使用してファイル内容を生成
+            // ワークスペースルートからの相対パスを計算
+            const relativeFilePath = workspaceRoot ? path.relative(workspaceRoot, filePath) : filePath;
+            const relativeDirPath = workspaceRoot ? path.relative(workspaceRoot, folderPath) : folderPath;
+
+            const variables = {
+                datetime: now.toLocaleString(),
+                filename: fileName,
+                timestamp: timestamp,
+                filepath: relativeFilePath,
+                dirpath: relativeDirPath
+            };
+
+            // specテンプレートを使用
+            const content = loadTemplate(context, variables, 'spec');
+
+            // FileOperationServiceを使用してファイル作成
+            const result = await fileOperationService.createFile(filePath, content);
+
+            if (result.success) {
+                // ビューを更新してファイル一覧に新しいファイルを反映
+                tasksProvider.refresh();
+
+                // ビューの更新を待つ
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                // 作成したファイルをMarkdown Editor Viewで開く
+                await editorProvider.showFile(filePath);
+
+                vscode.window.showInformationMessage(`Created spec file ${fileName} in "${trimmedFolderName}"`);
+            } else {
+                vscode.window.showWarningMessage(`Folder created but failed to create spec file: ${result.error}`);
             }
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to create folder: ${error}`);
@@ -1349,7 +1464,7 @@ export function activate(context: vscode.ExtensionContext) {
         await terminalProvider.insertPaths(relativePaths);
     });
 
-    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openTasksSettingsCommand, openEditorSettingsCommand, openTerminalSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, newDirectoryCommand, renameDirectoryCommand, deleteDirectoryCommand, archiveDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand, navigateToDirectoryCommand, insertPathToEditorCommand, insertPathToTerminalCommand);
+    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openTasksSettingsCommand, openEditorSettingsCommand, openTerminalSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, createMarkdownFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, newDirectoryCommand, newSpecCommand, renameDirectoryCommand, deleteDirectoryCommand, archiveDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand, navigateToDirectoryCommand, insertPathToEditorCommand, insertPathToTerminalCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({

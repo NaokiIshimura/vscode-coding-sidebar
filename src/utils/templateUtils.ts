@@ -2,22 +2,30 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// テンプレートを読み込んで変数を置換する関数
-export function loadTemplate(context: vscode.ExtensionContext, variables: { [key: string]: string }): string {
-    let templatePath: string;
+// テンプレート種別
+export type TemplateType = 'prompt' | 'task' | 'spec';
 
-    // 1. ワークスペースの.vscode/ai-coding-sidebar/templates/task.mdを優先
+// テンプレートを読み込んで変数を置換する関数
+export function loadTemplate(
+    context: vscode.ExtensionContext,
+    variables: { [key: string]: string },
+    templateType: TemplateType = 'prompt'
+): string {
+    let templatePath: string;
+    const templateFileName = `${templateType}.md`;
+
+    // 1. ワークスペースの.vscode/ai-coding-sidebar/templates/[templateType].mdを優先
     const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
     if (workspaceRoot) {
-        const vscodeTemplatePath = path.join(workspaceRoot, '.vscode', 'ai-coding-sidebar', 'templates', 'task.md');
+        const vscodeTemplatePath = path.join(workspaceRoot, '.vscode', 'ai-coding-sidebar', 'templates', templateFileName);
         if (fs.existsSync(vscodeTemplatePath)) {
             templatePath = vscodeTemplatePath;
         } else {
-            // 2. 拡張機能内のtask.mdをフォールバック
-            templatePath = path.join(context.extensionPath, 'templates', 'task.md');
+            // 2. 拡張機能内の[templateType].mdをフォールバック
+            templatePath = path.join(context.extensionPath, 'templates', templateFileName);
         }
     } else {
-        templatePath = path.join(context.extensionPath, 'templates', 'task.md');
+        templatePath = path.join(context.extensionPath, 'templates', templateFileName);
     }
 
     if (!fs.existsSync(templatePath)) {

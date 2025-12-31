@@ -32,7 +32,7 @@ src/
 ├── providers/            # UIコンポーネント
 │   ├── TasksProvider.ts  # Tasksビュー（フラットリスト、Drag&Drop）
 │   ├── EditorProvider.ts # Markdown EditorのWebView
-│   ├── TerminalProvider.ts # xterm.jsターミナルのWebView
+│   ├── TerminalProvider.ts # xterm.jsターミナルのWebView（スクロール位置自動追従機能付き）
 │   ├── MenuProvider.ts   # 設定メニュー
 │   └── items/            # TreeItem定義
 │       ├── FileItem.ts   # ファイル/ディレクトリ項目

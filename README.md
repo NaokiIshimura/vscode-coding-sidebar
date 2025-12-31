@@ -58,6 +58,7 @@ Embedded terminal in the panel using xterm.js with full PTY support.
 | --- | --- |
 | Multiple tabs | Create up to 5 terminal tabs, each with its own independent session. Click the "+" button to add a new tab, click a tab to switch, and click "×" to close |
 | Session persistence | Terminal session and output history are preserved when switching views or extensions |
+| Auto-scroll | Automatically maintains scroll position at the bottom when new output arrives or when view is resized (only if already at the bottom) |
 | Clickable links | URLs open in browser, file paths (e.g., `./src/file.ts:123`) open in editor with line navigation |
 | Unicode support | Full support for CJK characters and other Unicode characters with proper width calculation |
 | Claude Code shortcuts | Quick command buttons for Claude Code: `claude`, `claude -c`, `claude -r` when not running; `/compact`, `/clear` when running |

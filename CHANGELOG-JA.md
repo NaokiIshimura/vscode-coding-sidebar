@@ -5,6 +5,27 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.7] - 2025-12-31
+
+### 変更
+- **コマンド名変更**: 「New .md」コマンドを「New PROMPT.md」に名称変更し明確化
+- **Tasks View - ヘッダー簡素化**: Tasks viewタイトルバーから「New Directory」「New PROMPT.md」ボタンを削除
+  - これらの機能はパス表示行のインラインボタンとして利用可能に
+  - タイトルバーには New Task、New Spec、Refresh、Settings のみ表示
+
+### 追加
+- **新規ファイルコマンド**: 「New TASK.md」「New SPEC.md」コマンドを追加
+  - 現在のディレクトリにタイムスタンプ付きのTASK.mdまたはSPEC.mdファイルを作成
+  - Tasksのパス表示行とEditorヘッダーの両方から利用可能
+- **Tasks View - パス表示インラインボタン**: パス表示行にインラインアクションボタンを追加
+  - New PROMPT.md、New TASK.md、New SPEC.md: 新規ファイル作成
+  - Copy、Rename: 現在のディレクトリを管理（サブディレクトリのみ）
+  - New Directory: 新しいサブディレクトリを作成
+  - Archive: 現在のディレクトリをアーカイブ（サブディレクトリのみ）
+- **Editor View - 新規ファイルボタン**: Editor viewヘッダーに「New TASK.md」「New SPEC.md」ボタンを追加
+  - Editor viewから直接新しいファイルタイプを作成可能
+  - 既存の「New PROMPT.md」ボタンを補完
+
 ## [0.8.6] - 2025-12-31
 
 ### 変更
@@ -524,6 +545,7 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.8.7]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.6...v0.8.7
 [0.8.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.5...v0.8.6
 [0.8.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.4...v0.8.5
 [0.8.4]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.3...v0.8.4

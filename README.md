@@ -25,7 +25,7 @@ Display directories and files under a specified path in a flat list view.
 | --- | --- |
 | Flat list display | Shows contents of the current directory only (not a tree structure) |
 | Directory navigation | Click a directory to navigate into it. Use ".." to go back to the parent directory |
-| Path display | Current path shown as the first item in the list with Copy Relative Path and Rename buttons |
+| Path display | Current path shown as the first item in the list with inline action buttons (New PROMPT.md, New TASK.md, New SPEC.md, Copy, Rename, New Directory, Archive) |
 | Sorting | Files are sorted by creation date (ascending) by default |
 | Drag & Drop | Copy files by dragging them within the view or from external sources |
 | Auto-refresh | Automatically updates when files are created, modified, or deleted |
@@ -40,7 +40,7 @@ Edit Markdown files directly in the panel.
 | Auto-display | Automatically opens when selecting a timestamp-named Markdown file (format: `YYYY_MMDD_HHMM_SS_PROMPT.md`). Other Markdown files open in the standard editor |
 | Save button | Displays in header with color change indicating unsaved changes. Creates new file if none is open (saves to current Tasks directory) |
 | Run task | Press `Cmd+R` / `Ctrl+R` to send a customizable command to terminal (auto-saves before running, works even without a file open) |
-| New file | Create new markdown file with `Cmd+M` / `Ctrl+M` |
+| New file buttons | Create PROMPT.md, TASK.md, or SPEC.md files from the header. Also available with `Cmd+M` / `Ctrl+M` for PROMPT.md |
 | Customizable run command | Configure the command executed by the Run button in settings |
 | Run without file | Execute commands using editor content when no file is open |
 | Terminal View integration | Run commands are sent to the embedded Terminal view |
@@ -158,8 +158,10 @@ Use the following variables inside a template:
 | Item | Steps |
 | --- | --- |
 | New Task | Click the rocket icon in Tasks title menu.<br>Creates a new directory under the currently opened directory in Tasks View and automatically generates a timestamped Markdown file.<br>The file is selected in Tasks with "editing" label and opens in Editor View.<br>If the current path cannot be retrieved, it falls back to the default path. |
-| New Directory | Click the folder icon in Tasks.<br>Creates a new directory under the currently opened directory (without creating a Markdown file). |
-| Create a file | Click the "+" icon in Tasks.<br>A timestamped Markdown file is created (for example, `2025_1229_1430_25_PROMPT.md`) and opens in Editor View. |
+| New Directory | Click the folder icon in the path display row.<br>Creates a new directory under the currently opened directory (without creating a Markdown file). |
+| Create PROMPT.md | Click the file icon in the path display row or Editor header.<br>A timestamped Markdown file is created (for example, `2025_1229_1430_25_PROMPT.md`) and opens in Editor View. |
+| Create TASK.md | Click the TASK.md icon in the path display row or Editor header.<br>A timestamped TASK.md file is created and opens in Editor View. |
+| Create SPEC.md | Click the SPEC.md icon in the path display row or Editor header.<br>A timestamped SPEC.md file is created and opens in Editor View. |
 
 ### Configure the Default Relative Path
 

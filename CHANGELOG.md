@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.11] - 2025-12-31
+
+### Added
+- **Editor View - Focus Indicator**: Shows a border around the Editor view when focused
+  - Uses VSCode theme color `--vscode-focusBorder` for consistent appearance
+  - Helps users identify which view currently has focus
+- **Terminal View - Focus Indicator**: Shows a border around the Terminal view when focused
+  - Same styling as Editor view for visual consistency
+
 ## [0.8.10] - 2025-12-31
 
 ### Added
@@ -1069,6 +1078,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.8.11]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.10...v0.8.11
+[0.8.10]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.8...v0.8.10
+[0.8.8]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.7...v0.8.8
 [0.8.7]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.6...v0.8.7
 [0.8.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.5...v0.8.6
 [0.8.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.4...v0.8.5

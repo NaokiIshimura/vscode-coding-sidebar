@@ -5,6 +5,15 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.11] - 2025-12-31
+
+### 追加
+- **Editor View - フォーカスインジケーター**: Editor viewにフォーカスがあるときに枠線を表示
+  - VSCodeテーマカラー `--vscode-focusBorder` を使用して一貫した外観を実現
+  - どのビューにフォーカスがあるかをユーザーが識別しやすくなった
+- **Terminal View - フォーカスインジケーター**: Terminal viewにフォーカスがあるときに枠線を表示
+  - Editor viewと同じスタイリングで視覚的な一貫性を実現
+
 ## [0.8.10] - 2025-12-31
 
 ### 追加
@@ -575,6 +584,9 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.8.11]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.10...v0.8.11
+[0.8.10]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.8...v0.8.10
+[0.8.8]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.7...v0.8.8
 [0.8.7]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.6...v0.8.7
 [0.8.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.5...v0.8.6
 [0.8.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.4...v0.8.5

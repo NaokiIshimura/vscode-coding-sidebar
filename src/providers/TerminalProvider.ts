@@ -466,6 +466,11 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
             overflow: hidden;
             background: var(--vscode-terminal-background, #1e1e1e);
             position: relative;
+            box-sizing: border-box;
+            border: 1px solid transparent;
+        }
+        body.focused {
+            border-color: var(--vscode-focusBorder);
         }
         #header {
             background-color: var(--vscode-editor-background);
@@ -1112,6 +1117,14 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                         tabInfo.term.focus();
                     }
                 }
+            });
+
+            // Focus/blur handlers for visual focus indicator
+            window.addEventListener('focus', () => {
+                document.body.classList.add('focused');
+            });
+            window.addEventListener('blur', () => {
+                document.body.classList.remove('focused');
             });
 
             // 準備完了を通知

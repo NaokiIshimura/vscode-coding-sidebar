@@ -48,6 +48,7 @@ Edit Markdown files directly in the panel.
 | Auto-save | Automatically saves when switching files, navigating directories, or closing the view |
 | Restore editing | Restores the editing file when returning from another extension |
 | Settings icon | Quick access to run command configuration |
+| Focus indicator | Shows a border around the view when focused |
 
 ### Terminal
 
@@ -66,6 +67,7 @@ Embedded terminal in the panel using xterm.js with full PTY support.
 | WebView header | Tab bar with shell names, shortcut buttons, plus Clear and Kill buttons for the active tab |
 | Settings icon | Quick access to terminal settings in the title bar |
 | Default visibility | Collapsed (expand when needed) |
+| Focus indicator | Shows a border around the view when focused |
 
 ### Menu
 
@@ -274,14 +276,14 @@ npm run watch
 1. Download the latest VSIX file from the [GitHub Releases page](https://github.com/NaokiIshimura/vscode-panel/releases).
 2. Install via command line:
    ```bash
-   code --install-extension ai-coding-sidebar-0.8.8.vsix
+   code --install-extension ai-coding-sidebar-0.8.11.vsix
    ```
 3. Restart VS Code.
 
 #### Use a local build
 ```bash
 # Install directly from the releases directory
-code --install-extension releases/ai-coding-sidebar-0.8.6.vsix
+code --install-extension releases/ai-coding-sidebar-0.8.11.vsix
 ```
 
 #### Build the package yourself
@@ -295,7 +297,7 @@ code --install-extension releases/ai-coding-sidebar-0.8.6.vsix
    ```
 3. Install the generated VSIX file:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.8.6.vsix
+   code --install-extension releases/ai-coding-sidebar-0.8.11.vsix
    ```
 4. Restart VS Code.
 

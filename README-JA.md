@@ -48,6 +48,7 @@ AIコーディングツールとの連携を強化するパネル拡張機能。
 | 自動保存 | ファイル切替、ディレクトリ移動、ビューを閉じる際に自動保存 |
 | 編集ファイル復元 | 別の拡張機能から戻ってきたときに編集中のファイルを復元 |
 | 設定アイコン | 実行コマンド設定へのクイックアクセス |
+| フォーカスインジケーター | フォーカス時にビューの周囲に枠線を表示 |
 
 ### Terminal
 
@@ -66,6 +67,7 @@ xterm.jsを使用した完全なPTYサポートを備えた埋め込みターミ
 | WebViewヘッダー | タブバーにシェル名とショートカットボタンを表示、アクティブタブ用のClear、Killボタン |
 | 設定アイコン | タイトルバーからターミナル設定へのクイックアクセス |
 | デフォルト表示 | 折りたたみ（必要に応じて展開） |
+| フォーカスインジケーター | フォーカス時にビューの周囲に枠線を表示 |
 
 ### Menu
 
@@ -276,14 +278,14 @@ npm run watch
 1. [GitHubのReleasesページ](https://github.com/NaokiIshimura/vscode-panel/releases)から最新のVSIXファイルをダウンロード
 2. コマンドラインからインストール:
    ```bash
-   code --install-extension ai-coding-sidebar-0.8.8.vsix
+   code --install-extension ai-coding-sidebar-0.8.11.vsix
    ```
 3. VS Codeを再起動
 
 #### ローカルビルド版を使用する場合:
 ```bash
 # releasesディレクトリから直接インストール
-code --install-extension releases/ai-coding-sidebar-0.8.6.vsix
+code --install-extension releases/ai-coding-sidebar-0.8.11.vsix
 ```
 
 #### 自分でパッケージを作成する場合:
@@ -297,7 +299,7 @@ code --install-extension releases/ai-coding-sidebar-0.8.6.vsix
    ```
 3. 生成されたVSIXファイルをインストール:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.8.6.vsix
+   code --install-extension releases/ai-coding-sidebar-0.8.11.vsix
    ```
 4. VS Codeを再起動
 

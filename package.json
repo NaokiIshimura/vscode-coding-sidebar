@@ -111,6 +111,11 @@
         "icon": "$(rocket)"
       },
       {
+        "command": "aiCodingSidebar.newSpec",
+        "title": "New Spec",
+        "icon": "$(file-code)"
+      },
+      {
         "command": "aiCodingSidebar.renameDirectory",
         "title": "Rename Directory",
         "icon": "$(edit)"
@@ -239,24 +244,29 @@
           "group": "navigation@1"
         },
         {
-          "command": "aiCodingSidebar.addDirectory",
+          "command": "aiCodingSidebar.newSpec",
           "when": "view == aiCodingSidebarExplorer",
           "group": "navigation@2"
         },
         {
-          "command": "aiCodingSidebar.createMarkdownFile",
+          "command": "aiCodingSidebar.addDirectory",
           "when": "view == aiCodingSidebarExplorer",
           "group": "navigation@3"
         },
         {
-          "command": "aiCodingSidebar.refresh",
+          "command": "aiCodingSidebar.createMarkdownFile",
           "when": "view == aiCodingSidebarExplorer",
           "group": "navigation@4"
         },
         {
-          "command": "aiCodingSidebar.openTasksSettings",
+          "command": "aiCodingSidebar.refresh",
           "when": "view == aiCodingSidebarExplorer",
           "group": "navigation@5"
+        },
+        {
+          "command": "aiCodingSidebar.openTasksSettings",
+          "when": "view == aiCodingSidebarExplorer",
+          "group": "navigation@6"
         },
         {
           "command": "aiCodingSidebar.createMarkdownFile",

@@ -740,6 +740,18 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
             // Claude Code起動状態の管理
             const claudeCodeState = new Map(); // tabId -> boolean
 
+            // スクロール位置の状態管理（最下部にいるかどうか）
+            const isAtBottomState = new Map(); // tabId -> boolean
+
+            // 最下部判定のヘルパー関数
+            function isTerminalAtBottom(term) {
+                const buffer = term.buffer.active;
+                const baseY = buffer.baseY;
+                const viewportY = buffer.viewportY;
+                // baseY === viewportY の場合、最下部にいる
+                return baseY === viewportY;
+            }
+
             // ショートカットバーの表示切り替え
             function updateShortcutBar(isClaudeCodeRunning) {
                 const notRunning = document.getElementById('shortcuts-not-running');
@@ -840,16 +852,19 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                 // スクロール位置を監視してボタンの表示/非表示を切り替え
                 function updateScrollButtonVisibility() {
                     if (activeTabId !== tabId) return;
+
+                    // 最下部にいるかどうかを判定
+                    const atBottom = isTerminalAtBottom(term);
+
+                    // スクロール位置の状態を更新
+                    isAtBottomState.set(tabId, atBottom);
+
+                    // スクロールボタンの表示/非表示を切り替え
                     const buffer = term.buffer.active;
                     const baseY = buffer.baseY;
-                    const viewportY = buffer.viewportY;
-                    // 最下部にいるかどうかを判定（スクロール可能なコンテンツがある場合のみ）
-                    // baseY > 0: スクロールバックバッファがある
-                    // viewportY < baseY: 最下部より上にスクロールしている
                     const hasScrollback = baseY > 0;
-                    const isScrolledUp = viewportY < baseY;
 
-                    if (hasScrollback && isScrolledUp) {
+                    if (hasScrollback && !atBottom) {
                         scrollToBottomBtn.classList.remove('hidden');
                     } else {
                         scrollToBottomBtn.classList.add('hidden');
@@ -929,9 +944,15 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                 };
                 tabs.set(tabId, tabInfo);
 
+                // スクロール位置の初期状態を設定（最下部にいる状態）
+                isAtBottomState.set(tabId, true);
+
                 // リサイズを監視
                 const resizeObserver = new ResizeObserver(() => {
                     if (wrapperEl.classList.contains('active')) {
+                        // リサイズ前に最下部にいたかどうかを確認
+                        const wasAtBottom = isAtBottomState.get(tabId);
+
                         try {
                             fitAddon.fit();
                             vscode.postMessage({
@@ -940,6 +961,11 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                                 cols: term.cols,
                                 rows: term.rows
                             });
+
+                            // 最下部にいた場合は自動的に追従
+                            if (wasAtBottom) {
+                                term.scrollToBottom();
+                            }
                         } catch (e) {
                             console.error('Resize error:', e);
                         }
@@ -1004,6 +1030,9 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                 tabInfo.wrapperEl.remove();
                 tabInfo.term.dispose();
                 tabs.delete(tabId);
+
+                // スクロール位置の状態をクリア
+                isAtBottomState.delete(tabId);
             }
 
             // Extensionからのメッセージを処理
@@ -1024,7 +1053,15 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                         {
                             const tabInfo = tabs.get(message.tabId);
                             if (tabInfo) {
+                                // 出力前に最下部にいたかどうかを確認
+                                const wasAtBottom = isAtBottomState.get(message.tabId);
+
                                 tabInfo.term.write(message.data);
+
+                                // 最下部にいた場合は自動的に追従
+                                if (wasAtBottom) {
+                                    tabInfo.term.scrollToBottom();
+                                }
                             }
                         }
                         break;
@@ -1113,6 +1150,8 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                     const tabInfo = tabs.get(activeTabId);
                     if (tabInfo) {
                         tabInfo.term.scrollToBottom();
+                        // 最下部に移動したので状態を更新
+                        isAtBottomState.set(activeTabId, true);
                         scrollToBottomBtn.classList.add('hidden');
                         tabInfo.term.focus();
                     }

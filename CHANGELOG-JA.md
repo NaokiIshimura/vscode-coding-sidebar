@@ -5,6 +5,15 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.16] - 2026-01-01
+
+### 改善
+- **Terminal View - 自動スクロール**: 新しい出力が追加されたときやビューのサイズが変更されたときに、スクロール位置を最下部に自動維持
+  - 各ターミナルタブのスクロール位置を独立して追跡
+  - ユーザーが最下部にいる場合のみ自動スクロール（手動スクロール位置は保持）
+  - ユーザーが「↓」スクロール-最下部ボタンをクリックすると自動スクロールを再開
+  - 長時間実行コマンド中も最新の出力を表示し続けることで、ユーザー体験を向上
+
 ## [0.8.15] - 2025-12-31
 
 ### 技術的変更
@@ -626,6 +635,7 @@
 [0.7.24]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.23...v0.7.24
 [0.7.23]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.20...v0.7.23
 [0.7.20]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.19...v0.7.20
+[0.8.16]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.15...v0.8.16
 [0.7.19]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.18...v0.7.19
 [0.7.18]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.17...v0.7.18
 [0.7.17]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.16...v0.7.17

@@ -14,10 +14,10 @@ export function loadTemplate(
     let templatePath: string;
     const templateFileName = `${templateType}.md`;
 
-    // 1. ワークスペースの.vscode/ai-coding-sidebar/templates/[templateType].mdを優先
+    // 1. ワークスペースの.vscode/ai-coding-panel/templates/[templateType].mdを優先
     const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
     if (workspaceRoot) {
-        const vscodeTemplatePath = path.join(workspaceRoot, '.vscode', 'ai-coding-sidebar', 'templates', templateFileName);
+        const vscodeTemplatePath = path.join(workspaceRoot, '.vscode', 'ai-coding-panel', 'templates', templateFileName);
         if (fs.existsSync(vscodeTemplatePath)) {
             templatePath = vscodeTemplatePath;
         } else {

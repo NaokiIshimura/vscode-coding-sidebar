@@ -5,6 +5,22 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.6] - 2025-12-31
+
+### 変更
+- **テンプレート機能 - ディレクトリパス**: テンプレートディレクトリパスを `.vscode/ai-coding-sidebar/templates` から `.vscode/ai-coding-panel/templates` に変更
+  - 拡張機能のリネーム後の表示名「AI Coding Panel」に合わせた変更
+  - すべてのテンプレート参照が新しいパスを使用するように
+
+### 追加
+- **テンプレート機能 - 複数テンプレート**: Customize Templateで3つのテンプレートファイルを作成
+  - `task.md` - Start Taskコマンド用テンプレート
+  - `spec.md` - New Specコマンド用テンプレート
+  - `prompt.md` - New File (PROMPT.md)コマンド用テンプレート
+  - 以前は`task.md`ファイル1つのみを作成していた
+- **テンプレート機能 - エクスプローラー表示**: テンプレート作成後、templatesディレクトリをエクスプローラーで表示
+  - 複数のテンプレートファイルへのナビゲーションと編集が容易に
+
 ## [0.8.3] - 2025-12-31
 
 ### 追加
@@ -508,6 +524,10 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.8.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.5...v0.8.6
+[0.8.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.4...v0.8.5
+[0.8.4]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.3...v0.8.4
+[0.8.3]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.2...v0.8.3
 [0.8.2]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.1...v0.8.2
 [0.8.1]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.38...v0.8.0

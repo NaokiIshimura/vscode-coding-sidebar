@@ -46,33 +46,40 @@ export async function setupSettingsJson(workspaceRoot: string): Promise<void> {
 
 // テンプレートを設定するヘルパー関数
 export async function setupTemplate(context: vscode.ExtensionContext, workspaceRoot: string): Promise<void> {
-    const templatesDir = path.join(workspaceRoot, '.vscode', 'ai-coding-sidebar', 'templates');
-    const templatePath = path.join(templatesDir, 'task.md');
+    const templatesDir = path.join(workspaceRoot, '.vscode', 'ai-coding-panel', 'templates');
+    const templateFiles = ['task.md', 'spec.md', 'prompt.md'];
 
     try {
-        // .vscode/ai-coding-sidebar/templatesディレクトリを作成（存在しない場合）
+        // .vscode/ai-coding-panel/templatesディレクトリを作成（存在しない場合）
         if (!fs.existsSync(templatesDir)) {
             fs.mkdirSync(templatesDir, { recursive: true });
         }
 
-        // テンプレートファイルが存在しない場合のみ作成
-        if (!fs.existsSync(templatePath)) {
-            // 拡張機能内のtemplates/task.mdから読み込む
-            const extensionTemplatePath = path.join(context.extensionPath, 'templates', 'task.md');
-            if (!fs.existsSync(extensionTemplatePath)) {
-                throw new Error(`Template file not found: ${extensionTemplatePath}`);
+        // 各テンプレートファイルを作成（存在しない場合のみ）
+        for (const templateFile of templateFiles) {
+            const templatePath = path.join(templatesDir, templateFile);
+            if (!fs.existsSync(templatePath)) {
+                // 拡張機能内のtemplatesから読み込む
+                const extensionTemplatePath = path.join(context.extensionPath, 'templates', templateFile);
+                if (!fs.existsSync(extensionTemplatePath)) {
+                    throw new Error(`Template file not found: ${extensionTemplatePath}`);
+                }
+                const templateContent = fs.readFileSync(extensionTemplatePath, 'utf8');
+                fs.writeFileSync(templatePath, templateContent, 'utf8');
             }
-            const templateContent = fs.readFileSync(extensionTemplatePath, 'utf8');
-            fs.writeFileSync(templatePath, templateContent, 'utf8');
         }
 
-        // ファイルを開く
-        const document = await vscode.workspace.openTextDocument(templatePath);
+        // templatesディレクトリを開く（最初のテンプレートファイルを表示）
+        const firstTemplatePath = path.join(templatesDir, templateFiles[0]);
+        const document = await vscode.workspace.openTextDocument(firstTemplatePath);
         await vscode.window.showTextDocument(document);
 
-        vscode.window.showInformationMessage('Template file opened. Please edit and save.');
+        // templatesフォルダをエクスプローラーで表示
+        vscode.commands.executeCommand('revealInExplorer', vscode.Uri.file(templatesDir));
+
+        vscode.window.showInformationMessage(`Template files created: ${templateFiles.join(', ')}`);
     } catch (error) {
-        vscode.window.showErrorMessage(`Failed to create template file: ${error}`);
+        vscode.window.showErrorMessage(`Failed to create template files: ${error}`);
     }
 }
 

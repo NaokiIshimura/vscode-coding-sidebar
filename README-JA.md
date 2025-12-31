@@ -102,7 +102,10 @@ AIコーディングで使用するmarkdownファイルの構造を統一し、�
 ### テンプレートの設定方法
 1. Tasksペインの歯車アイコンをクリック
 2. 「ワークスペース設定」->「テンプレートをカスタマイズ」を選択
-3. `.vscode/ai-coding-sidebar/templates/task.md` が作成されます
+3. `.vscode/ai-coding-panel/templates/` にテンプレートファイルが作成されます:
+   - `task.md` - Start Task用テンプレート
+   - `spec.md` - New Spec用テンプレート
+   - `prompt.md` - New File (PROMPT.md)用テンプレート
 4. テンプレートを編集して保存
 
 ### デフォルトテンプレート
@@ -128,7 +131,7 @@ created: {{datetime}}
 - `{{dirpath}}`: ワークスペースルートからのディレクトリパス（例: .claude/tasks）
 
 ### テンプレートの優先順位
-1. ワークスペースの `.vscode/ai-coding-sidebar/templates/task.md`（存在する場合）
+1. `.vscode/ai-coding-panel/templates/` のワークスペーステンプレート（存在する場合）
 2. 拡張機能内のデフォルトテンプレート
 
 ### テンプレートの活用例
@@ -268,14 +271,14 @@ npm run watch
 1. [GitHubのReleasesページ](https://github.com/NaokiIshimura/vscode-panel/releases)から最新のVSIXファイルをダウンロード
 2. コマンドラインからインストール:
    ```bash
-   code --install-extension ai-coding-sidebar-0.8.3.vsix
+   code --install-extension ai-coding-sidebar-0.8.6.vsix
    ```
 3. VS Codeを再起動
 
 #### ローカルビルド版を使用する場合:
 ```bash
 # releasesディレクトリから直接インストール
-code --install-extension releases/ai-coding-sidebar-0.8.3.vsix
+code --install-extension releases/ai-coding-sidebar-0.8.6.vsix
 ```
 
 #### 自分でパッケージを作成する場合:
@@ -289,7 +292,7 @@ code --install-extension releases/ai-coding-sidebar-0.8.3.vsix
    ```
 3. 生成されたVSIXファイルをインストール:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.8.3.vsix
+   code --install-extension releases/ai-coding-sidebar-0.8.6.vsix
    ```
 4. VS Codeを再起動
 

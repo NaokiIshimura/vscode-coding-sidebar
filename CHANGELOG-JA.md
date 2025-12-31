@@ -5,6 +5,27 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.10] - 2025-12-31
+
+### 追加
+- **Terminal View - Claude Codeショートカット**: Claude Codeコマンド用のショートカットボタンを追加
+  - Claude Code未起動時: `claude`, `claude -c`, `claude -r` ボタン
+  - Claude Code起動中: `/compact`, `/clear` ボタン
+  - トグルボタン（⇆）でショートカットグループを手動切り替え可能
+- **Terminal View - Claude Code自動検知**: ターミナル出力からClaude Codeの起動・終了を自動検知
+  - 起動検知パターン: `claude>` プロンプト、`╭─` UI要素、`Entering interactive mode`、`Type /help`
+  - 終了検知パターン: シェルプロンプト（`$`, `%`, `#`）で行に「claude」を含まない場合
+  - 検知された状態に応じてショートカットボタンを自動切り替え
+- **Terminal View - スマートEnterキー**: シェルコマンドにのみEnterキーを送信
+  - シェルコマンド: コマンド + 改行を送信
+  - Claude Codeコマンド: コマンドのみ送信（Claude Code入力での不要な改行を防止）
+  - ショートカットボタンとEditor Runコマンドの両方に適用
+
+### 変更
+- **Terminal View - ヘッダーレイアウト**: 2行ヘッダーレイアウトに変更
+  - 1行目: タブバー、新規タブボタン、Clear/Killボタン
+  - 2行目: Claude Code用ショートカットボタン
+
 ## [0.8.8] - 2025-12-31
 
 ### 変更

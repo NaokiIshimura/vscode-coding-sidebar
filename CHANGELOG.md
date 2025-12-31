@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.10] - 2025-12-31
+
+### Added
+- **Terminal View - Claude Code Shortcuts**: Added shortcut buttons for Claude Code commands
+  - When Claude Code is not running: `claude`, `claude -c`, `claude -r` buttons
+  - When Claude Code is running: `/compact`, `/clear` buttons
+  - Toggle button (⇆) to manually switch between shortcut groups
+- **Terminal View - Auto-detect Claude Code**: Automatically detects Claude Code start/exit from terminal output
+  - Detects start patterns: `claude>` prompt, `╭─` UI element, `Entering interactive mode`, `Type /help`
+  - Detects exit pattern: shell prompt (`$`, `%`, `#`) without "claude" in the line
+  - Automatically switches shortcut buttons based on detected state
+- **Terminal View - Smart Enter Key**: Sends Enter key only for shell commands
+  - Shell commands: Sends command + newline
+  - Claude Code commands: Sends command only (prevents unwanted newlines in Claude Code input)
+  - Applied to both shortcut buttons and Editor Run command
+
+### Changed
+- **Terminal View - Header Layout**: Changed to 2-row header layout
+  - Row 1: Tab bar, New tab button, Clear/Kill buttons
+  - Row 2: Shortcut buttons for Claude Code
+
 ## [0.8.8] - 2025-12-31
 
 ### Changed

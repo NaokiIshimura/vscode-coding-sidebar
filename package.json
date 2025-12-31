@@ -444,6 +444,11 @@
           "default": "claude \"${editorContent}\"",
           "description": "Command template to execute when clicking the Run button without a file open. Use ${editorContent} as placeholder for the editor content."
         },
+        "aiCodingSidebar.editor.planCommand": {
+          "type": "string",
+          "default": "claude \"Review the file at ${filePath} and create an implementation plan.\"",
+          "description": "Command template to execute when clicking the Plan button. Use ${filePath} as placeholder for the file path."
+        },
         "aiCodingSidebar.terminal.shell": {
           "type": "string",
           "default": "",

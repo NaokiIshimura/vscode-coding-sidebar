@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.3] - 2025-12-31
+
+### Added
+- **Tasks View - Path Header Buttons**: Added Copy Relative Path and Rename buttons to the path display header
+  - Copy Relative Path button copies the current directory path to clipboard
+  - Rename button allows renaming the current directory inline
+  - Both buttons appear next to the archive button in the path header
+
+### Changed
+- **Tasks View - Rename Navigation**: After renaming a directory, automatically navigates to the renamed directory
+  - Previously stayed at the old (now invalid) path
+  - Provides immediate feedback by showing the renamed directory contents
+
+### Improved
+- **Editor View - Auto-save**: Enhanced auto-save functionality to cover more scenarios
+  - Now saves when webview is disposed (e.g., closing the sidebar)
+  - Now saves when extension is deactivated (e.g., closing VS Code)
+  - Added proper Disposable interface implementation for cleanup
+
 ## [0.8.2] - 2025-12-30
 
 ### Added

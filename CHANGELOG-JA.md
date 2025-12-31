@@ -5,6 +5,15 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.12] - 2025-12-31
+
+### 追加
+- **Tasks View - パス挿入インラインボタン**: ファイル行にパス挿入用のインラインボタンを追加
+  - 「Insert Path to Editor」ボタン（editアイコン）でファイルの相対パスをEditor viewに挿入
+  - 「Insert Path to Terminal」ボタン（terminalアイコン）でファイルの相対パスをTerminal viewに挿入
+  - Tasks viewでファイルアイテムにホバーするとボタンが表示
+  - 既存のコンテキストメニューと同じ機能を1クリックで利用可能に
+
 ## [0.8.11] - 2025-12-31
 
 ### 追加
@@ -584,6 +593,7 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.8.12]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.11...v0.8.12
 [0.8.11]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.10...v0.8.11
 [0.8.10]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.8...v0.8.10
 [0.8.8]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.7...v0.8.8

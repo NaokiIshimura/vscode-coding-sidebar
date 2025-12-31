@@ -2,7 +2,7 @@
   "name": "ai-coding-sidebar",
   "displayName": "AI Coding Panel",
   "description": "A sidebar extension that strengthens integration with AI coding tools.Browse and manage files and folders efficiently to keep coding with AI smooth.",
-  "version": "0.8.11",
+  "version": "0.8.12",
   "publisher": "nacn",
   "icon": "images/icon.png",
   "repository": {
@@ -202,11 +202,13 @@
       },
       {
         "command": "aiCodingSidebar.insertPathToEditor",
-        "title": "Insert Path to Editor"
+        "title": "Insert Path to Editor",
+        "icon": "$(edit)"
       },
       {
         "command": "aiCodingSidebar.insertPathToTerminal",
-        "title": "Insert Path to Terminal"
+        "title": "Insert Path to Terminal",
+        "icon": "$(terminal)"
       },
       {
         "command": "aiCodingSidebar.openDocumentation",
@@ -429,6 +431,16 @@
           "command": "aiCodingSidebar.copyRelativePath",
           "when": "view == aiCodingSidebarExplorer && viewItem == file",
           "group": "1_copy@2"
+        },
+        {
+          "command": "aiCodingSidebar.insertPathToEditor",
+          "when": "view == aiCodingSidebarExplorer && viewItem == file",
+          "group": "inline@1"
+        },
+        {
+          "command": "aiCodingSidebar.insertPathToTerminal",
+          "when": "view == aiCodingSidebarExplorer && viewItem == file",
+          "group": "inline@2"
         },
         {
           "command": "aiCodingSidebar.insertPathToEditor",

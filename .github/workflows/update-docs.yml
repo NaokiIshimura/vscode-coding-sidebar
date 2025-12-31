@@ -85,12 +85,6 @@ jobs:
             - バージョン番号はpackage.jsonを参照
             - CHANGELOGは先頭（最新バージョン）に追記
 
-          allowed_tools: |
-            Read
-            Edit
-            Write
-            Bash
-
       - name: Commit and push changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"

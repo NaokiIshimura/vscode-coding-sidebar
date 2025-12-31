@@ -528,8 +528,13 @@
         },
         "aiCodingSidebar.editor.planCommand": {
           "type": "string",
-          "default": "claude \"Review the file at ${filePath} and create an implementation plan.\"",
+          "default": "claude \"Review the file at ${filePath} and create an implementation plan (plan.md).\"",
           "description": "Command template to execute when clicking the Plan button. Use ${filePath} as placeholder for the file path."
+        },
+        "aiCodingSidebar.editor.specCommand": {
+          "type": "string",
+          "default": "claude \"Review the file at ${filePath} and create specification documents (requirements.md, design.md, tasks.md).\"",
+          "description": "Command template to execute when clicking the Spec button. Use ${filePath} as placeholder for the file path."
         },
         "aiCodingSidebar.terminal.shell": {
           "type": "string",

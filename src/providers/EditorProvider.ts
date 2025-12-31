@@ -225,7 +225,53 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
 
                         // Get the plan command template from settings
                         const config = vscode.workspace.getConfiguration('aiCodingSidebar');
-                        const commandTemplate = config.get<string>('editor.planCommand', 'claude "Review the file at ${filePath} and create an implementation plan."');
+                        const commandTemplate = config.get<string>('editor.planCommand', 'claude "Review the file at ${filePath} and create an implementation plan (plan.md)."');
+
+                        // Replace ${filePath} placeholder with actual file path
+                        const command = commandTemplate.replace(/\$\{filePath\}/g, relativeFilePath.trim());
+
+                        // Send command to Terminal view
+                        if (this._terminalProvider) {
+                            this._terminalProvider.focus();
+                            await this._terminalProvider.sendCommand(command);
+                        }
+                    }
+                    break;
+                case 'specTask':
+                    // Spec button clicked - save file if needed, then send spec command to terminal
+                    if (this._currentFilePath) {
+                        // Save file first if content is provided
+                        if (data.content) {
+                            try {
+                                await fs.promises.writeFile(this._currentFilePath, data.content, 'utf8');
+                                this._currentContent = data.content;
+                                this._pendingContent = undefined;
+                                this._isDirty = false;
+                                // Update dirty state in webview
+                                this._view?.webview.postMessage({
+                                    type: 'updateDirtyState',
+                                    isDirty: false
+                                });
+                            } catch (error) {
+                                vscode.window.showErrorMessage(`Failed to save file: ${error}`);
+                                return;
+                            }
+                        }
+
+                        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+                        let relativeFilePath: string;
+
+                        if (workspaceRoot) {
+                            // Calculate relative path from workspace root
+                            relativeFilePath = path.relative(workspaceRoot, this._currentFilePath);
+                        } else {
+                            // If no workspace, use the full path
+                            relativeFilePath = this._currentFilePath;
+                        }
+
+                        // Get the spec command template from settings
+                        const config = vscode.workspace.getConfiguration('aiCodingSidebar');
+                        const commandTemplate = config.get<string>('editor.specCommand', 'claude "Review the file at ${filePath} and create specification documents (requirements.md, design.md, tasks.md)."');
 
                         // Replace ${filePath} placeholder with actual file path
                         const command = commandTemplate.replace(/\$\{filePath\}/g, relativeFilePath.trim());
@@ -596,6 +642,22 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
             opacity: 0.5;
             cursor: not-allowed;
         }
+        .spec-button {
+            padding: 2px 8px;
+            font-size: 11px;
+            background-color: #6f42c1;
+            color: #ffffff;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        .spec-button:hover {
+            background-color: #5a32a3;
+        }
+        .spec-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
         .readonly-indicator {
             font-size: 11px;
             color: var(--vscode-editorWarning-foreground);
@@ -661,6 +723,7 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
             <span class="readonly-indicator" id="readonly-indicator">Read-only</span>
             <button class="save-button" id="save-button" title="Save file">Save</button>
             <button class="plan-button" id="plan-button" title="Create implementation plan">Plan</button>
+            <button class="spec-button" id="spec-button" title="Create specification documents">Spec</button>
             <button class="run-button" id="run-button" title="Run task (Cmd+R / Ctrl+R)">Run</button>
         </div>
     </div>
@@ -676,6 +739,7 @@ Cmd+R / Ctrl+R - Run task in terminal</div>
         const readonlyIndicator = document.getElementById('readonly-indicator');
         const saveButton = document.getElementById('save-button');
         const planButton = document.getElementById('plan-button');
+        const specButton = document.getElementById('spec-button');
         const runButton = document.getElementById('run-button');
         let originalContent = '';
         let currentFilePath = '';
@@ -838,6 +902,25 @@ Cmd+R / Ctrl+R - Run task in terminal</div>
                 vscode.postMessage({
                     type: 'showWarning',
                     message: 'Please open a file to create an implementation plan.'
+                });
+            }
+        });
+
+        // Spec button click handler
+        specButton.addEventListener('click', () => {
+            if (currentFilePath) {
+                // File is open - use the file-based spec task
+                const isDirty = editor.value !== originalContent;
+                vscode.postMessage({
+                    type: 'specTask',
+                    filePath: currentFilePath,
+                    content: isDirty && !isReadOnly ? editor.value : null
+                });
+            } else {
+                // No file open - show warning
+                vscode.postMessage({
+                    type: 'showWarning',
+                    message: 'Please open a file to create specification documents.'
                 });
             }
         });

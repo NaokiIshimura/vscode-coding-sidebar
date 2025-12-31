@@ -26,6 +26,7 @@ tsconfig.json
 CLAUDE.md
 .claude/
 .serena/
+.env
 
 # Test files
 test/

@@ -678,8 +678,13 @@ export function activate(context: vscode.ExtensionContext) {
             const result = await fileOperationService.renameFile(item.filePath, newPath);
 
             if (result.success) {
-                // ビューを更新
-                tasksProvider.refresh();
+                // ディレクトリの場合はリネーム後のディレクトリに移動（Editorはクリアしない）
+                if (item.isDirectory) {
+                    tasksProvider.setActiveFolder(newPath, true);
+                } else {
+                    // ファイルの場合はビューを更新
+                    tasksProvider.refresh();
+                }
 
                 vscode.window.showInformationMessage(`Renamed ${oldName} to ${newName}`);
             } else {
@@ -1350,6 +1355,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push({
         dispose: () => {
             tasksProvider.dispose();
+            editorProvider.dispose();
         }
     });
 }

@@ -8,7 +8,7 @@ import { FileWatcherService } from '../services/FileWatcherService';
 // Forward declaration for EditorProvider to avoid circular dependency
 export interface IEditorProvider {
     getCurrentFilePath(): string | undefined;
-    clearFile(): void;
+    clearFile(): Promise<void>;
 }
 
 export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDragAndDropController<FileItem> {
@@ -535,7 +535,7 @@ export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.
     /**
      * 指定されたディレクトリに移動する（フラットリスト表示用）
      */
-    navigateToDirectory(targetPath: string): void {
+    async navigateToDirectory(targetPath: string): Promise<void> {
         if (!targetPath || !fs.existsSync(targetPath)) {
             return;
         }
@@ -545,12 +545,12 @@ export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.
             return;
         }
 
+        // ディレクトリ移動時にEditorのファイル選択をクリア（自動保存含む）
+        await this.editorProvider?.clearFile();
+
         this.activeFolderPath = targetPath;
         this.updateTitle();
         this.refresh();
-
-        // ディレクトリ移動時にEditorのファイル選択をクリア
-        this.editorProvider?.clearFile();
     }
 
     async getParent(element: FileItem): Promise<FileItem | undefined> {

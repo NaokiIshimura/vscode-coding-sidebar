@@ -25,7 +25,7 @@ AIコーディングツールとの連携を強化するパネル拡張機能。
 | --- | --- |
 | フラットリスト表示 | 現在のディレクトリの内容のみを表示（ツリー構造ではない） |
 | ディレクトリナビゲーション | ディレクトリをクリックでそのディレクトリに移動。".."で親ディレクトリに戻る |
-| パス表示 | 現在のパスをリストの先頭アイテムとして表示 |
+| パス表示 | 現在のパスをリストの先頭アイテムとして表示（Copy Relative Path、Renameボタン付き） |
 | ソート | ファイルはデフォルトで作成日時の昇順でソート |
 | ドラッグ&ドロップ | ビュー内または外部からのファイルをドラッグしてコピー |
 | 自動更新 | ファイルが作成、変更、削除されたときに自動的に更新 |
@@ -45,7 +45,7 @@ AIコーディングツールとの連携を強化するパネル拡張機能。
 | ファイル未開でも実行可能 | ファイルを開いていない状態でもエディタの内容を使用してコマンドを実行 |
 | Terminalビュー連携 | Runコマンドを埋め込みTerminalビューに送信 |
 | 読み取り専用モード | VSCodeエディタでファイルがアクティブになると自動的に読み取り専用モードに切り替わる |
-| 自動保存 | 別の拡張機能やファイルに切り替える際に自動保存 |
+| 自動保存 | ファイル切替、ディレクトリ移動、ビューを閉じる際に自動保存 |
 | 編集ファイル復元 | 別の拡張機能から戻ってきたときに編集中のファイルを復元 |
 | 設定アイコン | 実行コマンド設定へのクイックアクセス |
 
@@ -141,7 +141,7 @@ created: {{datetime}}
 | 機能 | 説明 |
 | --- | --- |
 | ファイル・フォルダ作成 | 新しいファイルやフォルダを簡単に作成 |
-| 名前の変更 | ファイル・フォルダの名前を変更 |
+| 名前の変更 | ファイル・フォルダの名前を変更。ディレクトリのリネーム後は自動的にリネーム後のディレクトリを表示 |
 | 削除 | ファイル・フォルダを削除（ゴミ箱に移動） |
 | コピー・切り取り・貼り付け | 標準的なファイル操作をサポート |
 | ドラッグ&ドロップ | Tasksビュー内または外部からファイルをドラッグしてコピー。コピー成功時にメッセージを表示 |
@@ -268,14 +268,14 @@ npm run watch
 1. [GitHubのReleasesページ](https://github.com/NaokiIshimura/vscode-panel/releases)から最新のVSIXファイルをダウンロード
 2. コマンドラインからインストール:
    ```bash
-   code --install-extension ai-coding-sidebar-0.8.2.vsix
+   code --install-extension ai-coding-sidebar-0.8.3.vsix
    ```
 3. VS Codeを再起動
 
 #### ローカルビルド版を使用する場合:
 ```bash
 # releasesディレクトリから直接インストール
-code --install-extension releases/ai-coding-sidebar-0.8.2.vsix
+code --install-extension releases/ai-coding-sidebar-0.8.3.vsix
 ```
 
 #### 自分でパッケージを作成する場合:
@@ -289,7 +289,7 @@ code --install-extension releases/ai-coding-sidebar-0.8.2.vsix
    ```
 3. 生成されたVSIXファイルをインストール:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.8.2.vsix
+   code --install-extension releases/ai-coding-sidebar-0.8.3.vsix
    ```
 4. VS Codeを再起動
 

@@ -9,7 +9,7 @@ export interface ITerminalProvider {
     sendCommand(command: string, addNewline?: boolean): Promise<void>;
 }
 
-export class EditorProvider implements vscode.WebviewViewProvider {
+export class EditorProvider implements vscode.WebviewViewProvider, vscode.Disposable {
     public static readonly viewType = 'markdownEditor';
     private _view?: vscode.WebviewView;
     private _currentFilePath?: string;
@@ -20,14 +20,17 @@ export class EditorProvider implements vscode.WebviewViewProvider {
     private _tasksProvider?: TasksProvider;
     private _terminalProvider?: ITerminalProvider;
     private _pendingFileToRestore?: string;
+    private _disposables: vscode.Disposable[] = [];
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
     ) {
         // アクティブエディタの変更を監視
-        vscode.window.onDidChangeActiveTextEditor(editor => {
-            this._checkAndUpdateReadOnlyState(editor);
-        });
+        this._disposables.push(
+            vscode.window.onDidChangeActiveTextEditor(editor => {
+                this._checkAndUpdateReadOnlyState(editor);
+            })
+        );
     }
 
     private _checkAndUpdateReadOnlyState(editor: vscode.TextEditor | undefined) {
@@ -257,6 +260,23 @@ export class EditorProvider implements vscode.WebviewViewProvider {
             this._pendingFileToRestore = this._currentFilePath;
         }
 
+        // Listen to webview disposal
+        this._disposables.push(
+            webviewView.onDidDispose(async () => {
+                // Save changes when webview is disposed
+                if (this._currentFilePath && this._isDirty && this._pendingContent) {
+                    try {
+                        await fs.promises.writeFile(this._currentFilePath, this._pendingContent, 'utf8');
+                        this._currentContent = this._pendingContent;
+                        this._isDirty = false;
+                    } catch (error) {
+                        console.error(`Failed to auto-save file on dispose: ${error}`);
+                    }
+                }
+                this._view = undefined;
+            })
+        );
+
         // Listen to visibility changes
         webviewView.onDidChangeVisibility(async () => {
             if (webviewView.visible && this._currentFilePath) {
@@ -358,7 +378,18 @@ export class EditorProvider implements vscode.WebviewViewProvider {
         this._terminalProvider = provider;
     }
 
-    public clearFile(): void {
+    public async clearFile(): Promise<void> {
+        // Save current file if it has unsaved changes before clearing
+        if (this._currentFilePath && this._isDirty && this._pendingContent) {
+            try {
+                await fs.promises.writeFile(this._currentFilePath, this._pendingContent, 'utf8');
+                this._currentContent = this._pendingContent;
+                this._isDirty = false;
+            } catch (error) {
+                console.error(`Failed to auto-save file before clearing: ${error}`);
+            }
+        }
+
         this._currentFilePath = undefined;
         this._currentContent = undefined;
         this._pendingContent = undefined;
@@ -389,6 +420,35 @@ export class EditorProvider implements vscode.WebviewViewProvider {
 
         // Editorビューをフォーカス
         this._view.show?.(true);
+    }
+
+    /**
+     * Save pending changes synchronously (for deactivation)
+     */
+    public saveSync(): void {
+        if (this._currentFilePath && this._isDirty && this._pendingContent) {
+            try {
+                fs.writeFileSync(this._currentFilePath, this._pendingContent, 'utf8');
+                this._currentContent = this._pendingContent;
+                this._isDirty = false;
+            } catch (error) {
+                console.error(`Failed to save file on deactivation: ${error}`);
+            }
+        }
+    }
+
+    /**
+     * Dispose the provider and save any pending changes
+     */
+    public dispose(): void {
+        // Save pending changes synchronously
+        this.saveSync();
+
+        // Dispose all subscriptions
+        for (const disposable of this._disposables) {
+            disposable.dispose();
+        }
+        this._disposables = [];
     }
 
     private _getHtmlForWebview(webview: vscode.Webview) {

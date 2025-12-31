@@ -25,7 +25,7 @@ Display directories and files under a specified path in a flat list view.
 | --- | --- |
 | Flat list display | Shows contents of the current directory only (not a tree structure) |
 | Directory navigation | Click a directory to navigate into it. Use ".." to go back to the parent directory |
-| Path display | Current path shown as the first item in the list |
+| Path display | Current path shown as the first item in the list with Copy Relative Path and Rename buttons |
 | Sorting | Files are sorted by creation date (ascending) by default |
 | Drag & Drop | Copy files by dragging them within the view or from external sources |
 | Auto-refresh | Automatically updates when files are created, modified, or deleted |
@@ -45,7 +45,7 @@ Edit Markdown files directly in the panel.
 | Run without file | Execute commands using editor content when no file is open |
 | Terminal View integration | Run commands are sent to the embedded Terminal view |
 | Read-only mode | Automatically switches to read-only mode when the file is active in VSCode editor |
-| Auto-save | Saves when switching to another extension or file |
+| Auto-save | Automatically saves when switching files, navigating directories, or closing the view |
 | Restore editing | Restores the editing file when returning from another extension |
 | Settings icon | Quick access to run command configuration |
 
@@ -139,7 +139,7 @@ Use the following variables inside a template:
 | Feature | Description |
 | --- | --- |
 | Create files or folders | Quickly scaffold new files and folders. |
-| Rename | Rename files and folders. |
+| Rename | Rename files and folders. After renaming a directory, automatically navigates to the renamed directory. |
 | Delete | Delete files and folders (moved to trash). |
 | Copy / Cut / Paste | Perform standard clipboard operations. |
 | Drag & Drop | Copy files by dragging them within the Tasks view or from external sources. Displays a success message after copying. |
@@ -266,14 +266,14 @@ npm run watch
 1. Download the latest VSIX file from the [GitHub Releases page](https://github.com/NaokiIshimura/vscode-panel/releases).
 2. Install via command line:
    ```bash
-   code --install-extension ai-coding-sidebar-0.8.2.vsix
+   code --install-extension ai-coding-sidebar-0.8.3.vsix
    ```
 3. Restart VS Code.
 
 #### Use a local build
 ```bash
 # Install directly from the releases directory
-code --install-extension releases/ai-coding-sidebar-0.8.2.vsix
+code --install-extension releases/ai-coding-sidebar-0.8.3.vsix
 ```
 
 #### Build the package yourself
@@ -287,7 +287,7 @@ code --install-extension releases/ai-coding-sidebar-0.8.2.vsix
    ```
 3. Install the generated VSIX file:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.8.2.vsix
+   code --install-extension releases/ai-coding-sidebar-0.8.3.vsix
    ```
 4. Restart VS Code.
 

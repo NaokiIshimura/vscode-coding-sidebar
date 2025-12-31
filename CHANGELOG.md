@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.7] - 2025-12-31
+
+### Changed
+- **Command Rename**: Renamed "New .md" command to "New PROMPT.md" for clarity
+- **Tasks View - Header Simplification**: Removed "New Directory" and "New PROMPT.md" buttons from the Tasks view title bar
+  - These functions are now available as inline buttons in the path display row
+  - Title bar now shows only: New Task, New Spec, Refresh, Settings
+
+### Added
+- **New File Commands**: Added "New TASK.md" and "New SPEC.md" commands
+  - Create timestamped TASK.md or SPEC.md files in the current directory
+  - Available from both Tasks path display row and Editor header
+- **Tasks View - Path Display Inline Buttons**: Added inline action buttons to the path display row
+  - New PROMPT.md, New TASK.md, New SPEC.md: Create new files
+  - Copy, Rename: Manage the current directory (subdirectories only)
+  - New Directory: Create new subdirectory
+  - Archive: Archive the current directory (subdirectories only)
+- **Editor View - New File Buttons**: Added "New TASK.md" and "New SPEC.md" buttons to the Editor view header
+  - Create new file types directly from the Editor view
+  - Supplements the existing "New PROMPT.md" button
+
 ## [0.8.6] - 2025-12-31
 
 ### Changed
@@ -1018,6 +1039,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.8.7]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.6...v0.8.7
 [0.8.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.5...v0.8.6
 [0.8.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.4...v0.8.5
 [0.8.4]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.3...v0.8.4

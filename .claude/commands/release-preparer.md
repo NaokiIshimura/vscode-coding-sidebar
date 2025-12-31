@@ -48,11 +48,24 @@ git pull origin main
 git checkout -b v{バージョン}
 ```
 
-## 4. README更新
+## 4. CLAUDE.md & README更新
 
 対象ファイル：
+- `CLAUDE.md`（プロジェクトドキュメント）
 - `README.md`（英語版）
 - `README-JA.md`（日本語版）
+
+### CLAUDE.md更新ルール
+
+**更新内容**：
+- 新機能・変更に伴うアーキテクチャの更新
+- ファイル構成の変更を反映
+- 開発コマンドの追加・変更
+- デバッグ方法の更新
+- 重要な注意事項の追加
+
+**言語**：
+- 日本語で記述（コードベースへのチェックイン用プロジェクト説明）
 
 ### README更新ルール
 
@@ -134,7 +147,7 @@ git checkout -b v{バージョン}
 
 ```bash
 # 変更をステージング（.claude, .vscodeは除外）
-git add package.json package-lock.json README.md README-JA.md CHANGELOG.md CHANGELOG-JA.md
+git add package.json package-lock.json CLAUDE.md README.md README-JA.md CHANGELOG.md CHANGELOG-JA.md
 
 # コミット（英語メッセージ）
 git commit -m "Release v{バージョン}: Update documentation"
@@ -189,6 +202,7 @@ GitHub MCPまたはghコマンドを使用してPRを作成：
 | commitメッセージ | 英語 |
 | PR title | 英語 |
 | PR description | 英語 |
+| CLAUDE.md | 日本語 |
 | README.md | 英語 |
 | README-JA.md | 日本語 |
 | CHANGELOG.md | 英語 |

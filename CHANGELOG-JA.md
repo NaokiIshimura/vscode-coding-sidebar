@@ -5,6 +5,15 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.8] - 2025-12-31
+
+### 変更
+- **ファイル作成ボタンのアイコン**: ファイル作成ボタンのアイコンを変更し、視覚的な区別を改善
+  - New PROMPT.md: `$(new-file)` から `$(comment-discussion)`（吹き出しアイコン）に変更
+  - New TASK.md: `$(new-file)` から `$(tasklist)`（タスクリストアイコン）に変更
+  - New SPEC.md: `$(new-file)` から `$(file-code)`（コードファイルアイコン）に変更
+  - 異なるファイル作成アクションを識別しやすくなった
+
 ## [0.8.7] - 2025-12-31
 
 ### 変更

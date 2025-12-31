@@ -2,7 +2,7 @@
   "name": "ai-coding-sidebar",
   "displayName": "AI Coding Panel",
   "description": "A sidebar extension that strengthens integration with AI coding tools.Browse and manage files and folders efficiently to keep coding with AI smooth.",
-  "version": "0.8.7",
+  "version": "0.8.8",
   "publisher": "nacn",
   "icon": "images/icon.png",
   "repository": {
@@ -78,17 +78,17 @@
       {
         "command": "aiCodingSidebar.createMarkdownFile",
         "title": "New PROMPT.md",
-        "icon": "$(new-file)"
+        "icon": "$(comment-discussion)"
       },
       {
         "command": "aiCodingSidebar.createTaskFile",
         "title": "New TASK.md",
-        "icon": "$(new-file)"
+        "icon": "$(tasklist)"
       },
       {
         "command": "aiCodingSidebar.createSpecFile",
         "title": "New SPEC.md",
-        "icon": "$(new-file)"
+        "icon": "$(file-code)"
       },
       {
         "command": "aiCodingSidebar.createFile",

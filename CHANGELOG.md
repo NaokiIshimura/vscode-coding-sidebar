@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.8] - 2025-12-31
+
+### Changed
+- **File Creation Button Icons**: Changed icons for file creation buttons to improve visual distinction
+  - New PROMPT.md: Changed from `$(new-file)` to `$(comment-discussion)` (speech bubble icon)
+  - New TASK.md: Changed from `$(new-file)` to `$(tasklist)` (task list icon)
+  - New SPEC.md: Changed from `$(new-file)` to `$(file-code)` (code file icon)
+  - Makes it easier to distinguish between different file creation actions
+
 ## [0.8.7] - 2025-12-31
 
 ### Changed

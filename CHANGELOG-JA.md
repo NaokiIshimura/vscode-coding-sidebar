@@ -5,6 +5,12 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.15] - 2025-12-31
+
+### 技術的変更
+- **バージョン更新**: バージョンを0.8.15に更新
+- **ドキュメント**: READMEファイルのバージョン参照を更新
+
 ## [0.8.12] - 2025-12-31
 
 ### 追加
@@ -593,6 +599,7 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.8.15]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.12...v0.8.15
 [0.8.12]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.11...v0.8.12
 [0.8.11]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.10...v0.8.11
 [0.8.10]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.8...v0.8.10

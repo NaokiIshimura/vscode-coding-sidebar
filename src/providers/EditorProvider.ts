@@ -514,6 +514,11 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
             height: 100vh;
             display: flex;
             flex-direction: column;
+            box-sizing: border-box;
+            border: 1px solid transparent;
+        }
+        body.focused {
+            border-color: var(--vscode-focusBorder);
         }
         #header {
             padding: 8px;
@@ -850,6 +855,14 @@ Cmd+R / Ctrl+R - Run task in terminal</div>
                     type: 'createMarkdownFile'
                 });
             }
+        });
+
+        // Focus/blur handlers for visual focus indicator
+        window.addEventListener('focus', () => {
+            document.body.classList.add('focused');
+        });
+        window.addEventListener('blur', () => {
+            document.body.classList.remove('focused');
         });
     </script>
 </body>

@@ -26,6 +26,70 @@ export class MenuProvider implements vscode.TreeDataProvider<MenuItem> {
         if (!element) {
             // ルートレベル: メニュー項目を返す
             return [
+                // Usage Guide（親項目）
+                new MenuItem(
+                    'Usage Guide',
+                    'How to use this extension',
+                    undefined,
+                    new vscode.ThemeIcon('book'),
+                    [
+                        new MenuItem(
+                            'Getting Started',
+                            'Basic usage and workflow overview',
+                            {
+                                command: 'aiCodingSidebar.openGettingStarted',
+                                title: 'Open Getting Started'
+                            },
+                            new vscode.ThemeIcon('rocket')
+                        ),
+                        new MenuItem(
+                            'Tasks View',
+                            'File browsing and management guide',
+                            {
+                                command: 'aiCodingSidebar.openTasksViewGuide',
+                                title: 'Open Tasks View Guide'
+                            },
+                            new vscode.ThemeIcon('list-tree')
+                        ),
+                        new MenuItem(
+                            'Editor View',
+                            'Markdown editing and Run/Plan commands',
+                            {
+                                command: 'aiCodingSidebar.openEditorViewGuide',
+                                title: 'Open Editor View Guide'
+                            },
+                            new vscode.ThemeIcon('edit')
+                        ),
+                        new MenuItem(
+                            'Terminal View',
+                            'Terminal tabs and configuration',
+                            {
+                                command: 'aiCodingSidebar.openTerminalViewGuide',
+                                title: 'Open Terminal View Guide'
+                            },
+                            new vscode.ThemeIcon('terminal')
+                        ),
+                        new MenuItem(
+                            'Keyboard Shortcuts',
+                            'All keyboard shortcuts reference',
+                            {
+                                command: 'aiCodingSidebar.openKeyboardShortcuts',
+                                title: 'Open Keyboard Shortcuts'
+                            },
+                            new vscode.ThemeIcon('keyboard')
+                        ),
+                        new MenuItem(
+                            'Documentation',
+                            'View full documentation on GitHub',
+                            {
+                                command: 'aiCodingSidebar.openDocumentation',
+                                title: 'Open Documentation'
+                            },
+                            new vscode.ThemeIcon('link-external')
+                        )
+                    ],
+                    vscode.TreeItemCollapsibleState.Collapsed
+                ),
                 // グローバル（親項目）
                 new MenuItem(
                     'Global',
@@ -73,10 +137,10 @@ export class MenuProvider implements vscode.TreeDataProvider<MenuItem> {
                     ],
                     vscode.TreeItemCollapsibleState.Collapsed
                 ),
-                // Shortcut（親項目）
+                // Quick actions（親項目）
                 new MenuItem(
-                    'Shortcut',
-                    'Quick actions and shortcuts',
+                    'Quick actions',
+                    'Convenient actions for development',
                     undefined,
                     new vscode.ThemeIcon('zap'),
                     [
@@ -115,34 +179,6 @@ export class MenuProvider implements vscode.TreeDataProvider<MenuItem> {
                                 title: 'Duplicate Workspace in New Window'
                             },
                             new vscode.ThemeIcon('multiple-windows')
-                        )
-                    ],
-                    vscode.TreeItemCollapsibleState.Collapsed
-                ),
-                // Note（親項目）
-                new MenuItem(
-                    'Note',
-                    'Keyboard shortcuts and tips',
-                    undefined,
-                    new vscode.ThemeIcon('info'),
-                    [
-                        new MenuItem(
-                            'Focus Sidebar',
-                            'Cmd+Shift+A (macOS) / Ctrl+Shift+A (Windows/Linux)',
-                            undefined,
-                            new vscode.ThemeIcon('keyboard')
-                        ),
-                        new MenuItem(
-                            'New Task',
-                            'Cmd+S (macOS) / Ctrl+S (Windows/Linux) - When sidebar is focused',
-                            undefined,
-                            new vscode.ThemeIcon('keyboard')
-                        ),
-                        new MenuItem(
-                            'Create Markdown File',
-                            'Cmd+M (macOS) / Ctrl+M (Windows/Linux) - When sidebar is focused',
-                            undefined,
-                            new vscode.ThemeIcon('keyboard')
                         )
                     ],
                     vscode.TreeItemCollapsibleState.Collapsed

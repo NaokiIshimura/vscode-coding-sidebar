@@ -7,6 +7,7 @@ export interface TerminalTab {
     id: string;
     sessionId: string;
     shellName: string;
+    isClaudeCodeRunning: boolean;
 }
 
 export class TerminalProvider implements vscode.WebviewViewProvider {
@@ -113,6 +114,68 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                 case 'killTerminal':
                     this.killTerminal();
                     break;
+                case 'sendShortcut':
+                    {
+                        const command = data.command as string;
+                        const startsClaudeCode = data.startsClaudeCode as boolean;
+
+                        if (!command) {
+                            break;
+                        }
+
+                        if (this._activeTabId) {
+                            const tab = this._tabs.find(t => t.id === this._activeTabId);
+                            if (tab) {
+                                if (tab.isClaudeCodeRunning) {
+                                    // Claude Code起動中: コマンドのみ送信（Enterなし）
+                                    this._terminalService.write(tab.sessionId, command);
+                                } else {
+                                    // シェル: コマンド + 改行を送信
+                                    this._terminalService.write(tab.sessionId, command + '\n');
+
+                                    // 状態を更新
+                                    if (startsClaudeCode) {
+                                        tab.isClaudeCodeRunning = true;
+                                        // WebViewに状態を通知
+                                        this._view?.webview.postMessage({
+                                            type: 'claudeCodeStateChanged',
+                                            tabId: tab.id,
+                                            isRunning: true
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 'resetClaudeCodeState':
+                    if (this._activeTabId) {
+                        const tab = this._tabs.find(t => t.id === this._activeTabId);
+                        if (tab) {
+                            tab.isClaudeCodeRunning = false;
+                            this._view?.webview.postMessage({
+                                type: 'claudeCodeStateChanged',
+                                tabId: tab.id,
+                                isRunning: false
+                            });
+                        }
+                    }
+                    break;
+                case 'setClaudeCodeRunning':
+                    {
+                        const tabId = data.tabId as string;
+                        const isRunning = data.isRunning as boolean;
+                        const tab = this._tabs.find(t => t.id === tabId);
+                        if (tab) {
+                            tab.isClaudeCodeRunning = isRunning;
+                            this._view?.webview.postMessage({
+                                type: 'claudeCodeStateChanged',
+                                tabId: tab.id,
+                                isRunning: isRunning
+                            });
+                        }
+                    }
+                    break;
             }
         });
 
@@ -156,7 +219,8 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
             const tab: TerminalTab = {
                 id: tabId,
                 sessionId: sessionId,
-                shellName: shellName
+                shellName: shellName,
+                isClaudeCodeRunning: false
             };
             this._tabs.push(tab);
 
@@ -167,6 +231,48 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                     tabId: tabId,
                     data: data
                 });
+
+                // エスケープシーケンスを除去してクリーンなテキストを取得
+                const cleanData = data.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
+
+                // Claude Code起動検知
+                if (!tab.isClaudeCodeRunning) {
+                    // Claude Codeの起動パターンを検出
+                    // - "claude>" プロンプト
+                    // - "╭─" や ">" などのClaude Code特有のUI要素
+                    const claudeStartPatterns = [
+                        /claude>\s*$/,           // claude>プロンプト
+                        /╭─/,                    // Claude CodeのUI要素
+                        /Entering interactive mode/i,  // 起動メッセージ
+                        /Type \/help/i           // ヘルプ案内
+                    ];
+                    for (const pattern of claudeStartPatterns) {
+                        if (pattern.test(cleanData)) {
+                            tab.isClaudeCodeRunning = true;
+                            this._view?.webview.postMessage({
+                                type: 'claudeCodeStateChanged',
+                                tabId: tab.id,
+                                isRunning: true
+                            });
+                            break;
+                        }
+                    }
+                }
+
+                // Claude Code終了検知
+                if (tab.isClaudeCodeRunning) {
+                    // シェルプロンプトパターンを検出（行末に$や%がある場合）
+                    const shellPromptPattern = /[$%#]\s*$/;
+                    // "claude"を含まないプロンプト行で終了を検知
+                    if (shellPromptPattern.test(cleanData) && !cleanData.includes('claude')) {
+                        tab.isClaudeCodeRunning = false;
+                        this._view?.webview.postMessage({
+                            type: 'claudeCodeStateChanged',
+                            tabId: tab.id,
+                            isRunning: false
+                        });
+                    }
+                }
             });
             this._outputDisposables.set(tabId, disposable);
 
@@ -272,7 +378,7 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
     /**
      * ターミナルにコマンドを送信
      * @param command 実行するコマンド
-     * @param addNewline 改行を追加するかどうか（デフォルト: true）
+     * @param addNewline 改行を追加するかどうか（デフォルト: true、Claude Code起動中は自動的にfalse）
      */
     public async sendCommand(command: string, addNewline: boolean = true): Promise<void> {
         // タブがない場合は作成
@@ -284,7 +390,9 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
         if (this._activeTabId) {
             const tab = this._tabs.find(t => t.id === this._activeTabId);
             if (tab) {
-                const commandToSend = addNewline ? command + '\n' : command;
+                // Claude Code起動中は改行を追加しない
+                const shouldAddNewline = addNewline && !tab.isClaudeCodeRunning;
+                const commandToSend = shouldAddNewline ? command + '\n' : command;
                 this._terminalService.write(tab.sessionId, commandToSend);
             }
         }
@@ -360,16 +468,55 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
             position: relative;
         }
         #header {
-            height: 33px;
-            padding: 0 4px;
             background-color: var(--vscode-editor-background);
             border-bottom: 1px solid var(--vscode-panel-border);
             font-size: 12px;
             color: var(--vscode-foreground);
             display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+        .header-row-1 {
+            height: 33px;
+            padding: 0 4px;
+            display: flex;
             align-items: center;
             justify-content: space-between;
             box-sizing: border-box;
+        }
+        .header-row-2 {
+            padding: 4px 8px;
+            display: flex;
+            gap: 4px;
+            border-top: 1px solid var(--vscode-panel-border);
+        }
+        .shortcut-group {
+            display: flex;
+            gap: 4px;
+        }
+        .shortcut-group.hidden {
+            display: none;
+        }
+        .shortcut-button {
+            padding: 2px 8px;
+            font-size: 11px;
+            background-color: var(--vscode-button-secondaryBackground);
+            color: var(--vscode-button-secondaryForeground);
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .shortcut-button:hover {
+            background-color: var(--vscode-button-secondaryHoverBackground);
+        }
+        .shortcut-button.toggle-button {
+            padding: 2px 6px;
+            margin-left: 4px;
+            opacity: 0.6;
+        }
+        .shortcut-button.toggle-button:hover {
+            opacity: 1;
+            background-color: var(--vscode-button-secondaryHoverBackground);
         }
         .tab-bar {
             display: flex;
@@ -468,14 +615,14 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
             background-color: var(--vscode-inputValidation-errorBackground, #5a1d1d);
         }
         #terminals-container {
-            height: calc(100% - 33px);
+            height: calc(100% - 33px - 29px);
             width: 100%;
             position: relative;
             overflow: hidden;
         }
         #terminal-overlay {
             position: absolute;
-            top: 33px;
+            top: 62px;
             left: 0;
             right: 0;
             bottom: 0;
@@ -542,11 +689,26 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
 </head>
 <body>
     <div id="header">
-        <div class="tab-bar" id="tab-bar"></div>
-        <button class="new-tab-button" id="new-tab-button" title="New Terminal">+</button>
-        <div class="header-actions">
-            <button class="header-button" id="clear-button" title="Clear Terminal">Clear</button>
-            <button class="header-button danger" id="kill-button" title="Kill Terminal">Kill</button>
+        <div class="header-row-1">
+            <div class="tab-bar" id="tab-bar"></div>
+            <button class="new-tab-button" id="new-tab-button" title="New Terminal">+</button>
+            <div class="header-actions">
+                <button class="header-button" id="clear-button" title="Clear Terminal">Clear</button>
+                <button class="header-button danger" id="kill-button" title="Kill Terminal">Kill</button>
+            </div>
+        </div>
+        <div class="header-row-2" id="shortcut-bar">
+            <div class="shortcut-group" id="shortcuts-not-running">
+                <button class="shortcut-button" id="btn-claude">claude</button>
+                <button class="shortcut-button" id="btn-claude-c">claude -c</button>
+                <button class="shortcut-button" id="btn-claude-r">claude -r</button>
+                <button class="shortcut-button toggle-button" id="toggle-shortcuts-1" title="Switch to Claude Code commands">⇆</button>
+            </div>
+            <div class="shortcut-group hidden" id="shortcuts-running">
+                <button class="shortcut-button" id="btn-compact">/compact</button>
+                <button class="shortcut-button" id="btn-clear">/clear</button>
+                <button class="shortcut-button toggle-button" id="toggle-shortcuts-2" title="Switch to shell commands">⇆</button>
+            </div>
         </div>
     </div>
     <div id="error-message"></div>
@@ -569,6 +731,22 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
             // タブとターミナルの管理
             const tabs = new Map(); // tabId -> { tabEl, wrapperEl, term, fitAddon }
             let activeTabId = null;
+
+            // Claude Code起動状態の管理
+            const claudeCodeState = new Map(); // tabId -> boolean
+
+            // ショートカットバーの表示切り替え
+            function updateShortcutBar(isClaudeCodeRunning) {
+                const notRunning = document.getElementById('shortcuts-not-running');
+                const running = document.getElementById('shortcuts-running');
+                if (isClaudeCodeRunning) {
+                    notRunning.classList.add('hidden');
+                    running.classList.remove('hidden');
+                } else {
+                    notRunning.classList.remove('hidden');
+                    running.classList.add('hidden');
+                }
+            }
 
             // CSS変数から色を取得するヘルパー関数
             function getCssVar(name, fallback) {
@@ -783,6 +961,10 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                 tabInfo.wrapperEl.classList.add('active');
                 activeTabId = tabId;
 
+                // ショートカットバーの状態を更新
+                const isClaudeCodeRunning = claudeCodeState.get(tabId) || false;
+                updateShortcutBar(isClaudeCodeRunning);
+
                 // スクロールボタンの表示状態を更新
                 const buffer = tabInfo.term.buffer.active;
                 const hasScrollback = buffer.baseY > 0;
@@ -861,6 +1043,14 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                             }
                         }
                         break;
+                    case 'claudeCodeStateChanged':
+                        {
+                            claudeCodeState.set(message.tabId, message.isRunning);
+                            if (message.tabId === activeTabId) {
+                                updateShortcutBar(message.isRunning);
+                            }
+                        }
+                        break;
                 }
             });
 
@@ -874,6 +1064,43 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
             document.getElementById('kill-button')?.addEventListener('click', () => {
                 vscode.postMessage({ type: 'killTerminal' });
             });
+
+            // ショートカットボタンのイベントハンドラ
+            function sendShortcut(command, startsClaudeCode) {
+                if (!activeTabId) return;
+
+                const tabInfo = tabs.get(activeTabId);
+                if (tabInfo) {
+                    tabInfo.term.focus();
+                }
+
+                // Extension側でコマンド送信を処理
+                vscode.postMessage({
+                    type: 'sendShortcut',
+                    command: command,
+                    startsClaudeCode: startsClaudeCode
+                });
+            }
+
+            document.getElementById('btn-claude')?.addEventListener('click', () => sendShortcut('claude', true));
+            document.getElementById('btn-claude-c')?.addEventListener('click', () => sendShortcut('claude -c', true));
+            document.getElementById('btn-claude-r')?.addEventListener('click', () => sendShortcut('claude -r', true));
+            document.getElementById('btn-compact')?.addEventListener('click', () => sendShortcut('/compact', false));
+            document.getElementById('btn-clear')?.addEventListener('click', () => sendShortcut('/clear', false));
+
+            // トグルボタンのイベントハンドラ（ショートカット表示の切り替え）
+            function toggleShortcuts() {
+                if (!activeTabId) return;
+                const isClaudeRunning = claudeCodeState.get(activeTabId) || false;
+                // 状態を反転
+                const newState = !isClaudeRunning;
+                claudeCodeState.set(activeTabId, newState);
+                updateShortcutBar(newState);
+                // Extension側にも状態を通知
+                vscode.postMessage({ type: 'setClaudeCodeRunning', tabId: activeTabId, isRunning: newState });
+            }
+            document.getElementById('toggle-shortcuts-1')?.addEventListener('click', toggleShortcuts);
+            document.getElementById('toggle-shortcuts-2')?.addEventListener('click', toggleShortcuts);
 
             // スクロールボタンのイベントハンドラ
             scrollToBottomBtn?.addEventListener('click', () => {

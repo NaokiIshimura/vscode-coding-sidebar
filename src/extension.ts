@@ -1608,7 +1608,52 @@ export function activate(context: vscode.ExtensionContext) {
         await terminalProvider.insertPaths(relativePaths);
     });
 
-    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openTasksSettingsCommand, openEditorSettingsCommand, openTerminalSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, createMarkdownFileCommand, createTaskFileCommand, createSpecFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, newDirectoryCommand, newSpecCommand, renameDirectoryCommand, deleteDirectoryCommand, archiveDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand, navigateToDirectoryCommand, insertPathToEditorCommand, insertPathToTerminalCommand);
+    // ドキュメントを開くコマンドを登録
+    const openDocumentationCommand = vscode.commands.registerCommand('aiCodingSidebar.openDocumentation', () => {
+        vscode.env.openExternal(vscode.Uri.parse('https://github.com/NaokiIshimura/vscode-ai-coding-sidebar'));
+    });
+
+    // Getting Startedを開くコマンドを登録
+    const openGettingStartedCommand = vscode.commands.registerCommand('aiCodingSidebar.openGettingStarted', async () => {
+        const extensionPath = context.extensionPath;
+        const guidePath = path.join(extensionPath, 'docs', 'getting-started.md');
+        const uri = vscode.Uri.file(guidePath);
+        await vscode.commands.executeCommand('markdown.showPreview', uri);
+    });
+
+    // Tasks View Guideを開くコマンドを登録
+    const openTasksViewGuideCommand = vscode.commands.registerCommand('aiCodingSidebar.openTasksViewGuide', async () => {
+        const extensionPath = context.extensionPath;
+        const guidePath = path.join(extensionPath, 'docs', 'tasks-view.md');
+        const uri = vscode.Uri.file(guidePath);
+        await vscode.commands.executeCommand('markdown.showPreview', uri);
+    });
+
+    // Editor View Guideを開くコマンドを登録
+    const openEditorViewGuideCommand = vscode.commands.registerCommand('aiCodingSidebar.openEditorViewGuide', async () => {
+        const extensionPath = context.extensionPath;
+        const guidePath = path.join(extensionPath, 'docs', 'editor-view.md');
+        const uri = vscode.Uri.file(guidePath);
+        await vscode.commands.executeCommand('markdown.showPreview', uri);
+    });
+
+    // Terminal View Guideを開くコマンドを登録
+    const openTerminalViewGuideCommand = vscode.commands.registerCommand('aiCodingSidebar.openTerminalViewGuide', async () => {
+        const extensionPath = context.extensionPath;
+        const guidePath = path.join(extensionPath, 'docs', 'terminal-view.md');
+        const uri = vscode.Uri.file(guidePath);
+        await vscode.commands.executeCommand('markdown.showPreview', uri);
+    });
+
+    // Keyboard Shortcutsを開くコマンドを登録
+    const openKeyboardShortcutsCommand = vscode.commands.registerCommand('aiCodingSidebar.openKeyboardShortcuts', async () => {
+        const extensionPath = context.extensionPath;
+        const guidePath = path.join(extensionPath, 'docs', 'keyboard-shortcuts.md');
+        const uri = vscode.Uri.file(guidePath);
+        await vscode.commands.executeCommand('markdown.showPreview', uri);
+    });
+
+    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openTasksSettingsCommand, openEditorSettingsCommand, openTerminalSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, createMarkdownFileCommand, createTaskFileCommand, createSpecFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, newDirectoryCommand, newSpecCommand, renameDirectoryCommand, deleteDirectoryCommand, archiveDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand, navigateToDirectoryCommand, insertPathToEditorCommand, insertPathToTerminalCommand, openDocumentationCommand, openGettingStartedCommand, openTasksViewGuideCommand, openEditorViewGuideCommand, openTerminalViewGuideCommand, openKeyboardShortcutsCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({

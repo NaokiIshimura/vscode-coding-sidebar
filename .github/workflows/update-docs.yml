@@ -1,0 +1,71 @@
+name: Update Documentation
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  update-docs:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          # Maxプランの場合（推奨）
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # APIキーの場合は以下を使用
+          # anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+          prompt: |
+            このPRがマージされました。以下のドキュメントファイルを更新してください。
+
+            ## PR情報
+            - タイトル: ${{ github.event.pull_request.title }}
+            - 番号: #${{ github.event.pull_request.number }}
+            - 本文: ${{ github.event.pull_request.body }}
+
+            ## 更新対象ファイル
+
+            ### 1. README.md と README-JA.md
+            - `package.json`からバージョン番号を取得
+            - VSIXファイル名のバージョン番号を最新に更新
+              例: `ai-coding-sidebar-0.8.12.vsix` → `ai-coding-sidebar-{新バージョン}.vsix`
+
+            ### 2. CHANGELOG.md
+            - PRの内容をもとに変更履歴エントリを追加
+            - Keep a Changelog形式に従う
+            - 日付はマージ日
+            - 適切なカテゴリ（Added/Changed/Fixed/Removed）を使用
+            - 末尾のバージョンリンクも追加
+
+            ### 3. CHANGELOG-JA.md
+            - CHANGELOG.mdと同じ内容を日本語で追加
+            - 既存の日本語スタイルに合わせる
+
+            ## 注意事項
+            - 既存のフォーマットを維持すること
+            - バージョン番号はpackage.jsonを参照
+            - CHANGELOGは先頭（最新バージョン）に追記
+
+          allowed_tools: |
+            Read
+            Edit
+            Write
+            Bash
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add README.md README-JA.md CHANGELOG.md CHANGELOG-JA.md
+          git diff --staged --quiet || git commit -m "docs: Update documentation for merged PR #${{ github.event.pull_request.number }}"
+          git push

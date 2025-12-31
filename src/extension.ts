@@ -324,7 +324,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     // Editor設定を開くコマンドを登録
     const openEditorSettingsCommand = vscode.commands.registerCommand('aiCodingSidebar.openEditorSettings', async () => {
-        await vscode.commands.executeCommand('workbench.action.openSettings', 'aiCodingSidebar.editor.runCommand');
+        await vscode.commands.executeCommand('workbench.action.openSettings', 'aiCodingSidebar.editor');
     });
 
     // Terminal設定を開くコマンドを登録

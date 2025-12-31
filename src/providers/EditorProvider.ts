@@ -188,6 +188,55 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
                     // Cmd+M / Ctrl+M pressed - execute create markdown file command
                     vscode.commands.executeCommand('aiCodingSidebar.createMarkdownFile');
                     break;
+                case 'showWarning':
+                    vscode.window.showWarningMessage(data.message);
+                    break;
+                case 'planTask':
+                    // Plan button clicked - save file if needed, then send plan command to terminal
+                    if (this._currentFilePath) {
+                        // Save file first if content is provided
+                        if (data.content) {
+                            try {
+                                await fs.promises.writeFile(this._currentFilePath, data.content, 'utf8');
+                                this._currentContent = data.content;
+                                this._pendingContent = undefined;
+                                this._isDirty = false;
+                                // Update dirty state in webview
+                                this._view?.webview.postMessage({
+                                    type: 'updateDirtyState',
+                                    isDirty: false
+                                });
+                            } catch (error) {
+                                vscode.window.showErrorMessage(`Failed to save file: ${error}`);
+                                return;
+                            }
+                        }
+
+                        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+                        let relativeFilePath: string;
+
+                        if (workspaceRoot) {
+                            // Calculate relative path from workspace root
+                            relativeFilePath = path.relative(workspaceRoot, this._currentFilePath);
+                        } else {
+                            // If no workspace, use the full path
+                            relativeFilePath = this._currentFilePath;
+                        }
+
+                        // Get the plan command template from settings
+                        const config = vscode.workspace.getConfiguration('aiCodingSidebar');
+                        const commandTemplate = config.get<string>('editor.planCommand', 'claude "Review the file at ${filePath} and create an implementation plan."');
+
+                        // Replace ${filePath} placeholder with actual file path
+                        const command = commandTemplate.replace(/\$\{filePath\}/g, relativeFilePath.trim());
+
+                        // Send command to Terminal view
+                        if (this._terminalProvider) {
+                            this._terminalProvider.focus();
+                            await this._terminalProvider.sendCommand(command);
+                        }
+                    }
+                    break;
                 case 'runTask':
                     // Run button clicked - save file if needed, then send command to terminal
                     if (this._currentFilePath) {
@@ -519,12 +568,28 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
             cursor: not-allowed;
         }
         .save-button.dirty {
-            background-color: var(--vscode-button-background);
-            color: var(--vscode-button-foreground);
+            background-color: #f0ad4e;
+            color: #ffffff;
             border: none;
         }
         .save-button.dirty:hover {
-            background-color: var(--vscode-button-hoverBackground);
+            background-color: #ec971f;
+        }
+        .plan-button {
+            padding: 2px 8px;
+            font-size: 11px;
+            background-color: #28a745;
+            color: #ffffff;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        .plan-button:hover {
+            background-color: #218838;
+        }
+        .plan-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         .readonly-indicator {
             font-size: 11px;
@@ -590,6 +655,7 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
         <div class="header-actions">
             <span class="readonly-indicator" id="readonly-indicator">Read-only</span>
             <button class="save-button" id="save-button" title="Save file">Save</button>
+            <button class="plan-button" id="plan-button" title="Create implementation plan">Plan</button>
             <button class="run-button" id="run-button" title="Run task (Cmd+R / Ctrl+R)">Run</button>
         </div>
     </div>
@@ -604,6 +670,7 @@ Cmd+R / Ctrl+R - Run task in terminal</div>
         const filePathElement = document.getElementById('file-path');
         const readonlyIndicator = document.getElementById('readonly-indicator');
         const saveButton = document.getElementById('save-button');
+        const planButton = document.getElementById('plan-button');
         const runButton = document.getElementById('run-button');
         let originalContent = '';
         let currentFilePath = '';
@@ -749,6 +816,25 @@ Cmd+R / Ctrl+R - Run task in terminal</div>
         // Run button click handler
         runButton.addEventListener('click', () => {
             runTask();
+        });
+
+        // Plan button click handler
+        planButton.addEventListener('click', () => {
+            if (currentFilePath) {
+                // File is open - use the file-based plan task
+                const isDirty = editor.value !== originalContent;
+                vscode.postMessage({
+                    type: 'planTask',
+                    filePath: currentFilePath,
+                    content: isDirty && !isReadOnly ? editor.value : null
+                });
+            } else {
+                // No file open - show warning
+                vscode.postMessage({
+                    type: 'showWarning',
+                    message: 'Please open a file to create an implementation plan.'
+                });
+            }
         });
 
         // Notify extension that webview is ready

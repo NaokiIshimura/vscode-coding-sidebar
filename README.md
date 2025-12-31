@@ -100,8 +100,11 @@ When you create a file from Tasks, you can automatically populate it with a temp
 ### Configure the template
 1. Click the gear icon in the Tasks pane.
 2. Choose "Workspace Settings" -> "Customize template."
-3. `.vscode/ai-coding-sidebar/templates/task.md` is created.
-4. Edit the template and save it.
+3. Template files are created in `.vscode/ai-coding-panel/templates/`:
+   - `task.md` - Template for Start Task
+   - `spec.md` - Template for New Spec
+   - `prompt.md` - Template for New File (PROMPT.md)
+4. Edit the templates and save them.
 
 ### Default template
 The first template contains the following:
@@ -126,8 +129,8 @@ Use the following variables inside a template:
 - `{{dirpath}}`: Directory path relative to workspace root (for example, .claude/tasks)
 
 ### Template priority
-1. Workspace template `.vscode/ai-coding-sidebar/templates/task.md` (if present)
-2. Built-in extension template
+1. Workspace templates in `.vscode/ai-coding-panel/templates/` (if present)
+2. Built-in extension templates
 
 ### Template examples
 - Capture prompts for AI assistants in the `overview` section.
@@ -266,14 +269,14 @@ npm run watch
 1. Download the latest VSIX file from the [GitHub Releases page](https://github.com/NaokiIshimura/vscode-panel/releases).
 2. Install via command line:
    ```bash
-   code --install-extension ai-coding-sidebar-0.8.3.vsix
+   code --install-extension ai-coding-sidebar-0.8.6.vsix
    ```
 3. Restart VS Code.
 
 #### Use a local build
 ```bash
 # Install directly from the releases directory
-code --install-extension releases/ai-coding-sidebar-0.8.3.vsix
+code --install-extension releases/ai-coding-sidebar-0.8.6.vsix
 ```
 
 #### Build the package yourself
@@ -287,7 +290,7 @@ code --install-extension releases/ai-coding-sidebar-0.8.3.vsix
    ```
 3. Install the generated VSIX file:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.8.3.vsix
+   code --install-extension releases/ai-coding-sidebar-0.8.6.vsix
    ```
 4. Restart VS Code.
 

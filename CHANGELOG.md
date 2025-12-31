@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.6] - 2025-12-31
+
+### Changed
+- **Template Feature - Directory Path**: Changed template directory path from `.vscode/ai-coding-sidebar/templates` to `.vscode/ai-coding-panel/templates`
+  - Aligns with the extension's renamed display name "AI Coding Panel"
+  - All template references now use the new path
+
+### Added
+- **Template Feature - Multiple Templates**: Customize Template now creates 3 template files
+  - `task.md` - Template for Start Task command
+  - `spec.md` - Template for New Spec command
+  - `prompt.md` - Template for New File (PROMPT.md) command
+  - Previously only created a single `task.md` file
+- **Template Feature - Explorer Reveal**: After creating templates, the templates directory is revealed in Explorer
+  - Makes it easier to navigate and edit multiple template files
+
 ## [0.8.3] - 2025-12-31
 
 ### Added
@@ -1002,6 +1018,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.8.6]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.5...v0.8.6
+[0.8.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.4...v0.8.5
+[0.8.4]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.3...v0.8.4
+[0.8.3]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.2...v0.8.3
 [0.8.2]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.1...v0.8.2
 [0.8.1]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.7.38...v0.8.0

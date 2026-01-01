@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.17] - 2026-01-02
+
+### Changed
+- **Editor View - Run Command**: Updated default value of `aiCodingSidebar.editor.runCommand` setting
+  - Old: `claude "${filePath}"`
+  - New: `claude "Review the file at ${filePath}"`
+  - Provides clearer context to Claude Code when reviewing files
+
 ## [0.8.16] - 2026-01-01
 
 ### Improved

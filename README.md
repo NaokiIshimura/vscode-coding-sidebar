@@ -1,5 +1,7 @@
 # AI Coding Panel
 
+[![Version](https://img.shields.io/vscode-marketplace/v/nacn.ai-coding-sidebar.svg)](https://marketplace.visualstudio.com/items?itemName=nacn.ai-coding-sidebar) [![Installs](https://img.shields.io/vscode-marketplace/i/nacn.ai-coding-sidebar.svg)](https://marketplace.visualstudio.com/items?itemName=nacn.ai-coding-sidebar) [![Rating](https://img.shields.io/vscode-marketplace/r/nacn.ai-coding-sidebar.svg)](https://marketplace.visualstudio.com/items?itemName=nacn.ai-coding-sidebar)
+
 A panel extension that strengthens integration with AI coding tools.
 
 Streamline your AI-assisted coding workflow by managing prompt files, running AI commands, and viewing results—all within a single panel. No more switching between file explorer, editor, and terminal. Focus on coding while AI does the heavy lifting.

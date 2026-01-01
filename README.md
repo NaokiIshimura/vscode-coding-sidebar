@@ -221,7 +221,7 @@ Add the following to `.vscode/settings.json`:
   "aiCodingSidebar.defaultRelativePath": ".claude",
   "aiCodingSidebar.markdownList.sortBy": "created",
   "aiCodingSidebar.markdownList.sortOrder": "ascending",
-  "aiCodingSidebar.editor.runCommand": "claude \"${filePath}\"",
+  "aiCodingSidebar.editor.runCommand": "claude \"Review the file at ${filePath}\"",
   "aiCodingSidebar.editor.runCommandWithoutFile": "claude \"${editorContent}\"",
   "aiCodingSidebar.terminal.fontSize": 12,
   "aiCodingSidebar.terminal.cursorStyle": "block"

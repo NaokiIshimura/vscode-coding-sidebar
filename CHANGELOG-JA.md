@@ -5,6 +5,14 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.17] - 2026-01-02
+
+### 変更
+- **Editor View - Runコマンド**: `aiCodingSidebar.editor.runCommand`設定のデフォルト値を更新
+  - 旧: `claude "${filePath}"`
+  - 新: `claude "Review the file at ${filePath}"`
+  - ファイルレビュー時にClaude Codeへのコンテキストをより明確に提供
+
 ## [0.8.16] - 2026-01-01
 
 ### 改善

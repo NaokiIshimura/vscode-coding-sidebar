@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.19] - 2026-01-02
+
+### Added
+- **Editor View - Edit in VS Code Button**: Added button to open markdown file in VS Code standard editor
+  - Pencil icon (✏️) button placed left of Save button
+  - Opens file in VS Code standard editor when clicked
+  - Auto-saves unsaved changes before opening
+  - Editor View becomes read-only when file is open in VS Code
+
+### Changed
+- **Editor View - Button UI**: Improved button design and consistency
+  - Edit and Save buttons now show icons only (✏️ and 💾)
+  - All buttons now have unified height with `line-height: 16px`
+  - "Read-only" text changed to "Editing in VS Code"
+
+### Improved
+- **Editor View - Read-only Mode**: Enhanced read-only mode behavior and user experience
+  - Read-only indicator now displays in top-right corner of editor area with fade-in/out animation
+  - Edit button shows active state (highlighted background) when file is open in VS Code
+  - Editor remains read-only while file tab is open in VS Code (not just when active)
+  - Clicking read-only editor area focuses the file tab in VS Code
+  - Real-time synchronization: changes saved in VS Code editor automatically reflect in Editor View
+
 ## [0.8.18] - 2026-01-02
 
 ### Fixed

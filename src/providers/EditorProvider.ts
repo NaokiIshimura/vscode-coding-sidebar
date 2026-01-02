@@ -31,6 +31,65 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
                 this._checkAndUpdateReadOnlyState(editor);
             })
         );
+
+        // タブグループの変更を監視（タブの開閉、移動を検知）
+        this._disposables.push(
+            vscode.window.tabGroups.onDidChangeTabs(event => {
+                this._checkAndUpdateReadOnlyState(undefined);
+            })
+        );
+
+        // ファイル保存を監視してEditor Viewを更新
+        this._disposables.push(
+            vscode.workspace.onDidSaveTextDocument(async (document) => {
+                // 保存されたファイルが現在Editor Viewで開いているファイルと一致するか確認
+                if (this._currentFilePath && document.uri.fsPath === this._currentFilePath) {
+                    try {
+                        // ファイル内容を再読み込み
+                        const content = await fs.promises.readFile(this._currentFilePath, 'utf8');
+
+                        // 内容が変更されている場合のみ更新
+                        if (content !== this._currentContent) {
+                            this._currentContent = content;
+                            this._pendingContent = undefined;
+                            this._isDirty = false;
+
+                            const displayPath = path.basename(this._currentFilePath);
+                            const isOpenInEditor = this._isFileOpenInTab(this._currentFilePath);
+
+                            // Webviewに更新内容を送信
+                            if (this._view) {
+                                this._view.webview.postMessage({
+                                    type: 'showContent',
+                                    filePath: displayPath,
+                                    content: content,
+                                    isReadOnly: isOpenInEditor
+                                });
+                            }
+                        }
+                    } catch (error) {
+                        console.error(`Failed to reload file after save: ${error}`);
+                    }
+                }
+            })
+        );
+    }
+
+    /**
+     * ファイルがVS Codeのタブで開かれているかチェック
+     */
+    private _isFileOpenInTab(filePath: string): boolean {
+        // すべてのタブグループをチェック
+        for (const group of vscode.window.tabGroups.all) {
+            for (const tab of group.tabs) {
+                if (tab.input instanceof vscode.TabInputText) {
+                    if (tab.input.uri.fsPath === filePath) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private _checkAndUpdateReadOnlyState(editor: vscode.TextEditor | undefined) {
@@ -38,13 +97,13 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
             return;
         }
 
-        // アクティブなエディタがMarkdown Editorで開いているファイルと同じかチェック
-        const isActiveInEditor = editor && editor.document.uri.fsPath === this._currentFilePath;
+        // すべてのタブでファイルが開かれているかチェック（アクティブでなくてもタブが開いていれば）
+        const isOpenInEditor = this._isFileOpenInTab(this._currentFilePath);
 
         // webviewに読み取り専用状態を更新
         this._view.webview.postMessage({
             type: 'setReadOnlyState',
-            isReadOnly: !!isActiveInEditor
+            isReadOnly: isOpenInEditor
         });
     }
 
@@ -236,6 +295,71 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
                         vscode.window.showWarningMessage('Please enter some text in the editor to run a task.');
                     }
                     break;
+                case 'openInVSCode':
+                    // Edit button clicked - save if needed, then open in VS Code editor
+                    if (!this._currentFilePath) {
+                        vscode.window.showWarningMessage('No file is currently open.');
+                        return;
+                    }
+
+                    // Save file first if content is provided (unsaved changes)
+                    if (data.content) {
+                        try {
+                            await fs.promises.writeFile(this._currentFilePath, data.content, 'utf8');
+                            this._currentContent = data.content;
+                            this._pendingContent = undefined;
+                            this._isDirty = false;
+                            // Update dirty state in webview
+                            this._view?.webview.postMessage({
+                                type: 'updateDirtyState',
+                                isDirty: false
+                            });
+                        } catch (error) {
+                            vscode.window.showErrorMessage(`Failed to save file: ${error}`);
+                            return;
+                        }
+                    }
+
+                    // Open file in VS Code editor
+                    try {
+                        const document = await vscode.workspace.openTextDocument(this._currentFilePath);
+                        await vscode.window.showTextDocument(document, {
+                            preview: false,
+                            preserveFocus: false
+                        });
+                    } catch (error) {
+                        vscode.window.showErrorMessage(`Failed to open file in editor: ${error}`);
+                    }
+                    break;
+                case 'focusTabInVSCode':
+                    // Readonly editor clicked - focus the tab in VS Code
+                    if (!this._currentFilePath) {
+                        return;
+                    }
+
+                    // Find and focus the tab
+                    try {
+                        // すべてのタブグループをチェックして、該当ファイルのタブを見つける
+                        for (const group of vscode.window.tabGroups.all) {
+                            for (const tab of group.tabs) {
+                                if (tab.input instanceof vscode.TabInputText) {
+                                    if (tab.input.uri.fsPath === this._currentFilePath) {
+                                        // タブが見つかったら、そのドキュメントを開いてフォーカス
+                                        const document = await vscode.workspace.openTextDocument(this._currentFilePath);
+                                        await vscode.window.showTextDocument(document, {
+                                            preview: false,
+                                            preserveFocus: false,
+                                            viewColumn: group.viewColumn
+                                        });
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.error(`Failed to focus tab in VS Code: ${error}`);
+                    }
+                    break;
             }
         });
 
@@ -274,13 +398,13 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
                     this._isDirty = false;
 
                     const displayPath = path.basename(this._currentFilePath);
-                    const isActiveInEditor = vscode.window.activeTextEditor?.document.uri.fsPath === this._currentFilePath;
+                    const isOpenInEditor = this._isFileOpenInTab(this._currentFilePath);
 
                     this._view?.webview.postMessage({
                         type: 'showContent',
                         filePath: displayPath,
                         content: content,
-                        isReadOnly: isActiveInEditor
+                        isReadOnly: isOpenInEditor
                     });
                 } catch (error) {
                     console.error(`Failed to restore file: ${error}`);
@@ -312,11 +436,11 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
 
         this._currentFilePath = filePath;
 
-        // アクティブなエディタがこのファイルかチェック
-        const isActiveInEditor = vscode.window.activeTextEditor?.document.uri.fsPath === filePath;
+        // すべてのタブでファイルが開かれているかチェック
+        const isOpenInEditor = this._isFileOpenInTab(filePath);
 
-        if (isActiveInEditor) {
-            vscode.window.showWarningMessage('This file is active in the editor. Markdown Editor will be read-only.');
+        if (isOpenInEditor) {
+            vscode.window.showWarningMessage('This file is open in the editor. Markdown Editor will be read-only.');
         }
 
         try {
@@ -333,7 +457,7 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
                     type: 'showContent',
                     filePath: displayPath,
                     content: content,
-                    isReadOnly: isActiveInEditor
+                    isReadOnly: isOpenInEditor
                 });
                 this._view.show?.(true);
             }
@@ -601,6 +725,7 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
         .run-button {
             padding: 2px 8px;
             font-size: 11px;
+            line-height: 16px;
             background-color: var(--vscode-button-background);
             color: var(--vscode-button-foreground);
             border: none;
@@ -617,6 +742,7 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
         .save-button {
             padding: 2px 8px;
             font-size: 11px;
+            line-height: 16px;
             background-color: transparent;
             color: var(--vscode-foreground);
             border: 1px solid var(--vscode-button-border, transparent);
@@ -638,9 +764,35 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
         .save-button.dirty:hover {
             background-color: #ec971f;
         }
+        .edit-button {
+            padding: 2px 8px;
+            font-size: 11px;
+            line-height: 16px;
+            background-color: transparent;
+            color: var(--vscode-foreground);
+            border: 1px solid var(--vscode-button-border, transparent);
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        .edit-button:hover {
+            background-color: var(--vscode-toolbar-hoverBackground);
+        }
+        .edit-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .edit-button.active {
+            background-color: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+            border: none;
+        }
+        .edit-button.active:hover {
+            background-color: var(--vscode-button-hoverBackground);
+        }
         .plan-button {
             padding: 2px 8px;
             font-size: 11px;
+            line-height: 16px;
             background-color: #28a745;
             color: #ffffff;
             border: none;
@@ -657,6 +809,7 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
         .spec-button {
             padding: 2px 8px;
             font-size: 11px;
+            line-height: 16px;
             background-color: #6f42c1;
             color: #ffffff;
             border: none;
@@ -671,12 +824,22 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
             cursor: not-allowed;
         }
         .readonly-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
             font-size: 11px;
             color: var(--vscode-editorWarning-foreground);
-            display: none;
+            background-color: var(--vscode-editor-background);
+            padding: 4px 8px;
+            border-radius: 3px;
+            border: 1px solid var(--vscode-editorWarning-foreground);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10;
+            transition: opacity 0.2s ease-in-out;
         }
         .readonly-indicator.show {
-            display: inline;
+            opacity: 1;
         }
         #editor-container {
             flex: 1;
@@ -732,14 +895,15 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
             <span id="file-path"></span>
         </div>
         <div class="header-actions">
-            <span class="readonly-indicator" id="readonly-indicator">Read-only</span>
-            <button class="save-button" id="save-button" title="Save file">Save</button>
+            <button class="edit-button" id="edit-button" title="Edit in VS Code">✏️</button>
+            <button class="save-button" id="save-button" title="Save file">💾</button>
             <button class="plan-button" id="plan-button" title="Create implementation plan">Plan</button>
             <button class="spec-button" id="spec-button" title="Create specification documents">Spec</button>
             <button class="run-button" id="run-button" title="Run task (Cmd+R / Ctrl+R)">Run</button>
         </div>
     </div>
     <div id="editor-container">
+        <span class="readonly-indicator" id="readonly-indicator">Editing in VS Code</span>
         <textarea id="editor" placeholder="Enter prompt here..."></textarea>
         <div id="shortcuts-overlay">Cmd+M / Ctrl+M - Create new markdown file
 Cmd+R / Ctrl+R - Run task in terminal</div>
@@ -749,6 +913,7 @@ Cmd+R / Ctrl+R - Run task in terminal</div>
         const editor = document.getElementById('editor');
         const filePathElement = document.getElementById('file-path');
         const readonlyIndicator = document.getElementById('readonly-indicator');
+        const editButton = document.getElementById('edit-button');
         const saveButton = document.getElementById('save-button');
         const planButton = document.getElementById('plan-button');
         const specButton = document.getElementById('spec-button');
@@ -773,9 +938,11 @@ Cmd+R / Ctrl+R - Run task in terminal</div>
                     if (isReadOnly) {
                         editor.setAttribute('readonly', 'readonly');
                         readonlyIndicator.classList.add('show');
+                        editButton.classList.add('active');
                     } else {
                         editor.removeAttribute('readonly');
                         readonlyIndicator.classList.remove('show');
+                        editButton.classList.remove('active');
                     }
                     break;
                 case 'updateDirtyState':
@@ -791,10 +958,12 @@ Cmd+R / Ctrl+R - Run task in terminal</div>
                     if (isReadOnly) {
                         editor.setAttribute('readonly', 'readonly');
                         readonlyIndicator.classList.add('show');
+                        editButton.classList.add('active');
                         saveButton.classList.remove('dirty');
                     } else {
                         editor.removeAttribute('readonly');
                         readonlyIndicator.classList.remove('show');
+                        editButton.classList.remove('active');
                         // Check if content is dirty when switching back to editable
                         const isDirty = editor.value !== originalContent;
                         if (isDirty) {
@@ -809,6 +978,7 @@ Cmd+R / Ctrl+R - Run task in terminal</div>
                     filePathElement.textContent = '';
                     saveButton.classList.remove('dirty');
                     readonlyIndicator.classList.remove('show');
+                    editButton.classList.remove('active');
                     editor.removeAttribute('readonly');
                     isReadOnly = false;
                     break;
@@ -917,6 +1087,33 @@ Cmd+R / Ctrl+R - Run task in terminal</div>
                 filePath: currentFilePath,
                 content: (currentFilePath && isDirty && !isReadOnly) || !currentFilePath ? editor.value : null
             });
+        });
+
+        // Edit button click handler
+        editButton.addEventListener('click', () => {
+            if (!currentFilePath) {
+                vscode.postMessage({
+                    type: 'showWarning',
+                    message: 'No file is currently open. Please save the file first.'
+                });
+                return;
+            }
+            const isDirty = editor.value !== originalContent;
+            vscode.postMessage({
+                type: 'openInVSCode',
+                filePath: currentFilePath,
+                content: isDirty && !isReadOnly ? editor.value : null
+            });
+        });
+
+        // Editor click handler when readonly - focus the tab in VS Code
+        editor.addEventListener('click', () => {
+            if (isReadOnly && currentFilePath) {
+                vscode.postMessage({
+                    type: 'focusTabInVSCode',
+                    filePath: currentFilePath
+                });
+            }
         });
 
         // Notify extension that webview is ready

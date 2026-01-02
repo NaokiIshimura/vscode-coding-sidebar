@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.18] - 2026-01-02
+
+### Fixed
+- **Terminal View - Scroll Position**: Fixed scroll position jumping to top when resizing terminal view width
+  - Now properly maintains scroll position at bottom when user is at bottom before resize
+  - Uses `requestAnimationFrame` to ensure scroll adjustment happens after terminal fit operation completes
+  - Improves user experience by keeping the latest output visible when adjusting sidebar width
+
 ## [0.8.17] - 2026-01-02
 
 ### Changed
@@ -1110,6 +1118,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.8.18]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.17...v0.8.18
+[0.8.17]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.16...v0.8.17
+[0.8.16]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.15...v0.8.16
 [0.8.15]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.12...v0.8.15
 [0.8.12]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.11...v0.8.12
 [0.8.11]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.10...v0.8.11

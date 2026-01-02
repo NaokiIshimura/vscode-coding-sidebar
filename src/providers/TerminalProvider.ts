@@ -963,8 +963,11 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                             });
 
                             // 最下部にいた場合は自動的に追従
+                            // fitの処理が完了してからスクロールするため、requestAnimationFrameを使用
                             if (wasAtBottom) {
-                                term.scrollToBottom();
+                                requestAnimationFrame(() => {
+                                    term.scrollToBottom();
+                                });
                             }
                         } catch (e) {
                             console.error('Resize error:', e);

@@ -897,8 +897,8 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
         <div class="header-actions">
             <button class="edit-button" id="edit-button" title="Edit in VS Code">✏️</button>
             <button class="save-button" id="save-button" title="Save file">💾</button>
-            <button class="plan-button" id="plan-button" title="Create implementation plan">Plan</button>
             <button class="spec-button" id="spec-button" title="Create specification documents">Spec</button>
+            <button class="plan-button" id="plan-button" title="Create implementation plan">Plan</button>
             <button class="run-button" id="run-button" title="Run task (Cmd+R / Ctrl+R)">Run</button>
         </div>
     </div>
@@ -915,8 +915,8 @@ Cmd+R / Ctrl+R - Run task in terminal</div>
         const readonlyIndicator = document.getElementById('readonly-indicator');
         const editButton = document.getElementById('edit-button');
         const saveButton = document.getElementById('save-button');
-        const planButton = document.getElementById('plan-button');
         const specButton = document.getElementById('spec-button');
+        const planButton = document.getElementById('plan-button');
         const runButton = document.getElementById('run-button');
         let originalContent = '';
         let currentFilePath = '';
@@ -1069,21 +1069,21 @@ Cmd+R / Ctrl+R - Run task in terminal</div>
             runTask();
         });
 
-        // Plan button click handler
-        planButton.addEventListener('click', () => {
-            const isDirty = editor.value !== originalContent;
-            vscode.postMessage({
-                type: 'planTask',
-                filePath: currentFilePath,
-                content: (currentFilePath && isDirty && !isReadOnly) || !currentFilePath ? editor.value : null
-            });
-        });
-
         // Spec button click handler
         specButton.addEventListener('click', () => {
             const isDirty = editor.value !== originalContent;
             vscode.postMessage({
                 type: 'specTask',
+                filePath: currentFilePath,
+                content: (currentFilePath && isDirty && !isReadOnly) || !currentFilePath ? editor.value : null
+            });
+        });
+
+        // Plan button click handler
+        planButton.addEventListener('click', () => {
+            const isDirty = editor.value !== originalContent;
+            vscode.postMessage({
+                type: 'planTask',
                 filePath: currentFilePath,
                 content: (currentFilePath && isDirty && !isReadOnly) || !currentFilePath ? editor.value : null
             });

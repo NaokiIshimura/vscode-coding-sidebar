@@ -5,6 +5,14 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.20] - 2026-01-03
+
+### 変更
+- **Editor View - ボタン順序**: PlanボタンとSpecボタンの順序を入れ替え
+  - 旧順序: Edit、Save、Plan、Spec、Run
+  - 新順序: Edit、Save、Spec、Plan、Run
+  - Specボタンを先に配置することでワークフローを改善
+
 ## [0.8.19] - 2026-01-02
 
 ### 追加
@@ -647,6 +655,8 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.8.20]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.19...v0.8.20
+[0.8.19]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.18...v0.8.19
 [0.8.18]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.17...v0.8.18
 [0.8.17]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.16...v0.8.17
 [0.8.16]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.15...v0.8.16

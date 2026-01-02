@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.20] - 2026-01-03
+
+### Changed
+- **Editor View - Button Order**: Swapped the order of Plan and Spec buttons
+  - Previous order: Edit, Save, Plan, Spec, Run
+  - New order: Edit, Save, Spec, Plan, Run
+  - Improves workflow by placing Spec button before Plan button
+
 ## [0.8.19] - 2026-01-02
 
 ### Added
@@ -1141,6 +1149,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Workspace Settings**: Easily create and edit `.vscode/settings.json`
 - **Automated Build & Release**: Automated build and release via GitHub Actions
 
+[0.8.20]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.19...v0.8.20
+[0.8.19]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.18...v0.8.19
 [0.8.18]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.17...v0.8.18
 [0.8.17]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.16...v0.8.17
 [0.8.16]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.15...v0.8.16

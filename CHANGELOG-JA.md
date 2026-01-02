@@ -5,6 +5,14 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.18] - 2026-01-02
+
+### 修正
+- **Terminal View - スクロール位置**: ターミナルビューの横幅を変更したときにスクロール位置が最上部にジャンプしてしまう問題を修正
+  - リサイズ前に最下部にいた場合、スクロール位置が最下部に正しく維持されるように修正
+  - `requestAnimationFrame`を使用してターミナルのfit操作完了後にスクロール調整が実行されるように変更
+  - サイドバーの幅を調整しても最新の出力が表示され続けることで、ユーザー体験を向上
+
 ## [0.8.17] - 2026-01-02
 
 ### 変更
@@ -616,6 +624,9 @@
 - **ワークスペース設定**: `.vscode/settings.json`を簡単に作成・編集
 - **自動ビルド・リリース**: GitHub Actionsによる自動ビルドとリリース
 
+[0.8.18]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.17...v0.8.18
+[0.8.17]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.16...v0.8.17
+[0.8.16]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.15...v0.8.16
 [0.8.15]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.12...v0.8.15
 [0.8.12]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.11...v0.8.12
 [0.8.11]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.10...v0.8.11

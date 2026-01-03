@@ -5,6 +5,15 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.21] - 2026-01-03
+
+### 改善
+- **Terminal View - 自動スクロール強化**: 意図しないスクロール位置のずれを防ぐため、最下部への自動追従動作を強化
+  - `write()`コールバックを使用して、出力完了後に確実にスクロールを実行
+  - 2重の`requestAnimationFrame`でDOM更新との同期を確実に実現
+  - ユーザーが手動で上にスクロールしない限り、スクロール位置を最下部に維持
+  - 高速な出力（npm installなど）時のスクロール位置のずれを修正
+
 ## [0.8.20] - 2026-01-03
 
 ### 変更
@@ -708,3 +717,4 @@
 [0.2.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.1.0...v0.2.5
 [0.1.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.0.1...v0.1.0
 [0.0.1]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/releases/tag/v0.0.1
+[0.8.21]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.20...v0.8.21

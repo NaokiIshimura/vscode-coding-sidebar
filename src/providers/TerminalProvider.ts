@@ -850,30 +850,33 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                 term.open(wrapperEl);
 
                 // スクロール位置を監視してボタンの表示/非表示を切り替え
-                function updateScrollButtonVisibility() {
-                    if (activeTabId !== tabId) return;
+                function updateScrollButtonVisibility(targetTabId) {
+                    const tabInfo = tabs.get(targetTabId);
+                    if (!tabInfo) return;
 
                     // 最下部にいるかどうかを判定
-                    const atBottom = isTerminalAtBottom(term);
+                    const atBottom = isTerminalAtBottom(tabInfo.term);
 
-                    // スクロール位置の状態を更新
-                    isAtBottomState.set(tabId, atBottom);
+                    // スクロール位置の状態を更新（全タブの状態を更新）
+                    isAtBottomState.set(targetTabId, atBottom);
 
-                    // スクロールボタンの表示/非表示を切り替え
-                    const buffer = term.buffer.active;
-                    const baseY = buffer.baseY;
-                    const hasScrollback = baseY > 0;
+                    // アクティブタブの場合のみボタンの表示/非表示を更新
+                    if (activeTabId === targetTabId) {
+                        const buffer = tabInfo.term.buffer.active;
+                        const baseY = buffer.baseY;
+                        const hasScrollback = baseY > 0;
 
-                    if (hasScrollback && !atBottom) {
-                        scrollToBottomBtn.classList.remove('hidden');
-                    } else {
-                        scrollToBottomBtn.classList.add('hidden');
+                        if (hasScrollback && !atBottom) {
+                            scrollToBottomBtn.classList.remove('hidden');
+                        } else {
+                            scrollToBottomBtn.classList.add('hidden');
+                        }
                     }
                 }
 
                 // xterm.jsのonScrollイベントを監視
                 term.onScroll(() => {
-                    updateScrollButtonVisibility();
+                    updateScrollButtonVisibility(tabId);
                 });
 
                 // xterm-viewportのネイティブスクロールイベントも監視（DOM構築後に設定）
@@ -881,7 +884,7 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                     const viewport = wrapperEl.querySelector('.xterm-viewport');
                     if (viewport) {
                         viewport.addEventListener('scroll', () => {
-                            updateScrollButtonVisibility();
+                            updateScrollButtonVisibility(tabId);
                         }, { passive: true });
                     }
                 });
@@ -963,10 +966,14 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                             });
 
                             // 最下部にいた場合は自動的に追従
-                            // fitの処理が完了してからスクロールするため、requestAnimationFrameを使用
+                            // fitの処理が完了してからスクロールするため、2回のrequestAnimationFrameを使用
                             if (wasAtBottom) {
                                 requestAnimationFrame(() => {
-                                    term.scrollToBottom();
+                                    requestAnimationFrame(() => {
+                                        term.scrollToBottom();
+                                        // 確実に最下部にいることを記録
+                                        isAtBottomState.set(tabId, true);
+                                    });
                                 });
                             }
                         } catch (e) {
@@ -1059,12 +1066,20 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                                 // 出力前に最下部にいたかどうかを確認
                                 const wasAtBottom = isAtBottomState.get(message.tabId);
 
-                                tabInfo.term.write(message.data);
-
-                                // 最下部にいた場合は自動的に追従
-                                if (wasAtBottom) {
-                                    tabInfo.term.scrollToBottom();
-                                }
+                                // write()のコールバックを使用して、書き込み完了後にスクロール
+                                tabInfo.term.write(message.data, () => {
+                                    // 最下部にいた場合は自動的に追従
+                                    if (wasAtBottom) {
+                                        // DOM更新を確実に待つため、2回のrequestAnimationFrameを使用
+                                        requestAnimationFrame(() => {
+                                            requestAnimationFrame(() => {
+                                                tabInfo.term.scrollToBottom();
+                                                // 確実に最下部にいることを記録
+                                                isAtBottomState.set(message.tabId, true);
+                                            });
+                                        });
+                                    }
+                                });
                             }
                         }
                         break;

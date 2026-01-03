@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.21] - 2026-01-03
+
+### Improved
+- **Terminal View - Auto-scroll Enhancement**: Enhanced automatic scroll-to-bottom behavior to prevent unintended position shifts
+  - Uses `write()` callback to ensure scrolling happens after output is completely written
+  - Double `requestAnimationFrame` for reliable DOM update synchronization
+  - Maintains scroll position at bottom unless user manually scrolls up
+  - Fixes scroll position issues during rapid output (e.g., npm install)
+
 ## [0.8.20] - 2026-01-03
 
 ### Changed
@@ -1236,3 +1245,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.2.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.1.0...v0.2.5
 [0.1.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.0.1...v0.1.0
 [0.0.1]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/releases/tag/v0.0.1
+[0.8.21]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.20...v0.8.21

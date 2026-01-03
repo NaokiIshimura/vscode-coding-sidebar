@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.22] - 2026-01-04
+
+### Improved
+- **Terminal View - New Terminal Button Placement**: Positioned New Terminal button (+) to the right of tabs
+  - Uses `insertBefore` to insert tab elements before the button, ensuring button always appears on the right side
+  - Automatically hides + button when maximum number of terminal tabs (5) is reached
+  - Re-displays + button when a tab is closed and count drops below 5
+  - Improved UI/UX consistency makes creating new terminals more intuitive
+
 ## [0.8.21] - 2026-01-03
 
 ### Improved

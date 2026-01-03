@@ -286,6 +286,9 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
 
             // 新しいタブをアクティブ化
             this._activateTab(tabId);
+
+            // ボタンの表示状態を更新
+            this._updateNewTabButtonVisibility();
         } catch (error) {
             console.error('Failed to create terminal tab:', error);
             this._view?.webview.postMessage({
@@ -304,6 +307,15 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                 tabId: tabId
             });
         }
+    }
+
+    private _updateNewTabButtonVisibility(): void {
+        // タブ数が最大数に達している場合、ボタンを非表示にする
+        const shouldHideButton = this._tabs.length >= TerminalProvider.MAX_TABS;
+        this._view?.webview.postMessage({
+            type: 'updateNewTabButtonVisibility',
+            visible: !shouldHideButton
+        });
     }
 
     private _closeTab(tabId: string): void {
@@ -343,6 +355,9 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                 this._createTab();
             }
         }
+
+        // ボタンの表示状態を更新
+        this._updateNewTabButtonVisibility();
     }
 
     private _cleanup(): void {
@@ -695,8 +710,9 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
 <body>
     <div id="header">
         <div class="header-row-1">
-            <div class="tab-bar" id="tab-bar"></div>
-            <button class="new-tab-button" id="new-tab-button" title="New Terminal">+</button>
+            <div class="tab-bar" id="tab-bar">
+                <button class="new-tab-button" id="new-tab-button" title="New Terminal">+</button>
+            </div>
             <div class="header-actions">
                 <button class="header-button" id="clear-button" title="Clear Terminal">Clear</button>
                 <button class="header-button danger" id="kill-button" title="Kill Terminal">Kill</button>
@@ -804,7 +820,9 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                     vscode.postMessage({ type: 'closeTab', tabId: tabId });
                 });
 
-                tabBar.appendChild(tabEl);
+                // +ボタンの前にタブを挿入
+                const newTabButton = document.getElementById('new-tab-button');
+                tabBar.insertBefore(tabEl, newTabButton);
 
                 // ターミナルラッパーを作成（activeで作成してサイズ計算を可能に）
                 const wrapperEl = document.createElement('div');
@@ -1108,6 +1126,18 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                             claudeCodeState.set(message.tabId, message.isRunning);
                             if (message.tabId === activeTabId) {
                                 updateShortcutBar(message.isRunning);
+                            }
+                        }
+                        break;
+                    case 'updateNewTabButtonVisibility':
+                        {
+                            const newTabButton = document.getElementById('new-tab-button');
+                            if (newTabButton) {
+                                if (message.visible) {
+                                    newTabButton.style.display = 'flex';
+                                } else {
+                                    newTabButton.style.display = 'none';
+                                }
                             }
                         }
                         break;

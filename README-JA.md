@@ -201,8 +201,8 @@ created: {{datetime}}
 | 設定項目 | 説明 | 型 | デフォルト値 | 選択肢/例 |
 | --- | --- | --- | --- | --- |
 | `defaultRelativePath` | Tasksのデフォルト相対パス | string | `".claude/tasks"` | `"src"`, `".claude"`, `"docs/api"` |
-| `markdownList.sortBy` | Tasksのファイルのソート基準 | string | `"created"` | `"name"`: ファイル名<br>`"created"`: 作成日時<br>`"modified"`: 更新日時 |
-| `markdownList.sortOrder` | Tasksのファイルのソート順序 | string | `"ascending"` | `"ascending"`: 昇順<br>`"descending"`: 降順 |
+| `tasks.sortBy` | Tasksのファイル・ディレクトリのソート基準 | string | `"created"` | `"name"`: ファイル名<br>`"created"`: 作成日時<br>`"modified"`: 更新日時 |
+| `tasks.sortOrder` | Tasksのファイル・ディレクトリのソート順序 | string | `"ascending"` | `"ascending"`: 昇順<br>`"descending"`: 降順 |
 | `editor.runCommand` | Editorビューのrunボタンで実行されるコマンドテンプレート | string | `claude "${filePath}"` | `${filePath}`をファイルパスのプレースホルダーとして使用 |
 | `editor.runCommandWithoutFile` | ファイル未開時にrunボタンで実行されるコマンドテンプレート | string | `claude "${editorContent}"` | `${editorContent}`をエディタ内容のプレースホルダーとして使用 |
 | `terminal.shell` | Terminalビューのシェル実行パス | string | `""` | 空欄の場合はシステムのデフォルトシェルを使用 |
@@ -219,8 +219,8 @@ created: {{datetime}}
 ```json
 {
   "aiCodingSidebar.defaultRelativePath": ".claude",
-  "aiCodingSidebar.markdownList.sortBy": "created",
-  "aiCodingSidebar.markdownList.sortOrder": "ascending",
+  "aiCodingSidebar.tasks.sortBy": "created",
+  "aiCodingSidebar.tasks.sortOrder": "ascending",
   "aiCodingSidebar.editor.runCommand": "claude \"Review the file at ${filePath}\"",
   "aiCodingSidebar.editor.runCommandWithoutFile": "claude \"${editorContent}\"",
   "aiCodingSidebar.terminal.fontSize": 12,
@@ -279,14 +279,14 @@ npm run watch
 1. [GitHubのReleasesページ](https://github.com/NaokiIshimura/vscode-panel/releases)から最新のVSIXファイルをダウンロード
 2. コマンドラインからインストール:
    ```bash
-   code --install-extension ai-coding-sidebar-0.8.24.vsix
+   code --install-extension ai-coding-sidebar-0.8.25.vsix
    ```
 3. VS Codeを再起動
 
 #### ローカルビルド版を使用する場合:
 ```bash
 # releasesディレクトリから直接インストール
-code --install-extension releases/ai-coding-sidebar-0.8.24.vsix
+code --install-extension releases/ai-coding-sidebar-0.8.25.vsix
 ```
 
 #### 自分でパッケージを作成する場合:
@@ -300,7 +300,7 @@ code --install-extension releases/ai-coding-sidebar-0.8.24.vsix
    ```
 3. 生成されたVSIXファイルをインストール:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.8.24.vsix
+   code --install-extension releases/ai-coding-sidebar-0.8.25.vsix
    ```
 4. VS Codeを再起動
 

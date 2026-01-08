@@ -67,8 +67,8 @@ src/
 ### 設定項目（package.json）
 
 - `aiCodingSidebar.defaultRelativePath`: デフォルトの相対パス
-- `aiCodingSidebar.markdownList.sortBy`: ソート基準（name/created/modified）
-- `aiCodingSidebar.markdownList.sortOrder`: ソート順（ascending/descending）
+- `aiCodingSidebar.tasks.sortBy`: ソート基準（name/created/modified）- ファイルとディレクトリの両方に適用
+- `aiCodingSidebar.tasks.sortOrder`: ソート順（ascending/descending）- ファイルとディレクトリの両方に適用
 - `aiCodingSidebar.editor.runCommand`: Runボタン実行コマンド
 - `aiCodingSidebar.editor.runCommandWithoutFile`: ファイルなし時のRunコマンド
 - `aiCodingSidebar.terminal.*`: ターミナル設定（shell, fontSize, fontFamily, cursorStyle, cursorBlink, scrollback）

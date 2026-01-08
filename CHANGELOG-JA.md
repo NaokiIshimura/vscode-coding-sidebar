@@ -5,6 +5,27 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.25] - 2026-01-08
+
+### 追加
+- **Tasks View - ディレクトリソート設定**: ディレクトリがファイルと同様にソート設定を尊重するようになりました
+  - 新設定 `aiCodingSidebar.tasks.sortBy` と `aiCodingSidebar.tasks.sortOrder` が `markdownList.*` 設定を置き換え
+  - ディレクトリを名前、作成日時、更新日時でソート可能（従来は名前のみ）
+  - 昇順・降順の両方のソート順をサポート
+  - デフォルトソートは作成日時（昇順）に変更（従来は名前（昇順））
+
+### 変更
+- **設定名の変更**: Tasks Viewの設定名をより直感的に変更
+  - `aiCodingSidebar.markdownList.sortBy` → `aiCodingSidebar.tasks.sortBy`
+  - `aiCodingSidebar.markdownList.sortOrder` → `aiCodingSidebar.tasks.sortOrder`
+  - 旧設定は削除されました（自動移行なし）
+- **Tasks設定メニュー**: Tasks Settingsボタンで `aiCodingSidebar.tasks` 設定を直接開くように変更
+  - 従来は拡張機能の全設定を開いていました
+
+### 技術的変更
+- ディレクトリとファイル共通のソート関数にリファクタリング
+- 新しい設定名を監視するように設定変更監視を更新
+
 ## [0.8.24] - 2026-01-08
 
 ### 修正
@@ -747,3 +768,4 @@
 [0.8.24]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.23...v0.8.24
 [0.8.23]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.22...v0.8.23
 [0.8.21]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.20...v0.8.21
+[0.8.25]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.24...v0.8.25

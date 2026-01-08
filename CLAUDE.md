@@ -42,7 +42,7 @@ src/
 │   ├── templateUtils.ts  # loadTemplate
 │   └── workspaceSetup.ts # setupSettingsJson, setupTemplate, setupClaudeFolder
 ├── services/             # ビジネスロジック
-│   ├── TerminalService.ts    # PTYセッション管理（node-pty）
+│   ├── TerminalService.ts    # PTYセッション管理（node-pty、UTF-8ロケール自動設定）
 │   ├── FileWatcherService.ts # ファイル変更監視
 │   └── ...               # その他サービス
 ├── interfaces/           # サービスインターフェース定義

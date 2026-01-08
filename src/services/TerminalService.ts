@@ -101,13 +101,20 @@ export class TerminalService implements ITerminalService {
         }
 
         try {
+            // 環境変数を設定（UTF-8ロケールを明示的に設定）
+            const env = {
+                ...process.env,
+                LANG: process.env.LANG || 'ja_JP.UTF-8',
+                LC_ALL: process.env.LC_ALL || 'ja_JP.UTF-8'
+            };
+
             // PTYプロセスを作成
             const pty = this.nodePty.spawn(shellPath, shellArgs, {
                 name: 'xterm-256color',
                 cols: 80,
                 rows: 24,
                 cwd: workingDirectory,
-                env: process.env
+                env: env
             });
 
             // セッションを保存

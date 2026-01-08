@@ -10,6 +10,7 @@ export class FileItem extends vscode.TreeItem {
         public readonly isDirectory: boolean,
         public readonly size: number,
         public readonly modified: Date,
+        public readonly created: Date,
         showFileIcons: boolean = true
     ) {
         super(label, collapsibleState);
@@ -30,7 +31,7 @@ export class FileItem extends vscode.TreeItem {
 
         // ツールチップを設定
         const sizeText = isDirectory ? 'Directory' : formatFileSize(size);
-        this.tooltip = `${label}\nType: ${sizeText}\nLast modified: ${modified.toLocaleString('en-US')}`;
+        this.tooltip = `${label}\nType: ${sizeText}\nCreated: ${created.toLocaleString('en-US')}\nLast modified: ${modified.toLocaleString('en-US')}`;
 
         // ファイルの場合はクリックで開く（Markdownファイル以外）
         // Markdownファイルは Markdown Editor で開くため、vscode.open コマンドを設定しない

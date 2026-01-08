@@ -1674,6 +1674,7 @@ async function selectInitialFolder(treeView: vscode.TreeView<FileItem>, rootPath
             rootPath,
             true,
             0,
+            new Date(),
             new Date()
         );
 

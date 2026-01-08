@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.26] - 2026-01-08
+
+### Added
+- **Tasks View - Auto-file Selection**: Automatically selects and displays the oldest target file when navigating to a directory
+  - Searches for TASK.md, PROMPT.md, or SPEC.md files (case-insensitive, including timestamped variants)
+  - Selects the file with the oldest creation date
+  - Opens the selected file in Editor View automatically
+  - Works when clicking directories or navigating back with ".."
+  - No action taken if no target files are found
+
+### Technical
+- Extended `IEditorProvider` interface with `showFile()` method
+- Added `findOldestTargetFile()` method to `TasksProvider` for target file detection
+- Enhanced `navigateToDirectory()` to trigger auto-file selection after directory navigation
+
 ## [0.8.25] - 2026-01-08
 
 ### Added

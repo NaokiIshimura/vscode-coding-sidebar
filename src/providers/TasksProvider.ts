@@ -165,6 +165,7 @@ export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.
                     parentDir,
                     true,
                     0,
+                    new Date(),
                     new Date()
                 );
                 await this.getChildren(parentItem);
@@ -405,6 +406,7 @@ export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.
                 this.rootPath,
                 false,
                 0,
+                new Date(),
                 new Date()
             );
             createButton.contextValue = 'createDirectoryButton';
@@ -436,6 +438,7 @@ export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.
             currentPath,
             true,
             0,
+            new Date(),
             new Date()
         );
         // ルートディレクトリ以外の場合はarchiveボタンを表示するためにcontextValueを変更
@@ -453,6 +456,7 @@ export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.
                 parentPath,
                 true,
                 0,
+                new Date(),
                 new Date()
             );
             parentItem.contextValue = 'parentDirectory';
@@ -477,6 +481,7 @@ export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.
             const currentFilePath = this.editorProvider?.getCurrentFilePath();
             const fileItems = files.map(file => {
                 const isDirectory = file.isDirectory;
+
                 // フラットリスト表示のため、すべてCollapsibleState.None
                 const item = new FileItem(
                     file.name,
@@ -484,11 +489,16 @@ export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.
                     file.path,
                     isDirectory,
                     file.size,
-                    file.modified
+                    file.modified,
+                    file.created
                 );
 
                 // ディレクトリの場合、クリックでディレクトリ移動
                 if (isDirectory) {
+                    // ルートパスのディレクトリの場合、作成日を右側に表示
+                    if (currentPath === this.rootPath) {
+                        item.description = this.formatCreatedDate(file.created);
+                    }
                     item.command = {
                         command: 'aiCodingSidebar.navigateToDirectory',
                         title: 'Navigate to Directory',
@@ -587,6 +597,7 @@ export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.
                 this.rootPath,
                 true,
                 0,
+                new Date(),
                 new Date()
             );
         }
@@ -603,7 +614,8 @@ export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.
                 parentPath,
                 true,
                 0,
-                stat.mtime
+                stat.mtime,
+                stat.birthtime
             );
         } catch (error) {
             console.error('Failed to get parent folder:', error);
@@ -626,7 +638,8 @@ export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.
                 this.activeFolderPath,
                 stat.isDirectory(),
                 stat.isDirectory() ? 0 : stat.size,
-                stat.mtime
+                stat.mtime,
+                stat.birthtime
             );
 
             await this.treeView.reveal(item, { select: true, focus: false, expand: true });
@@ -661,13 +674,21 @@ export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.
                 directoryPath,
                 true,
                 0,
-                stat.mtime
+                stat.mtime,
+                stat.birthtime
             );
 
             await this.treeView.reveal(item, { select: true, focus: false, expand: false });
         } catch (error) {
             console.error('Failed to reveal directory:', error);
         }
+    }
+
+    private formatCreatedDate(date: Date): string {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
 
     private getFilesInDirectory(dirPath: string): FileInfo[] {

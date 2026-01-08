@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.23] - 2026-01-08
+
+### Added
+- **Tasks View - Directory Creation Date Display**: Shows creation date for directories at root path
+  - Displays creation date in YYYY-MM-DD format on the right side of directory names (as description)
+  - Only applies to directories at the root path level (e.g., `.claude/tasks/`)
+  - Subdirectories within do not show creation dates
+  - Helps users quickly identify when task directories were created for better task management
+
 ## [0.8.22] - 2026-01-04
 
 ### Improved

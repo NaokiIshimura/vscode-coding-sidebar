@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.25] - 2026-01-08
+
+### Added
+- **Tasks View - Directory Sort Settings**: Directories now respect sort settings alongside files
+  - New settings `aiCodingSidebar.tasks.sortBy` and `aiCodingSidebar.tasks.sortOrder` replace `markdownList.*` settings
+  - Directories can now be sorted by name, creation date, or modification date (previously name-only)
+  - Both ascending and descending sort orders are supported
+  - Default sort is by creation date (ascending), changed from name (ascending)
+
+### Changed
+- **Settings Rename**: More intuitive setting names for Tasks view
+  - `aiCodingSidebar.markdownList.sortBy` → `aiCodingSidebar.tasks.sortBy`
+  - `aiCodingSidebar.markdownList.sortOrder` → `aiCodingSidebar.tasks.sortOrder`
+  - Old settings have been removed (no automatic migration)
+- **Tasks Settings Menu**: Tasks Settings button now opens `aiCodingSidebar.tasks` settings directly
+  - Previously opened all extension settings
+
+### Technical
+- Refactored sort logic to use a shared function for both directories and files
+- Updated configuration monitoring to watch new setting names
+
 ## [0.8.24] - 2026-01-08
 
 ### Fixed
@@ -1275,3 +1296,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.8.24]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.23...v0.8.24
 [0.8.23]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.22...v0.8.23
 [0.8.21]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.20...v0.8.21
+[0.8.25]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.24...v0.8.25

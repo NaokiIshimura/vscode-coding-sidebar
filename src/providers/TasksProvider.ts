@@ -48,8 +48,8 @@ export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.
         }
         // 設定変更を監視してタイトルと表示を更新
         this.configChangeDisposable = vscode.workspace.onDidChangeConfiguration((e) => {
-            if (e.affectsConfiguration('aiCodingSidebar.markdownList.sortBy') ||
-                e.affectsConfiguration('aiCodingSidebar.markdownList.sortOrder')) {
+            if (e.affectsConfiguration('aiCodingSidebar.tasks.sortBy') ||
+                e.affectsConfiguration('aiCodingSidebar.tasks.sortOrder')) {
                 this.refresh();
             }
         });
@@ -723,33 +723,37 @@ export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.
                 }
             }
 
-            // ディレクトリを名前順でソート
-            directories.sort((a, b) => a.name.localeCompare(b.name));
-
-            // ファイルをソート設定に基づいてソート
-            const config = vscode.workspace.getConfiguration('aiCodingSidebar.markdownList');
+            // ソート設定を取得
+            const config = vscode.workspace.getConfiguration('aiCodingSidebar.tasks');
             const sortBy = config.get<string>('sortBy', 'created');
             const sortOrder = config.get<string>('sortOrder', 'ascending');
 
-            files.sort((a, b) => {
-                let comparison = 0;
+            // ソート処理を関数化
+            const sortItems = (items: FileInfo[]) => {
+                items.sort((a, b) => {
+                    let comparison = 0;
 
-                switch (sortBy) {
-                    case 'name':
-                        comparison = a.name.localeCompare(b.name);
-                        break;
-                    case 'created':
-                        comparison = a.created.getTime() - b.created.getTime();
-                        break;
-                    case 'modified':
-                        comparison = a.modified.getTime() - b.modified.getTime();
-                        break;
-                    default:
-                        comparison = a.created.getTime() - b.created.getTime();
-                }
+                    switch (sortBy) {
+                        case 'name':
+                            comparison = a.name.localeCompare(b.name);
+                            break;
+                        case 'created':
+                            comparison = a.created.getTime() - b.created.getTime();
+                            break;
+                        case 'modified':
+                            comparison = a.modified.getTime() - b.modified.getTime();
+                            break;
+                        default:
+                            comparison = a.created.getTime() - b.created.getTime();
+                    }
 
-                return sortOrder === 'descending' ? -comparison : comparison;
-            });
+                    return sortOrder === 'descending' ? -comparison : comparison;
+                });
+            };
+
+            // ディレクトリとファイルの両方をソート
+            sortItems(directories);
+            sortItems(files);
 
             // ディレクトリを先に、その後ファイルを返す
             return [...directories, ...files];

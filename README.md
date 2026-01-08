@@ -201,8 +201,8 @@ If the default relative path doesn't exist, Tasks displays a "Create directory" 
 | Setting | Description | Type | Default | Options / Examples |
 | --- | --- | --- | --- | --- |
 | `defaultRelativePath` | Default relative path for Tasks | string | `".claude/tasks"` | `"src"`, `.claude`, `"docs/api"` |
-| `markdownList.sortBy` | Sort files in Docs by | string | `"created"` | `"name"` (file name)<br>`"created"` (creation date)<br>`"modified"` (modified date) |
-| `markdownList.sortOrder` | Sort order for files in Docs | string | `"ascending"` | `"ascending"` (ascending)<br>`"descending"` (descending) |
+| `tasks.sortBy` | Sort files and directories in Tasks by | string | `"created"` | `"name"` (file name)<br>`"created"` (creation date)<br>`"modified"` (modified date) |
+| `tasks.sortOrder` | Sort order for files and directories in Tasks | string | `"ascending"` | `"ascending"` (ascending)<br>`"descending"` (descending) |
 | `editor.runCommand` | Command template to execute when clicking the Run button in the Editor view | string | `claude "${filePath}"` | Use `${filePath}` as placeholder for the file path |
 | `editor.runCommandWithoutFile` | Command template to execute when clicking the Run button without a file open | string | `claude "${editorContent}"` | Use `${editorContent}` as placeholder for the editor content |
 | `terminal.shell` | Shell executable path for Terminal view | string | `""` | Leave empty to use system default shell |
@@ -219,8 +219,8 @@ Add the following to `.vscode/settings.json`:
 ```json
 {
   "aiCodingSidebar.defaultRelativePath": ".claude",
-  "aiCodingSidebar.markdownList.sortBy": "created",
-  "aiCodingSidebar.markdownList.sortOrder": "ascending",
+  "aiCodingSidebar.tasks.sortBy": "created",
+  "aiCodingSidebar.tasks.sortOrder": "ascending",
   "aiCodingSidebar.editor.runCommand": "claude \"Review the file at ${filePath}\"",
   "aiCodingSidebar.editor.runCommandWithoutFile": "claude \"${editorContent}\"",
   "aiCodingSidebar.terminal.fontSize": 12,
@@ -279,14 +279,14 @@ npm run watch
 1. Download the latest VSIX file from the [GitHub Releases page](https://github.com/NaokiIshimura/vscode-panel/releases).
 2. Install via command line:
    ```bash
-   code --install-extension ai-coding-sidebar-0.8.24.vsix
+   code --install-extension ai-coding-sidebar-0.8.25.vsix
    ```
 3. Restart VS Code.
 
 #### Use a local build
 ```bash
 # Install directly from the releases directory
-code --install-extension releases/ai-coding-sidebar-0.8.24.vsix
+code --install-extension releases/ai-coding-sidebar-0.8.25.vsix
 ```
 
 #### Build the package yourself
@@ -300,7 +300,7 @@ code --install-extension releases/ai-coding-sidebar-0.8.24.vsix
    ```
 3. Install the generated VSIX file:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.8.24.vsix
+   code --install-extension releases/ai-coding-sidebar-0.8.25.vsix
    ```
 4. Restart VS Code.
 

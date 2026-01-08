@@ -319,7 +319,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     // Tasks設定を開くコマンドを登録
     const openTasksSettingsCommand = vscode.commands.registerCommand('aiCodingSidebar.openTasksSettings', async () => {
-        await vscode.commands.executeCommand('workbench.action.openSettings', '@ext:nacn.ai-coding-sidebar');
+        await vscode.commands.executeCommand('workbench.action.openSettings', 'aiCodingSidebar.tasks');
     });
 
     // Editor設定を開くコマンドを登録

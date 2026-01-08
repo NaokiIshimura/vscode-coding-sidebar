@@ -9,6 +9,7 @@ import { FileWatcherService } from '../services/FileWatcherService';
 export interface IEditorProvider {
     getCurrentFilePath(): string | undefined;
     clearFile(): Promise<void>;
+    showFile(filePath: string): Promise<void>;
 }
 
 export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDragAndDropController<FileItem> {
@@ -543,6 +544,40 @@ export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.
     }
 
     /**
+     * 指定されたディレクトリ内から対象ファイル（TASK.md、PROMPT.md、SPEC.md）を検索し、
+     * 最も古いファイルのパスを返す
+     */
+    private findOldestTargetFile(dirPath: string): string | undefined {
+        try {
+            const files = this.getFilesInDirectory(dirPath);
+
+            // 対象ファイルのパターン（大文字小文字を区別しない）
+            const targetPatterns = ['TASK.MD', 'PROMPT.MD', 'SPEC.MD'];
+
+            // 対象ファイルをフィルタリング
+            const targetFiles = files.filter(file => {
+                if (file.isDirectory) {
+                    return false;
+                }
+                const upperName = file.name.toUpperCase();
+                return targetPatterns.some(pattern => upperName.endsWith(pattern));
+            });
+
+            if (targetFiles.length === 0) {
+                return undefined;
+            }
+
+            // 作成日時でソート（昇順）して最も古いファイルを取得
+            targetFiles.sort((a, b) => a.created.getTime() - b.created.getTime());
+
+            return targetFiles[0].path;
+        } catch (error) {
+            console.error('Failed to find oldest target file:', error);
+            return undefined;
+        }
+    }
+
+    /**
      * 指定されたディレクトリに移動する（フラットリスト表示用）
      */
     async navigateToDirectory(targetPath: string): Promise<void> {
@@ -561,6 +596,14 @@ export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.
         this.activeFolderPath = targetPath;
         this.updateTitle();
         this.refresh();
+
+        // 対象ファイル（TASK.md、PROMPT.md、SPEC.md）を検索して自動選択
+        if (this.editorProvider) {
+            const oldestFile = this.findOldestTargetFile(targetPath);
+            if (oldestFile) {
+                await this.editorProvider.showFile(oldestFile);
+            }
+        }
     }
 
     async getParent(element: FileItem): Promise<FileItem | undefined> {

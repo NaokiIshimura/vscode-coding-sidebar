@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.24] - 2026-01-08
+
+### Fixed
+- **Terminal View - Japanese Character Encoding**: Fixed Japanese text garbling issue in terminal output
+  - Explicitly sets UTF-8 locale environment variables (LANG, LC_ALL) when creating PTY process
+  - Ensures proper character encoding for Japanese and other CJK languages
+  - Falls back to user's existing locale settings if already configured
+  - Improves international character support in terminal sessions
+
 ## [0.8.23] - 2026-01-08
 
 ### Added
@@ -1263,4 +1272,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.2.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.1.0...v0.2.5
 [0.1.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.0.1...v0.1.0
 [0.0.1]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/releases/tag/v0.0.1
+[0.8.24]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.23...v0.8.24
+[0.8.23]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.22...v0.8.23
 [0.8.21]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.20...v0.8.21

@@ -5,6 +5,15 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.24] - 2026-01-08
+
+### 修正
+- **Terminal View - 日本語文字エンコーディング**: ターミナル出力での日本語文字化け問題を修正
+  - PTYプロセス作成時にUTF-8ロケール環境変数（LANG、LC_ALL）を明示的に設定
+  - 日本語やその他のCJK言語の文字エンコーディングを確実に実行
+  - 既にロケールが設定されている場合はユーザーの設定を尊重
+  - ターミナルセッションでの国際文字サポートを改善
+
 ## [0.8.23] - 2026-01-08
 
 ### 追加
@@ -735,4 +744,6 @@
 [0.2.5]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.1.0...v0.2.5
 [0.1.0]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.0.1...v0.1.0
 [0.0.1]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/releases/tag/v0.0.1
+[0.8.24]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.23...v0.8.24
+[0.8.23]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.22...v0.8.23
 [0.8.21]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.20...v0.8.21

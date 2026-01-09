@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.28] - 2026-01-09
+
+### Improved
+- **Terminal View - Button Simplification**: Streamlined terminal header buttons for better clarity
+  - Renamed "Kill" button to "Close" for more intuitive terminology
+  - Removed redundant "× Close" button from shortcut area
+  - Single "Close" button now handles all tab closing operations
+  - Cleaner UI with reduced button clutter
+
+### Technical
+- Removed `closeTab` message handler from TypeScript backend
+- Updated HTML template: renamed Kill button to Close with updated title
+- Removed "× Close" button element from shortcut bar
+- Removed `btn-close-tab` event handler from JavaScript
+
 ## [0.8.27] - 2026-01-09
 
 ### Improved

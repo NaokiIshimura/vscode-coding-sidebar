@@ -32,7 +32,7 @@ src/
 ├── providers/            # UIコンポーネント
 │   ├── TasksProvider.ts  # Tasksビュー（フラットリスト、Drag&Drop）
 │   ├── EditorProvider.ts # Markdown EditorのWebView
-│   ├── TerminalProvider.ts # xterm.jsターミナルのWebView（スクロール位置自動追従機能付き）
+│   ├── TerminalProvider.ts # xterm.jsターミナルのWebView（スクロール位置自動追従、Claude Code自動検知機能付き）
 │   ├── MenuProvider.ts   # 設定メニュー
 │   └── items/            # TreeItem定義
 │       ├── FileItem.ts   # ファイル/ディレクトリ項目
@@ -94,5 +94,6 @@ mainブランチへのプッシュで自動的に以下が実行される：
 
 - `.claude`ディレクトリはコミット対象外
 - Git操作は明示的な指示がない限りコミットしない
+- ブランチを作成する場合は、必ずmainブランチから切ること
 - ファイル末尾は必ず空行を含める
 - テストフレームワークは未実装

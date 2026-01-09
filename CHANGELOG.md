@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.27] - 2026-01-09
+
+### Improved
+- **Terminal View - Close Button Position**: Improved tab close button placement for better usability
+  - Moved close button from individual tabs to the right end of the shortcut area
+  - Close button (× Close) is now always visible and easily accessible
+  - Single unified close button closes the active tab
+  - Reduces UI clutter and improves consistency across tab states
+
+### Technical
+- Removed close button from individual tab elements in HTML template
+- Repositioned close button as a direct child of shortcut bar using flexbox (`margin-left: auto`)
+- Consolidated two close button event handlers into a single handler for `btn-close-tab`
+- Simplified tab click event handler by removing close button detection logic
+
 ## [0.8.26] - 2026-01-08
 
 ### Added

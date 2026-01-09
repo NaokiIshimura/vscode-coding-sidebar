@@ -572,27 +572,23 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
             background-color: var(--vscode-terminal-background, #1e1e1e);
         }
         .tab-title {
-            margin-right: 6px;
         }
-        .tab-close {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 16px;
-            height: 16px;
-            padding: 0;
-            background: none;
+        .close-tab-button {
+            padding: 2px 8px;
+            font-size: 11px;
+            background-color: var(--vscode-button-secondaryBackground);
+            color: var(--vscode-button-secondaryForeground);
             border: none;
             border-radius: 3px;
-            color: var(--vscode-foreground);
             cursor: pointer;
-            opacity: 0.5;
-            font-size: 14px;
-            line-height: 1;
+            margin-left: auto;
         }
-        .tab-close:hover {
-            opacity: 1;
-            background-color: var(--vscode-toolbar-hoverBackground);
+        .close-tab-button:hover {
+            background-color: var(--vscode-inputValidation-errorBackground, #5a1d1d);
+        }
+        .close-tab-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         .new-tab-button {
             display: flex;
@@ -730,6 +726,7 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                 <button class="shortcut-button" id="btn-clear">/clear</button>
                 <button class="shortcut-button toggle-button" id="toggle-shortcuts-2" title="Switch to shell commands">⇆</button>
             </div>
+            <button class="shortcut-button close-tab-button" id="btn-close-tab" title="Close active tab">× Close</button>
         </div>
     </div>
     <div id="error-message"></div>
@@ -804,20 +801,11 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                 tabEl.dataset.tabId = tabId;
                 tabEl.innerHTML = \`
                     <span class="tab-title">\${shellName}\${tabIndex > 1 ? ' (' + tabIndex + ')' : ''}</span>
-                    <button class="tab-close" title="Close">×</button>
                 \`;
 
                 // タブクリックでアクティブ化
-                tabEl.addEventListener('click', (e) => {
-                    if (!e.target.classList.contains('tab-close')) {
-                        vscode.postMessage({ type: 'activateTab', tabId: tabId });
-                    }
-                });
-
-                // 閉じるボタン
-                tabEl.querySelector('.tab-close').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    vscode.postMessage({ type: 'closeTab', tabId: tabId });
+                tabEl.addEventListener('click', () => {
+                    vscode.postMessage({ type: 'activateTab', tabId: tabId });
                 });
 
                 // +ボタンの前にタブを挿入
@@ -1191,6 +1179,13 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
             }
             document.getElementById('toggle-shortcuts-1')?.addEventListener('click', toggleShortcuts);
             document.getElementById('toggle-shortcuts-2')?.addEventListener('click', toggleShortcuts);
+
+            // 閉じるボタンのイベントハンドラ
+            document.getElementById('btn-close-tab')?.addEventListener('click', () => {
+                if (activeTabId && tabs.size > 0) {
+                    vscode.postMessage({ type: 'closeTab', tabId: activeTabId });
+                }
+            });
 
             // スクロールボタンのイベントハンドラ
             scrollToBottomBtn?.addEventListener('click', () => {

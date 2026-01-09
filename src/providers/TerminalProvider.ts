@@ -105,9 +105,6 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                 case 'activateTab':
                     this._activateTab(data.tabId);
                     break;
-                case 'closeTab':
-                    this._closeTab(data.tabId);
-                    break;
                 case 'clearTerminal':
                     this.clearTerminal();
                     break;
@@ -589,27 +586,23 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
             background-color: var(--vscode-terminal-background, #1e1e1e);
         }
         .tab-title {
-            margin-right: 6px;
         }
-        .tab-close {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 16px;
-            height: 16px;
-            padding: 0;
-            background: none;
+        .close-tab-button {
+            padding: 2px 8px;
+            font-size: 11px;
+            background-color: var(--vscode-button-secondaryBackground);
+            color: var(--vscode-button-secondaryForeground);
             border: none;
             border-radius: 3px;
-            color: var(--vscode-foreground);
             cursor: pointer;
-            opacity: 0.5;
-            font-size: 14px;
-            line-height: 1;
+            margin-left: auto;
         }
-        .tab-close:hover {
-            opacity: 1;
-            background-color: var(--vscode-toolbar-hoverBackground);
+        .close-tab-button:hover {
+            background-color: var(--vscode-inputValidation-errorBackground, #5a1d1d);
+        }
+        .close-tab-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         .new-tab-button {
             display: flex;
@@ -732,7 +725,7 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
             </div>
             <div class="header-actions">
                 <button class="header-button" id="clear-button" title="Clear Terminal">Clear</button>
-                <button class="header-button danger" id="kill-button" title="Kill Terminal">Kill</button>
+                <button class="header-button danger" id="kill-button" title="Close Terminal">Close</button>
             </div>
         </div>
         <div class="header-row-2" id="shortcut-bar">
@@ -824,20 +817,11 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                 tabEl.dataset.tabId = tabId;
                 tabEl.innerHTML = \`
                     <span class="tab-title">\${shellName}\${tabIndex > 1 ? ' (' + tabIndex + ')' : ''}</span>
-                    <button class="tab-close" title="Close">×</button>
                 \`;
 
                 // タブクリックでアクティブ化
-                tabEl.addEventListener('click', (e) => {
-                    if (!e.target.classList.contains('tab-close')) {
-                        vscode.postMessage({ type: 'activateTab', tabId: tabId });
-                    }
-                });
-
-                // 閉じるボタン
-                tabEl.querySelector('.tab-close').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    vscode.postMessage({ type: 'closeTab', tabId: tabId });
+                tabEl.addEventListener('click', () => {
+                    vscode.postMessage({ type: 'activateTab', tabId: tabId });
                 });
 
                 // +ボタンの前にタブを挿入

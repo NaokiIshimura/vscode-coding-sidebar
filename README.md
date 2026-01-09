@@ -27,6 +27,7 @@ Display directories and files under a specified path in a flat list view.
 | --- | --- |
 | Flat list display | Shows contents of the current directory only (not a tree structure) |
 | Directory navigation | Click a directory to navigate into it. Use ".." to go back to the parent directory |
+| Auto-file selection | Automatically selects and displays the oldest TASK.md, PROMPT.md, or SPEC.md file when navigating to a directory |
 | Path display | Current path shown as the first item in the list with inline action buttons (New PROMPT.md, New TASK.md, New SPEC.md, Copy, Rename, New Directory, Archive) |
 | Sorting | Files are sorted by creation date (ascending) by default |
 | Drag & Drop | Copy files by dragging them within the view or from external sources |
@@ -58,7 +59,7 @@ Embedded terminal in the panel using xterm.js with full PTY support.
 
 | Feature | Description |
 | --- | --- |
-| Multiple tabs | Create up to 5 terminal tabs, each with its own independent session. Click the "+" button to add a new tab, click a tab to switch, and click "×" to close |
+| Multiple tabs | Create up to 5 terminal tabs, each with its own independent session. Click the "+" button to add a new tab, click a tab to switch. Close button (× Close) is located at the right end of the shortcut area |
 | Session persistence | Terminal session and output history are preserved when switching views or extensions |
 | Auto-scroll | Automatically maintains scroll position at the bottom when new output arrives or when view is resized (only if already at the bottom) |
 | Clickable links | URLs open in browser, file paths (e.g., `./src/file.ts:123`) open in editor with line navigation |
@@ -201,8 +202,8 @@ If the default relative path doesn't exist, Tasks displays a "Create directory" 
 | Setting | Description | Type | Default | Options / Examples |
 | --- | --- | --- | --- | --- |
 | `defaultRelativePath` | Default relative path for Tasks | string | `".claude/tasks"` | `"src"`, `.claude`, `"docs/api"` |
-| `markdownList.sortBy` | Sort files in Docs by | string | `"created"` | `"name"` (file name)<br>`"created"` (creation date)<br>`"modified"` (modified date) |
-| `markdownList.sortOrder` | Sort order for files in Docs | string | `"ascending"` | `"ascending"` (ascending)<br>`"descending"` (descending) |
+| `tasks.sortBy` | Sort files and directories in Tasks by | string | `"created"` | `"name"` (file name)<br>`"created"` (creation date)<br>`"modified"` (modified date) |
+| `tasks.sortOrder` | Sort order for files and directories in Tasks | string | `"ascending"` | `"ascending"` (ascending)<br>`"descending"` (descending) |
 | `editor.runCommand` | Command template to execute when clicking the Run button in the Editor view | string | `claude "${filePath}"` | Use `${filePath}` as placeholder for the file path |
 | `editor.runCommandWithoutFile` | Command template to execute when clicking the Run button without a file open | string | `claude "${editorContent}"` | Use `${editorContent}` as placeholder for the editor content |
 | `terminal.shell` | Shell executable path for Terminal view | string | `""` | Leave empty to use system default shell |
@@ -219,8 +220,8 @@ Add the following to `.vscode/settings.json`:
 ```json
 {
   "aiCodingSidebar.defaultRelativePath": ".claude",
-  "aiCodingSidebar.markdownList.sortBy": "created",
-  "aiCodingSidebar.markdownList.sortOrder": "ascending",
+  "aiCodingSidebar.tasks.sortBy": "created",
+  "aiCodingSidebar.tasks.sortOrder": "ascending",
   "aiCodingSidebar.editor.runCommand": "claude \"Review the file at ${filePath}\"",
   "aiCodingSidebar.editor.runCommandWithoutFile": "claude \"${editorContent}\"",
   "aiCodingSidebar.terminal.fontSize": 12,
@@ -279,14 +280,14 @@ npm run watch
 1. Download the latest VSIX file from the [GitHub Releases page](https://github.com/NaokiIshimura/vscode-panel/releases).
 2. Install via command line:
    ```bash
-   code --install-extension ai-coding-sidebar-0.8.24.vsix
+   code --install-extension ai-coding-sidebar-0.8.25.vsix
    ```
 3. Restart VS Code.
 
 #### Use a local build
 ```bash
 # Install directly from the releases directory
-code --install-extension releases/ai-coding-sidebar-0.8.24.vsix
+code --install-extension releases/ai-coding-sidebar-0.8.25.vsix
 ```
 
 #### Build the package yourself
@@ -300,7 +301,7 @@ code --install-extension releases/ai-coding-sidebar-0.8.24.vsix
    ```
 3. Install the generated VSIX file:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.8.24.vsix
+   code --install-extension releases/ai-coding-sidebar-0.8.25.vsix
    ```
 4. Restart VS Code.
 

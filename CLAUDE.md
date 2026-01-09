@@ -60,15 +60,16 @@ src/
 
 1. TasksProviderでディレクトリ/ファイルを選択（フラットリスト形式）
 2. ディレクトリクリックでそのディレクトリ内に移動、".."で親に移動
-3. タイムスタンプ形式のMarkdownファイル選択時、EditorProviderにファイルパスが渡される
-4. FileWatcherServiceがファイル変更を監視し、各Providerに通知
-5. EditorのRunボタンでTerminalProviderにコマンドを送信
+3. ディレクトリ移動時、自動的に最も古いTASK.md/PROMPT.md/SPEC.mdファイルを検索してEditorViewに表示
+4. タイムスタンプ形式のMarkdownファイル選択時、EditorProviderにファイルパスが渡される
+5. FileWatcherServiceがファイル変更を監視し、各Providerに通知
+6. EditorのRunボタンでTerminalProviderにコマンドを送信
 
 ### 設定項目（package.json）
 
 - `aiCodingSidebar.defaultRelativePath`: デフォルトの相対パス
-- `aiCodingSidebar.markdownList.sortBy`: ソート基準（name/created/modified）
-- `aiCodingSidebar.markdownList.sortOrder`: ソート順（ascending/descending）
+- `aiCodingSidebar.tasks.sortBy`: ソート基準（name/created/modified）- ファイルとディレクトリの両方に適用
+- `aiCodingSidebar.tasks.sortOrder`: ソート順（ascending/descending）- ファイルとディレクトリの両方に適用
 - `aiCodingSidebar.editor.runCommand`: Runボタン実行コマンド
 - `aiCodingSidebar.editor.runCommandWithoutFile`: ファイルなし時のRunコマンド
 - `aiCodingSidebar.terminal.*`: ターミナル設定（shell, fontSize, fontFamily, cursorStyle, cursorBlink, scrollback）

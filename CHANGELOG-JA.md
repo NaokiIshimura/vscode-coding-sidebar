@@ -5,6 +5,72 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.28] - 2026-01-09
+
+### 改善
+- **Terminal View - ボタンの簡素化**: ターミナルヘッダーボタンを整理し、より明確に
+  - より直感的な用語として「Kill」ボタンを「Close」に改名
+  - ショートカット領域から冗長な「× Close」ボタンを削除
+  - 単一の「Close」ボタンですべてのタブ閉じる操作を処理
+  - ボタンの混雑を減らし、よりクリーンなUI
+
+### 技術的変更
+- TypeScriptバックエンドから`closeTab`メッセージハンドラを削除
+- HTMLテンプレートを更新：Killボタンをタイトル付きでCloseに改名
+- ショートカットバーから「× Close」ボタン要素を削除
+- JavaScriptから`btn-close-tab`イベントハンドラを削除
+
+## [0.8.27] - 2026-01-09
+
+### 改善
+- **Terminal View - 閉じるボタンの配置**: タブの閉じるボタンの配置を改善し、使いやすさを向上
+  - 閉じるボタンを各タブからショートカット領域の右端に移動
+  - 閉じるボタン（× Close）が常に表示され、アクセスしやすくなりました
+  - 1つの統一された閉じるボタンでアクティブなタブを閉じる
+  - UIの混雑を減らし、タブの状態間での一貫性を改善
+
+### 技術的変更
+- HTMLテンプレートから個別のタブ要素の閉じるボタンを削除
+- flexbox（`margin-left: auto`）を使用してショートカットバーの直接の子要素として閉じるボタンを再配置
+- 2つの閉じるボタンイベントハンドラを`btn-close-tab`用の単一ハンドラに統合
+- 閉じるボタン検出ロジックを削除してタブクリックイベントハンドラを簡略化
+
+## [0.8.26] - 2026-01-08
+
+### 追加
+- **Tasks View - 自動ファイル選択**: ディレクトリに移動した際に、最も古い対象ファイルを自動的に選択して表示
+  - TASK.md、PROMPT.md、SPEC.mdファイルを検索（大文字小文字を区別せず、タイムスタンプ付きも含む）
+  - 最も古い作成日時のファイルを選択
+  - 選択されたファイルを自動的にEditor Viewで開く
+  - ディレクトリをクリックした場合や".."で戻った場合に動作
+  - 対象ファイルが見つからない場合は何もしない
+
+### 技術的変更
+- `IEditorProvider`インターフェースに`showFile()`メソッドを追加
+- `TasksProvider`に対象ファイル検出用の`findOldestTargetFile()`メソッドを追加
+- `navigateToDirectory()`を拡張してディレクトリ移動後に自動ファイル選択を実行
+
+## [0.8.25] - 2026-01-08
+
+### 追加
+- **Tasks View - ディレクトリソート設定**: ディレクトリがファイルと同様にソート設定を尊重するようになりました
+  - 新設定 `aiCodingSidebar.tasks.sortBy` と `aiCodingSidebar.tasks.sortOrder` が `markdownList.*` 設定を置き換え
+  - ディレクトリを名前、作成日時、更新日時でソート可能（従来は名前のみ）
+  - 昇順・降順の両方のソート順をサポート
+  - デフォルトソートは作成日時（昇順）に変更（従来は名前（昇順））
+
+### 変更
+- **設定名の変更**: Tasks Viewの設定名をより直感的に変更
+  - `aiCodingSidebar.markdownList.sortBy` → `aiCodingSidebar.tasks.sortBy`
+  - `aiCodingSidebar.markdownList.sortOrder` → `aiCodingSidebar.tasks.sortOrder`
+  - 旧設定は削除されました（自動移行なし）
+- **Tasks設定メニュー**: Tasks Settingsボタンで `aiCodingSidebar.tasks` 設定を直接開くように変更
+  - 従来は拡張機能の全設定を開いていました
+
+### 技術的変更
+- ディレクトリとファイル共通のソート関数にリファクタリング
+- 新しい設定名を監視するように設定変更監視を更新
+
 ## [0.8.24] - 2026-01-08
 
 ### 修正
@@ -747,3 +813,4 @@
 [0.8.24]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.23...v0.8.24
 [0.8.23]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.22...v0.8.23
 [0.8.21]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.20...v0.8.21
+[0.8.25]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.24...v0.8.25

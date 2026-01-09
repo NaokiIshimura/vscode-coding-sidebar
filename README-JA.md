@@ -25,6 +25,7 @@ AIコーディングツールとの連携を強化するパネル拡張機能。
 | --- | --- |
 | フラットリスト表示 | 現在のディレクトリの内容のみを表示（ツリー構造ではない） |
 | ディレクトリナビゲーション | ディレクトリをクリックでそのディレクトリに移動。".."で親ディレクトリに戻る |
+| 自動ファイル選択 | ディレクトリに移動した際に、最も古いTASK.md、PROMPT.md、SPEC.mdファイルを自動的に選択して表示 |
 | パス表示 | 現在のパスをリストの先頭アイテムとして表示（New PROMPT.md、New TASK.md、New SPEC.md、Copy、Rename、New Directory、Archiveボタン付き） |
 | ソート | ファイルはデフォルトで作成日時の昇順でソート |
 | ドラッグ&ドロップ | ビュー内または外部からのファイルをドラッグしてコピー |
@@ -56,7 +57,7 @@ xterm.jsを使用した完全なPTYサポートを備えた埋め込みターミ
 
 | 機能 | 説明 |
 | --- | --- |
-| 複数タブ | 最大5つのターミナルタブを作成可能。各タブは独立したセッションを持つ。「+」ボタンで新規タブ追加、タブクリックで切り替え、「×」で閉じる |
+| 複数タブ | 最大5つのターミナルタブを作成可能。各タブは独立したセッションを持つ。「+」ボタンで新規タブ追加、タブクリックで切り替え。閉じるボタン（× Close）はショートカット領域の右端に配置 |
 | セッション維持 | ビューや拡張機能を切り替えてもターミナルセッションと出力履歴が保持される |
 | 自動スクロール | 新しい出力が追加されたときやビューのサイズが変更されたときに、自動的にスクロール位置を最下部に維持（最下部にいる場合のみ） |
 | クリック可能リンク | URLはブラウザで開き、ファイルパス（例: `./src/file.ts:123`）はエディタで行番号指定して開く |
@@ -201,8 +202,8 @@ created: {{datetime}}
 | 設定項目 | 説明 | 型 | デフォルト値 | 選択肢/例 |
 | --- | --- | --- | --- | --- |
 | `defaultRelativePath` | Tasksのデフォルト相対パス | string | `".claude/tasks"` | `"src"`, `".claude"`, `"docs/api"` |
-| `markdownList.sortBy` | Tasksのファイルのソート基準 | string | `"created"` | `"name"`: ファイル名<br>`"created"`: 作成日時<br>`"modified"`: 更新日時 |
-| `markdownList.sortOrder` | Tasksのファイルのソート順序 | string | `"ascending"` | `"ascending"`: 昇順<br>`"descending"`: 降順 |
+| `tasks.sortBy` | Tasksのファイル・ディレクトリのソート基準 | string | `"created"` | `"name"`: ファイル名<br>`"created"`: 作成日時<br>`"modified"`: 更新日時 |
+| `tasks.sortOrder` | Tasksのファイル・ディレクトリのソート順序 | string | `"ascending"` | `"ascending"`: 昇順<br>`"descending"`: 降順 |
 | `editor.runCommand` | Editorビューのrunボタンで実行されるコマンドテンプレート | string | `claude "${filePath}"` | `${filePath}`をファイルパスのプレースホルダーとして使用 |
 | `editor.runCommandWithoutFile` | ファイル未開時にrunボタンで実行されるコマンドテンプレート | string | `claude "${editorContent}"` | `${editorContent}`をエディタ内容のプレースホルダーとして使用 |
 | `terminal.shell` | Terminalビューのシェル実行パス | string | `""` | 空欄の場合はシステムのデフォルトシェルを使用 |
@@ -219,8 +220,8 @@ created: {{datetime}}
 ```json
 {
   "aiCodingSidebar.defaultRelativePath": ".claude",
-  "aiCodingSidebar.markdownList.sortBy": "created",
-  "aiCodingSidebar.markdownList.sortOrder": "ascending",
+  "aiCodingSidebar.tasks.sortBy": "created",
+  "aiCodingSidebar.tasks.sortOrder": "ascending",
   "aiCodingSidebar.editor.runCommand": "claude \"Review the file at ${filePath}\"",
   "aiCodingSidebar.editor.runCommandWithoutFile": "claude \"${editorContent}\"",
   "aiCodingSidebar.terminal.fontSize": 12,
@@ -279,14 +280,14 @@ npm run watch
 1. [GitHubのReleasesページ](https://github.com/NaokiIshimura/vscode-panel/releases)から最新のVSIXファイルをダウンロード
 2. コマンドラインからインストール:
    ```bash
-   code --install-extension ai-coding-sidebar-0.8.24.vsix
+   code --install-extension ai-coding-sidebar-0.8.25.vsix
    ```
 3. VS Codeを再起動
 
 #### ローカルビルド版を使用する場合:
 ```bash
 # releasesディレクトリから直接インストール
-code --install-extension releases/ai-coding-sidebar-0.8.24.vsix
+code --install-extension releases/ai-coding-sidebar-0.8.25.vsix
 ```
 
 #### 自分でパッケージを作成する場合:
@@ -300,7 +301,7 @@ code --install-extension releases/ai-coding-sidebar-0.8.24.vsix
    ```
 3. 生成されたVSIXファイルをインストール:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.8.24.vsix
+   code --install-extension releases/ai-coding-sidebar-0.8.25.vsix
    ```
 4. VS Codeを再起動
 

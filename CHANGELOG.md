@@ -5,6 +5,72 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.28] - 2026-01-09
+
+### Improved
+- **Terminal View - Button Simplification**: Streamlined terminal header buttons for better clarity
+  - Renamed "Kill" button to "Close" for more intuitive terminology
+  - Removed redundant "× Close" button from shortcut area
+  - Single "Close" button now handles all tab closing operations
+  - Cleaner UI with reduced button clutter
+
+### Technical
+- Removed `closeTab` message handler from TypeScript backend
+- Updated HTML template: renamed Kill button to Close with updated title
+- Removed "× Close" button element from shortcut bar
+- Removed `btn-close-tab` event handler from JavaScript
+
+## [0.8.27] - 2026-01-09
+
+### Improved
+- **Terminal View - Close Button Position**: Improved tab close button placement for better usability
+  - Moved close button from individual tabs to the right end of the shortcut area
+  - Close button (× Close) is now always visible and easily accessible
+  - Single unified close button closes the active tab
+  - Reduces UI clutter and improves consistency across tab states
+
+### Technical
+- Removed close button from individual tab elements in HTML template
+- Repositioned close button as a direct child of shortcut bar using flexbox (`margin-left: auto`)
+- Consolidated two close button event handlers into a single handler for `btn-close-tab`
+- Simplified tab click event handler by removing close button detection logic
+
+## [0.8.26] - 2026-01-08
+
+### Added
+- **Tasks View - Auto-file Selection**: Automatically selects and displays the oldest target file when navigating to a directory
+  - Searches for TASK.md, PROMPT.md, or SPEC.md files (case-insensitive, including timestamped variants)
+  - Selects the file with the oldest creation date
+  - Opens the selected file in Editor View automatically
+  - Works when clicking directories or navigating back with ".."
+  - No action taken if no target files are found
+
+### Technical
+- Extended `IEditorProvider` interface with `showFile()` method
+- Added `findOldestTargetFile()` method to `TasksProvider` for target file detection
+- Enhanced `navigateToDirectory()` to trigger auto-file selection after directory navigation
+
+## [0.8.25] - 2026-01-08
+
+### Added
+- **Tasks View - Directory Sort Settings**: Directories now respect sort settings alongside files
+  - New settings `aiCodingSidebar.tasks.sortBy` and `aiCodingSidebar.tasks.sortOrder` replace `markdownList.*` settings
+  - Directories can now be sorted by name, creation date, or modification date (previously name-only)
+  - Both ascending and descending sort orders are supported
+  - Default sort is by creation date (ascending), changed from name (ascending)
+
+### Changed
+- **Settings Rename**: More intuitive setting names for Tasks view
+  - `aiCodingSidebar.markdownList.sortBy` → `aiCodingSidebar.tasks.sortBy`
+  - `aiCodingSidebar.markdownList.sortOrder` → `aiCodingSidebar.tasks.sortOrder`
+  - Old settings have been removed (no automatic migration)
+- **Tasks Settings Menu**: Tasks Settings button now opens `aiCodingSidebar.tasks` settings directly
+  - Previously opened all extension settings
+
+### Technical
+- Refactored sort logic to use a shared function for both directories and files
+- Updated configuration monitoring to watch new setting names
+
 ## [0.8.24] - 2026-01-08
 
 ### Fixed
@@ -1275,3 +1341,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.8.24]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.23...v0.8.24
 [0.8.23]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.22...v0.8.23
 [0.8.21]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.20...v0.8.21
+[0.8.25]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.24...v0.8.25

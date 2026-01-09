@@ -245,7 +245,9 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                     ];
                     for (const pattern of claudeStartPatterns) {
                         if (pattern.test(cleanData)) {
+                            console.log(`[DEBUG] Claude Code Start Detected - Pattern: ${pattern}, Data: "${cleanData.substring(0, 100)}"`);
                             tab.isClaudeCodeRunning = true;
+                            console.log(`[DEBUG] Sending claudeCodeStateChanged message - tabId: ${tab.id}, isRunning: true`);
                             this._view?.webview.postMessage({
                                 type: 'claudeCodeStateChanged',
                                 tabId: tab.id,
@@ -260,9 +262,24 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                 if (tab.isClaudeCodeRunning) {
                     // シェルプロンプトパターンを検出（行末に$や%がある場合）
                     const shellPromptPattern = /[$%#]\s*$/;
-                    // "claude"を含まないプロンプト行で終了を検知
-                    if (shellPromptPattern.test(cleanData) && !cleanData.includes('claude')) {
+                    // Claude Code内のプロンプトや要素を除外
+                    const claudeCodePatterns = [
+                        'claude',      // claude文字列を含む
+                        '❯',           // Claude Codeのプロンプト
+                        '╭',           // Claude CodeのUI要素
+                        '╰',           // Claude CodeのUI要素
+                        '─',           // 区切り線
+                        '│'            // Claude CodeのUI要素
+                    ];
+
+                    // これらのパターンのいずれかを含む場合は終了と判定しない
+                    const containsClaudePattern = claudeCodePatterns.some(pattern => cleanData.includes(pattern));
+
+                    // シェルプロンプトパターンにマッチし、かつClaude Codeのパターンを含まない場合のみ終了と判定
+                    if (shellPromptPattern.test(cleanData) && !containsClaudePattern) {
+                        console.log(`[DEBUG] Claude Code Exit Detected - Data: "${cleanData.substring(0, 100)}"`);
                         tab.isClaudeCodeRunning = false;
+                        console.log(`[DEBUG] Sending claudeCodeStateChanged message - tabId: ${tab.id}, isRunning: false`);
                         this._view?.webview.postMessage({
                             type: 'claudeCodeStateChanged',
                             tabId: tab.id,
@@ -763,14 +780,17 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
 
             // ショートカットバーの表示切り替え
             function updateShortcutBar(isClaudeCodeRunning) {
+                console.log('[DEBUG WebView] updateShortcutBar called - isClaudeCodeRunning: ' + isClaudeCodeRunning);
                 const notRunning = document.getElementById('shortcuts-not-running');
                 const running = document.getElementById('shortcuts-running');
                 if (isClaudeCodeRunning) {
                     notRunning.classList.add('hidden');
                     running.classList.remove('hidden');
+                    console.log('[DEBUG WebView] Showing Claude Code shortcuts (/compact, /clear)');
                 } else {
                     notRunning.classList.remove('hidden');
                     running.classList.add('hidden');
+                    console.log('[DEBUG WebView] Showing shell shortcuts (claude, claude -c, claude -r)');
                 }
             }
 
@@ -990,6 +1010,7 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
 
             // タブをアクティブ化
             function activateTab(tabId) {
+                console.log('[DEBUG WebView] activateTab called - tabId: ' + tabId);
                 const tabInfo = tabs.get(tabId);
                 if (!tabInfo) return;
 
@@ -1006,6 +1027,7 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
 
                 // ショートカットバーの状態を更新
                 const isClaudeCodeRunning = claudeCodeState.get(tabId) || false;
+                console.log('[DEBUG WebView] activateTab - tabId: ' + tabId + ', isClaudeCodeRunning: ' + isClaudeCodeRunning);
                 updateShortcutBar(isClaudeCodeRunning);
 
                 // スクロールボタンの表示状態を更新
@@ -1107,9 +1129,13 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                         break;
                     case 'claudeCodeStateChanged':
                         {
+                            console.log('[DEBUG WebView] Received claudeCodeStateChanged - tabId: ' + message.tabId + ', isRunning: ' + message.isRunning + ', activeTabId: ' + activeTabId);
                             claudeCodeState.set(message.tabId, message.isRunning);
                             if (message.tabId === activeTabId) {
+                                console.log('[DEBUG WebView] This is the active tab, updating shortcut bar');
                                 updateShortcutBar(message.isRunning);
+                            } else {
+                                console.log('[DEBUG WebView] This is not the active tab, state saved but not updating UI');
                             }
                         }
                         break;

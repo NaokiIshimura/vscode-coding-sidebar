@@ -65,7 +65,7 @@ Embedded terminal in the panel using xterm.js with full PTY support.
 | Clickable links | URLs open in browser, file paths (e.g., `./src/file.ts:123`) open in editor with line navigation |
 | Unicode support | Full support for CJK characters and other Unicode characters with proper width calculation |
 | Claude Code shortcuts | Quick command buttons for Claude Code: `claude`, `claude -c`, `claude -r` when not running; `/compact`, `/clear` when running |
-| Auto-detect Claude Code | Automatically detects Claude Code start/exit from terminal output and switches shortcut buttons |
+| Auto-detect Claude Code | Automatically detects Claude Code start/exit from terminal output and switches shortcut buttons (works even when launched without using shortcut buttons) |
 | Smart Enter key | Sends Enter key with shell commands but omits it for Claude Code commands (prevents unwanted newlines) |
 | Configurable | Customize shell path, font size, font family, cursor style, cursor blink, and scrollback lines |
 | WebView header | Tab bar with shell names, shortcut buttons, plus Clear and Kill buttons for the active tab |

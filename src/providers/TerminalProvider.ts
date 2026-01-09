@@ -105,9 +105,6 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                 case 'activateTab':
                     this._activateTab(data.tabId);
                     break;
-                case 'closeTab':
-                    this._closeTab(data.tabId);
-                    break;
                 case 'clearTerminal':
                     this.clearTerminal();
                     break;
@@ -711,7 +708,7 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
             </div>
             <div class="header-actions">
                 <button class="header-button" id="clear-button" title="Clear Terminal">Clear</button>
-                <button class="header-button danger" id="kill-button" title="Kill Terminal">Kill</button>
+                <button class="header-button danger" id="kill-button" title="Close Terminal">Close</button>
             </div>
         </div>
         <div class="header-row-2" id="shortcut-bar">
@@ -726,7 +723,6 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
                 <button class="shortcut-button" id="btn-clear">/clear</button>
                 <button class="shortcut-button toggle-button" id="toggle-shortcuts-2" title="Switch to shell commands">⇆</button>
             </div>
-            <button class="shortcut-button close-tab-button" id="btn-close-tab" title="Close active tab">× Close</button>
         </div>
     </div>
     <div id="error-message"></div>
@@ -1179,13 +1175,6 @@ export class TerminalProvider implements vscode.WebviewViewProvider {
             }
             document.getElementById('toggle-shortcuts-1')?.addEventListener('click', toggleShortcuts);
             document.getElementById('toggle-shortcuts-2')?.addEventListener('click', toggleShortcuts);
-
-            // 閉じるボタンのイベントハンドラ
-            document.getElementById('btn-close-tab')?.addEventListener('click', () => {
-                if (activeTabId && tabs.size > 0) {
-                    vscode.postMessage({ type: 'closeTab', tabId: activeTabId });
-                }
-            });
 
             // スクロールボタンのイベントハンドラ
             scrollToBottomBtn?.addEventListener('click', () => {

@@ -5,6 +5,21 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.31] - 2026-01-10
+
+### 改善
+- **Editor View - レスポンシブなヘッダーレイアウト**: 狭いビュー幅でのボタン表示を改善
+  - スペースが限られている場合、ファイル名が自動的に省略記号で切り詰められます
+  - ボタン（Edit、Save、Spec、Plan、Run）は常に完全に表示されます
+  - ビュー幅が狭くなると、ファイル名がボタンより優先的に非表示になります
+  - 改善されたFlexレイアウトにより、ボタンのオーバーフローを防ぎ、アクセシビリティを確保
+
+### 技術的変更
+- EditorProvider.tsのCSSを更新：ヘッダーから`flex-wrap: wrap`を削除
+- `.file-info`のflex動作を`flex: 1 1 0`に変更し、縮小を改善
+- `#file-path`から`min-width: 60px`を削除し、完全に非表示にできるように
+- `.file-info`に`overflow: hidden`を追加してコンテンツのオーバーフローを防止
+
 ## [0.8.30] - 2026-01-10
 
 ### 変更
@@ -827,3 +842,4 @@
 [0.8.23]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.22...v0.8.23
 [0.8.21]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.20...v0.8.21
 [0.8.25]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.24...v0.8.25
+[0.8.31]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.30...v0.8.31

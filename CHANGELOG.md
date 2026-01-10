@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.30] - 2026-01-10
+
+### Changed
+- **Editor Commands - Plan Mode Integration**: Added `--permission-mode plan` option to default command templates
+  - Plan Command now includes `--permission-mode plan` for explicit plan mode activation
+  - Spec Command now includes `--permission-mode plan` for structured specification creation
+  - Standardizes implementation planning workflow with Claude Code
+  - Existing custom command configurations remain unaffected
+
+### Technical
+- Updated `aiCodingSidebar.editor.planCommand` default value in package.json
+- Updated `aiCodingSidebar.editor.specCommand` default value in package.json
+
 ## [0.8.28] - 2026-01-09
 
 ### Improved

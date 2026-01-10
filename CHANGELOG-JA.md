@@ -5,6 +5,19 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.30] - 2026-01-10
+
+### 変更
+- **Editor Commands - Plan Mode統合**: デフォルトコマンドテンプレートに`--permission-mode plan`オプションを追加
+  - Plan Commandに明示的なplan mode起動のための`--permission-mode plan`を追加
+  - Spec Commandに構造化された仕様作成のための`--permission-mode plan`を追加
+  - Claude Codeとの実装計画ワークフローを標準化
+  - 既存のカスタムコマンド設定は影響を受けません
+
+### 技術的変更
+- package.jsonの`aiCodingSidebar.editor.planCommand`デフォルト値を更新
+- package.jsonの`aiCodingSidebar.editor.specCommand`デフォルト値を更新
+
 ## [0.8.28] - 2026-01-09
 
 ### 改善

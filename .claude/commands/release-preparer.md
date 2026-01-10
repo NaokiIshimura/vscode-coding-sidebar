@@ -50,6 +50,8 @@ git checkout -b v{バージョン}
 
 ## 4. CLAUDE.md & README更新
 
+**注意**: 手順4と手順5（CHANGELOG更新）は並行して実行できます。
+
 対象ファイル：
 - `CLAUDE.md`（プロジェクトドキュメント）
 - `README.md`（英語版）

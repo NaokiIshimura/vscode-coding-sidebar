@@ -711,16 +711,26 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 8px;
         }
         .file-info {
             display: flex;
             align-items: center;
             gap: 8px;
+            min-width: 0;
+            flex: 1 1 0;
+            overflow: hidden;
+        }
+        #file-path {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .header-actions {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 4px;
+            flex-shrink: 0;
         }
         .run-button {
             padding: 2px 8px;

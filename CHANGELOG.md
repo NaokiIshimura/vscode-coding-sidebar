@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.31] - 2026-01-10
+
+### Improved
+- **Editor View - Responsive Header Layout**: Enhanced button visibility in narrow view widths
+  - File name now automatically truncates with ellipsis when space is limited
+  - Buttons (Edit, Save, Spec, Plan, Run) remain fully visible at all times
+  - File name prioritizes hiding over buttons when view width decreases
+  - Improved flex layout prevents button overflow and ensures accessibility
+
+### Technical
+- Updated EditorProvider.ts CSS: removed `flex-wrap: wrap` from header
+- Changed `.file-info` flex behavior to `flex: 1 1 0` for better shrinking
+- Removed `min-width: 60px` from `#file-path` to allow complete hiding
+- Added `overflow: hidden` to `.file-info` to prevent content overflow
+
 ## [0.8.30] - 2026-01-10
 
 ### Changed
@@ -1355,3 +1370,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.8.23]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.22...v0.8.23
 [0.8.21]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.20...v0.8.21
 [0.8.25]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.24...v0.8.25
+[0.8.31]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.30...v0.8.31

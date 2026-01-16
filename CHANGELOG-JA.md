@@ -5,6 +5,29 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.32] - 2026-01-17
+
+### 変更
+- **ビュー名**: 拡張機能全体で "Tasks" ビューを "Plans" に名称変更
+  - ビュータイトルを "TASKS" から "PLANS" に変更
+  - メニュー項目を新しい名称に更新
+  - ドキュメントとREADMEを "Plans" 用語に更新
+- **設定構造 - 破壊的変更**: 設定キーを `plans` 名前空間に再編成
+  - `aiCodingSidebar.defaultRelativePath` → `aiCodingSidebar.plans.defaultRelativePath`
+  - `aiCodingSidebar.tasks.sortBy` → `aiCodingSidebar.plans.sortBy`
+  - `aiCodingSidebar.tasks.sortOrder` → `aiCodingSidebar.plans.sortOrder`
+  - デフォルトパスを `.claude/tasks` から `.claude/plans` に変更
+  - **注意**: 既存ユーザーの設定はデフォルト値にリセットされます（自動移行なし）
+- **設定メニュー**: "Tasks Settings" を "Plans Settings" に名称変更
+  - `aiCodingSidebar.plans` 設定セクションを直接開くように変更
+  - 新しい "Plans" 命名規則と一貫性を保つ
+
+### 技術的変更
+- 設定キー変更により5つのコアファイルを更新（合計18箇所の修正）
+- TasksProvider.tsを新しい設定名前空間に対応
+- ConfigurationProvider.tsを新しい設定構造に更新
+- ワークスペース設定ユーティリティを新しいデフォルトパスに変更
+
 ## [0.8.31] - 2026-01-10
 
 ### 改善

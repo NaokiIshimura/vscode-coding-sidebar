@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.32] - 2026-01-17
+
+### Changed
+- **View Name**: Renamed "Tasks" view to "Plans" throughout the extension
+  - View title changed from "TASKS" to "PLANS"
+  - Menu items updated to reflect new naming
+  - Documentation and README updated to use "Plans" terminology
+- **Settings Structure - Breaking Change**: Reorganized configuration keys under `plans` namespace
+  - `aiCodingSidebar.defaultRelativePath` → `aiCodingSidebar.plans.defaultRelativePath`
+  - `aiCodingSidebar.tasks.sortBy` → `aiCodingSidebar.plans.sortBy`
+  - `aiCodingSidebar.tasks.sortOrder` → `aiCodingSidebar.plans.sortOrder`
+  - Default path changed from `.claude/tasks` to `.claude/plans`
+  - **Note**: Existing user settings will be reset to defaults (no automatic migration)
+- **Settings Menu**: "Tasks Settings" renamed to "Plans Settings"
+  - Now opens `aiCodingSidebar.plans` settings section directly
+  - Consistent with new "Plans" naming convention
+
+### Technical
+- Updated 5 core files with settings key changes (18 total modifications)
+- Modified TasksProvider.ts to use new settings namespace
+- Updated ConfigurationProvider.ts for new configuration structure
+- Changed workspace setup utilities to use new default paths
+
 ## [0.8.31] - 2026-01-10
 
 ### Improved

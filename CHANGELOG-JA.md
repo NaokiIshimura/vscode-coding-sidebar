@@ -5,6 +5,16 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.33] - 2026-01-17
+
+### 変更
+- **ドキュメント**: "Plans" 命名規則を完全に反映するようドキュメントを更新
+  - CLAUDE.mdを新しい設定名前空間（`plans.defaultRelativePath`、`plans.sortBy`、`plans.sortOrder`）に更新
+  - README.mdとREADME-JA.mdを "Tasks" から "Plans" に一貫して更新
+  - 設定ドキュメントに `editor.planCommand` と `editor.specCommand` を追加
+  - すべてのVSIXバージョン参照を0.8.32から0.8.33に更新
+  - デフォルトパスの例を `.claude` から `.claude/plans` に修正
+
 ## [0.8.32] - 2026-01-17
 
 ### 変更
@@ -866,3 +876,5 @@
 [0.8.21]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.20...v0.8.21
 [0.8.25]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.24...v0.8.25
 [0.8.31]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.30...v0.8.31
+[0.8.32]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.31...v0.8.32
+[0.8.33]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.32...v0.8.33

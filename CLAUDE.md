@@ -30,7 +30,7 @@ npm run package     # VSIXパッケージ作成
 src/
 ├── extension.ts          # activate関数、コマンド登録（~1,377行）
 ├── providers/            # UIコンポーネント
-│   ├── TasksProvider.ts  # Tasksビュー（フラットリスト、Drag&Drop）
+│   ├── TasksProvider.ts  # Plansビュー（フラットリスト、Drag&Drop）
 │   ├── EditorProvider.ts # Markdown EditorのWebView
 │   ├── TerminalProvider.ts # xterm.jsターミナルのWebView（スクロール位置自動追従、Claude Code自動検知機能付き）
 │   ├── MenuProvider.ts   # 設定メニュー
@@ -58,7 +58,7 @@ src/
 
 ### データフロー
 
-1. TasksProviderでディレクトリ/ファイルを選択（フラットリスト形式）
+1. PlansProviderでディレクトリ/ファイルを選択（フラットリスト形式）
 2. ディレクトリクリックでそのディレクトリ内に移動、".."で親に移動
 3. ディレクトリ移動時、自動的に最も古いTASK.md/PROMPT.md/SPEC.mdファイルを検索してEditorViewに表示
 4. タイムスタンプ形式のMarkdownファイル選択時、EditorProviderにファイルパスが渡される
@@ -67,11 +67,13 @@ src/
 
 ### 設定項目（package.json）
 
-- `aiCodingSidebar.defaultRelativePath`: デフォルトの相対パス
-- `aiCodingSidebar.tasks.sortBy`: ソート基準（name/created/modified）- ファイルとディレクトリの両方に適用
-- `aiCodingSidebar.tasks.sortOrder`: ソート順（ascending/descending）- ファイルとディレクトリの両方に適用
+- `aiCodingSidebar.plans.defaultRelativePath`: デフォルトの相対パス（デフォルト: `.claude/plans`）
+- `aiCodingSidebar.plans.sortBy`: ソート基準（name/created/modified）- ファイルとディレクトリの両方に適用
+- `aiCodingSidebar.plans.sortOrder`: ソート順（ascending/descending）- ファイルとディレクトリの両方に適用
 - `aiCodingSidebar.editor.runCommand`: Runボタン実行コマンド
 - `aiCodingSidebar.editor.runCommandWithoutFile`: ファイルなし時のRunコマンド
+- `aiCodingSidebar.editor.planCommand`: Planボタン実行コマンド
+- `aiCodingSidebar.editor.specCommand`: Specボタン実行コマンド
 - `aiCodingSidebar.terminal.*`: ターミナル設定（shell, fontSize, fontFamily, cursorStyle, cursorBlink, scrollback）
 
 ## プルリクエスト作成前のチェックリスト

@@ -10,14 +10,14 @@ AIコーディングツールとの連携を強化するパネル拡張機能。
 
 | 機能 | 説明 |
 | --- | --- |
-| **Tasks** | フラットリストでファイルを閲覧・管理、ディレクトリナビゲーション対応 |
+| **Plans** | フラットリストでファイルを閲覧・管理、ディレクトリナビゲーション対応 |
 | **Editor** | パネル内でMarkdownファイルを直接編集、Runボタン連携 |
 | **Terminal** | 複数タブとPTYサポートを備えた埋め込みターミナル |
 | **Menu** | 設定や共通操作へのクイックアクセス |
 
 ## 機能詳細
 
-### Tasks
+### Plans
 
 指定したディレクトリ配下のフォルダとファイルをフラットリストで表示。
 
@@ -39,7 +39,7 @@ AIコーディングツールとの連携を強化するパネル拡張機能。
 | 機能 | 説明 |
 | --- | --- |
 | 自動表示 | タイムスタンプ形式のMarkdownファイル（形式: `YYYY_MMDD_HHMM_SS_PROMPT.md`）を選択すると自動的に表示。その他のMarkdownファイルは通常のエディタで開く |
-| Saveボタン | ヘッダーに表示され、未保存の変更がある場合は色が変わる。ファイル未開時は現在のTasksディレクトリに新規作成 |
+| Saveボタン | ヘッダーに表示され、未保存の変更がある場合は色が変わる。ファイル未開時は現在のPlansディレクトリに新規作成 |
 | タスク実行 | `Cmd+R` / `Ctrl+R`でカスタマイズ可能なコマンドをターミナルに送信（実行前に自動保存、ファイル未開でも実行可能） |
 | 新規ファイルボタン | ヘッダーからPROMPT.md、TASK.md、SPEC.mdファイルを作成。PROMPT.mdは`Cmd+M` / `Ctrl+M`でも作成可能 |
 | カスタマイズ可能な実行コマンド | Runボタンで実行されるコマンドを設定でカスタマイズ可能 |
@@ -94,20 +94,20 @@ xterm.jsを使用した完全なPTYサポートを備えた埋め込みターミ
 
 ### 基本操作
 1. アクティビティバーの「AI Coding Panel」アイコンをクリック（または`Cmd+Shift+A` / `Ctrl+Shift+A`を押す）
-2. TasksでAIコーディング用のディレクトリを作成
-3. Tasksでmarkdownファイルを作成
-4. Tasksでタイムスタンプ形式のMarkdownファイル（例: `2025_1229_1430_25_PROMPT.md`）をクリックして、下部のEditorビューで編集。その他のMarkdownファイルは通常のエディタで開く
+2. PlansでAIコーディング用のディレクトリを作成
+3. Plansでmarkdownファイルを作成
+4. Plansでタイムスタンプ形式のMarkdownファイル（例: `2025_1229_1430_25_PROMPT.md`）をクリックして、下部のEditorビューで編集。その他のMarkdownファイルは通常のエディタで開く
 5. EditorでAIへの指示を記述し、Saveボタンで保存
-6. Tasksでファイルを右クリック -> 相対パスをコピー
+6. Plansでファイルを右クリック -> 相対パスをコピー
 7. AIへ相対パスをペースト
 
 ## テンプレート機能
 
-Tasksでファイルを作成する際、テンプレートを使用して初期内容を自動設定できます。
+Plansでファイルを作成する際、テンプレートを使用して初期内容を自動設定できます。
 AIコーディングで使用するmarkdownファイルの構造を統一し、作業効率を向上させます。
 
 ### テンプレートの設定方法
-1. Tasksペインの歯車アイコンをクリック
+1. Plansペインの歯車アイコンをクリック
 2. 「ワークスペース設定」->「テンプレートをカスタマイズ」を選択
 3. `.vscode/ai-coding-panel/templates/` にテンプレートファイルが作成されます:
    - `task.md` - Start Task用テンプレート
@@ -134,8 +134,8 @@ created: {{datetime}}
 - `{{datetime}}`: 作成日時（例: 2025/11/3 12:27:13）
 - `{{filename}}`: ファイル名（拡張子を含む、例: 2025_1229_1430_25_PROMPT.md）
 - `{{timestamp}}`: タイムスタンプ（例: 2025_1229_1430_25）
-- `{{filepath}}`: ワークスペースルートからのファイルパス（例: .claude/tasks/2025_1229_1430_25_PROMPT.md）
-- `{{dirpath}}`: ワークスペースルートからのディレクトリパス（例: .claude/tasks）
+- `{{filepath}}`: ワークスペースルートからのファイルパス（例: .claude/plans/2025_1229_1430_25_PROMPT.md）
+- `{{dirpath}}`: ワークスペースルートからのディレクトリパス（例: .claude/plans）
 
 ### テンプレートの優先順位
 1. `.vscode/ai-coding-panel/templates/` のワークスペーステンプレート（存在する場合）
@@ -154,7 +154,7 @@ created: {{datetime}}
 | 名前の変更 | ファイル・フォルダの名前を変更。ディレクトリのリネーム後は自動的にリネーム後のディレクトリを表示 |
 | 削除 | ファイル・フォルダを削除（ゴミ箱に移動） |
 | コピー・切り取り・貼り付け | 標準的なファイル操作をサポート |
-| ドラッグ&ドロップ | Tasksビュー内または外部からファイルをドラッグしてコピー。コピー成功時にメッセージを表示 |
+| ドラッグ&ドロップ | Plansビュー内または外部からファイルをドラッグしてコピー。コピー成功時にメッセージを表示 |
 | アーカイブ | タスクディレクトリをアーカイブしてワークスペースを整理。ディレクトリ行のアーカイブアイコン（インラインボタン）をクリックするか、右クリックして「Archive」を選択すると、`archived`フォルダに移動されます。ルートディレクトリ以外のディレクトリ内にいる場合は、パス表示ヘッダーにもアーカイブボタンが表示され、クリックすると現在のディレクトリをアーカイブしてルートに戻ります。同名のディレクトリが既に存在する場合は、競合を避けるために自動的にタイムスタンプが追加されます。 |
 | ブランチチェックアウト | ディレクトリを右クリックして、ディレクトリ名をそのままブランチ名としてgitブランチをチェックアウト。ブランチが存在しない場合は作成し、既に存在する場合は切り替え |
 | Editorにパスを挿入 | Editorビューに相対パスを挿入。ファイル行のeditアイコンをクリック、または右クリックして「Insert Path to Editor」を選択。複数選択に対応 |
@@ -166,7 +166,7 @@ created: {{datetime}}
 
 | 項目 | 手順 |
 | --- | --- |
-| New Task | Tasksのタイトルメニューにあるロケットアイコンをクリック<br>Tasks Viewで現在開いているディレクトリ配下に新しいディレクトリを作成し、タイムスタンプ付きのMarkdownファイルを自動生成します<br>作成されたファイルはTasksで「editing」ラベルとともに選択され、Editor Viewで開かれます<br>現在のパスが取得できない場合は、デフォルトパス配下に作成されます |
+| New Task | Plansのタイトルメニューにあるロケットアイコンをクリック<br>Plans Viewで現在開いているディレクトリ配下に新しいディレクトリを作成し、タイムスタンプ付きのMarkdownファイルを自動生成します<br>作成されたファイルはPlansで「editing」ラベルとともに選択され、Editor Viewで開かれます<br>現在のパスが取得できない場合は、デフォルトパス配下に作成されます |
 | 新規ディレクトリ | パス表示行のフォルダアイコンをクリック<br>現在開いているディレクトリ配下に新しいディレクトリを作成します（Markdownファイルは作成しない） |
 | PROMPT.md作成 | パス表示行またはEditorヘッダーのファイルアイコンをクリック<br>タイムスタンプ付きのMarkdownファイルが作成され、Editor Viewで開かれます（例: `2025_1229_1430_25_PROMPT.md`） |
 | TASK.md作成 | パス表示行またはEditorヘッダーのTASK.mdアイコンをクリック<br>タイムスタンプ付きのTASK.mdファイルが作成され、Editor Viewで開かれます |
@@ -176,36 +176,38 @@ created: {{datetime}}
 
 | 方法 | 手順 |
 | --- | --- |
-| Tasks設定から（推奨） | 1. Tasksの歯車アイコンをクリック<br>2. 設定画面が開き、`aiCodingSidebar.defaultRelativePath`がフィルタ表示される<br>3. デフォルトの相対パスを編集（例: `src`, `.claude`, `docs/api`） |
-| ワークスペース設定 | 1. Tasksの歯車アイコンをクリック<br>2. 「ワークスペース設定」を選択<br>3. 設定したい項目を選択：<br>&nbsp;&nbsp;- **settings.jsonを作成/編集**: ワークスペース設定ファイルを自動作成<br>&nbsp;&nbsp;- **.claudeフォルダを設定**: .claudeフォルダを作成し設定を適用<br>&nbsp;&nbsp;- **テンプレートをカスタマイズ**: ファイル作成時のテンプレートを編集 |
-| 拡張機能から設定 | 1. Tasksの編集アイコンをクリック<br>2. 相対パスを入力（例: `src`, `.claude`, `docs/api`）<br>3. 設定に保存するか選択 |
+| Plans設定から（推奨） | 1. Plansの歯車アイコンをクリック<br>2. 設定画面が開き、`aiCodingSidebar.plans.defaultRelativePath`がフィルタ表示される<br>3. デフォルトの相対パスを編集（例: `src`, `.claude/plans`, `docs/api`） |
+| ワークスペース設定 | 1. Plansの歯車アイコンをクリック<br>2. 「ワークスペース設定」を選択<br>3. 設定したい項目を選択：<br>&nbsp;&nbsp;- **settings.jsonを作成/編集**: ワークスペース設定ファイルを自動作成<br>&nbsp;&nbsp;- **.claude/plansフォルダを設定**: .claude/plansフォルダを作成し設定を適用<br>&nbsp;&nbsp;- **テンプレートをカスタマイズ**: ファイル作成時のテンプレートを編集 |
+| 拡張機能から設定 | 1. Plansの編集アイコンをクリック<br>2. 相対パスを入力（例: `src`, `.claude/plans`, `docs/api`）<br>3. 設定に保存するか選択 |
 
 #### 相対パスの例
 - `src` -> プロジェクト/src
 - `docs/api` -> プロジェクト/docs/api
-- `.claude` -> プロジェクト/.claude
+- `.claude/plans` -> プロジェクト/.claude/plans
 - 空文字 -> プロジェクトルート
 
 #### 設定したパスが存在しない場合
-デフォルトの相対パスが存在しない場合、Tasksに「ディレクトリを作成」ボタンが表示されます。ボタンをクリックすると、自動的にディレクトリが作成され、その内容が表示されます。
+デフォルトの相対パスが存在しない場合、Plansに「ディレクトリを作成」ボタンが表示されます。ボタンをクリックすると、自動的にディレクトリが作成され、その内容が表示されます。
 
 ### その他
 
 | 機能 | 説明 |
 | --- | --- |
 | 相対パスコピー | ワークスペースからの相対パスをクリップボードにコピー |
-| Tasks設定 | Tasksから設定画面を開き、デフォルトの相対パスを直接編集 |
+| Plans設定 | Plansから設定画面を開き、デフォルトの相対パスを直接編集 |
 | 検索機能 | ワークスペース内のファイルを検索 |
 
 ## 設定
 
 | 設定項目 | 説明 | 型 | デフォルト値 | 選択肢/例 |
 | --- | --- | --- | --- | --- |
-| `defaultRelativePath` | Tasksのデフォルト相対パス | string | `".claude/tasks"` | `"src"`, `".claude"`, `"docs/api"` |
-| `tasks.sortBy` | Tasksのファイル・ディレクトリのソート基準 | string | `"created"` | `"name"`: ファイル名<br>`"created"`: 作成日時<br>`"modified"`: 更新日時 |
-| `tasks.sortOrder` | Tasksのファイル・ディレクトリのソート順序 | string | `"ascending"` | `"ascending"`: 昇順<br>`"descending"`: 降順 |
-| `editor.runCommand` | Editorビューのrunボタンで実行されるコマンドテンプレート | string | `claude "${filePath}"` | `${filePath}`をファイルパスのプレースホルダーとして使用 |
+| `plans.defaultRelativePath` | Plansのデフォルト相対パス | string | `".claude/plans"` | `"src"`, `".claude/plans"`, `"docs/api"` |
+| `plans.sortBy` | Plansのファイル・ディレクトリのソート基準 | string | `"created"` | `"name"`: ファイル名<br>`"created"`: 作成日時<br>`"modified"`: 更新日時 |
+| `plans.sortOrder` | Plansのファイル・ディレクトリのソート順序 | string | `"ascending"` | `"ascending"`: 昇順<br>`"descending"`: 降順 |
+| `editor.runCommand` | Editorビューのrunボタンで実行されるコマンドテンプレート | string | `claude "Review the file at ${filePath}"` | `${filePath}`をファイルパスのプレースホルダーとして使用 |
 | `editor.runCommandWithoutFile` | ファイル未開時にrunボタンで実行されるコマンドテンプレート | string | `claude "${editorContent}"` | `${editorContent}`をエディタ内容のプレースホルダーとして使用 |
+| `editor.planCommand` | Planボタンで実行されるコマンドテンプレート | string | `claude --permission-mode plan "Review the file at ${filePath} and create an implementation plan. Save it as a timestamped file (format: YYYY_MMDD_HHMM_SS_plan.md) in the same directory as ${filePath}."` | `${filePath}`をファイルパスのプレースホルダーとして使用 |
+| `editor.specCommand` | Specボタンで実行されるコマンドテンプレート | string | `claude --permission-mode plan "Review the file at ${filePath} and create specification documents. Save them as timestamped files (format: YYYY_MMDD_HHMM_SS_requirements.md, YYYY_MMDD_HHMM_SS_design.md, YYYY_MMDD_HHMM_SS_tasks.md) in the same directory as ${filePath}."` | `${filePath}`をファイルパスのプレースホルダーとして使用 |
 | `terminal.shell` | Terminalビューのシェル実行パス | string | `""` | 空欄の場合はシステムのデフォルトシェルを使用 |
 | `terminal.fontSize` | Terminalビューのフォントサイズ | number | `12` | 任意の正の数値 |
 | `terminal.fontFamily` | Terminalビューのフォントファミリー | string | `"monospace"` | 任意の有効なフォントファミリー |
@@ -219,11 +221,13 @@ created: {{datetime}}
 
 ```json
 {
-  "aiCodingSidebar.defaultRelativePath": ".claude",
-  "aiCodingSidebar.tasks.sortBy": "created",
-  "aiCodingSidebar.tasks.sortOrder": "ascending",
+  "aiCodingSidebar.plans.defaultRelativePath": ".claude/plans",
+  "aiCodingSidebar.plans.sortBy": "created",
+  "aiCodingSidebar.plans.sortOrder": "ascending",
   "aiCodingSidebar.editor.runCommand": "claude \"Review the file at ${filePath}\"",
   "aiCodingSidebar.editor.runCommandWithoutFile": "claude \"${editorContent}\"",
+  "aiCodingSidebar.editor.planCommand": "claude --permission-mode plan \"Review the file at ${filePath} and create an implementation plan. Save it as a timestamped file (format: YYYY_MMDD_HHMM_SS_plan.md) in the same directory as ${filePath}.\"",
+  "aiCodingSidebar.editor.specCommand": "claude --permission-mode plan \"Review the file at ${filePath} and create specification documents. Save them as timestamped files (format: YYYY_MMDD_HHMM_SS_requirements.md, YYYY_MMDD_HHMM_SS_design.md, YYYY_MMDD_HHMM_SS_tasks.md) in the same directory as ${filePath}.\"",
   "aiCodingSidebar.terminal.fontSize": 12,
   "aiCodingSidebar.terminal.cursorStyle": "block"
 }
@@ -280,7 +284,7 @@ npm run watch
 1. [GitHubのReleasesページ](https://github.com/NaokiIshimura/vscode-panel/releases)から最新のVSIXファイルをダウンロード
 2. コマンドラインからインストール:
    ```bash
-   code --install-extension ai-coding-sidebar-0.8.32.vsix
+   code --install-extension ai-coding-sidebar-0.8.33.vsix
    ```
 3. VS Codeを再起動
 

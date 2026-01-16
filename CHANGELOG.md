@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.33] - 2026-01-17
+
+### Changed
+- **Documentation**: Updated documentation to fully reflect the "Plans" naming convention
+  - Updated CLAUDE.md with new settings namespace (`plans.defaultRelativePath`, `plans.sortBy`, `plans.sortOrder`)
+  - Updated README.md and README-JA.md to consistently use "Plans" instead of "Tasks"
+  - Added `editor.planCommand` and `editor.specCommand` to settings documentation
+  - Updated all VSIX version references from 0.8.32 to 0.8.33
+  - Fixed default path examples from `.claude` to `.claude/plans`
+
 ## [0.8.32] - 2026-01-17
 
 ### Changed
@@ -1394,3 +1404,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.8.21]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.20...v0.8.21
 [0.8.25]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.24...v0.8.25
 [0.8.31]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.30...v0.8.31
+[0.8.32]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.31...v0.8.32
+[0.8.33]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.32...v0.8.33

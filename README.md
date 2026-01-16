@@ -176,9 +176,9 @@ Use the following variables inside a template:
 
 | Method | Steps |
 | --- | --- |
-| Tasks settings (recommended) | 1. Click the gear icon in Tasks.<br>2. The settings view opens with `aiCodingSidebar.defaultRelativePath` pre-filtered.<br>3. Edit the default relative path (for example, `src`, `.claude`, `docs/api`). |
-| Workspace settings | 1. Click the gear icon in Tasks.<br>2. Select "Workspace Settings."<br>3. Choose one of the following:<br>&nbsp;&nbsp;- **Create/Edit settings.json**: Generate or edit the workspace settings file.<br>&nbsp;&nbsp;- **Configure .claude folder**: Create a `.claude` folder and apply settings.<br>&nbsp;&nbsp;- **Customize template**: Edit the template used when creating files. |
-| Inline from the extension | 1. Click the edit icon in Tasks.<br>2. Enter a relative path (for example, `src`, `.claude`, `docs/api`).<br>3. Choose whether to save it to settings. |
+| Plans settings (recommended) | 1. Click the gear icon in Plans.<br>2. The settings view opens with `aiCodingSidebar.plans.defaultRelativePath` pre-filtered.<br>3. Edit the default relative path (for example, `src`, `.claude`, `docs/api`). |
+| Workspace settings | 1. Click the gear icon in Plans.<br>2. Select "Workspace Settings."<br>3. Choose one of the following:<br>&nbsp;&nbsp;- **Create/Edit settings.json**: Generate or edit the workspace settings file.<br>&nbsp;&nbsp;- **Configure .claude folder**: Create a `.claude` folder and apply settings.<br>&nbsp;&nbsp;- **Customize template**: Edit the template used when creating files. |
+| Inline from the extension | 1. Click the edit icon in Plans.<br>2. Enter a relative path (for example, `src`, `.claude`, `docs/api`).<br>3. Choose whether to save it to settings. |
 
 #### Relative path examples
 - `src` -> `<project>/src`
@@ -194,7 +194,7 @@ If the default relative path doesn't exist, Tasks displays a "Create directory" 
 | Feature | Description |
 | --- | --- |
 | Copy relative path | Copy the workspace-relative path to the clipboard. |
-| Tasks settings | Open the settings view from Tasks to edit the default relative path directly. |
+| Plans settings | Open the settings view from Plans to edit the default relative path directly. |
 | Search | Search files across the workspace. |
 
 ## Settings
@@ -280,14 +280,14 @@ npm run watch
 1. Download the latest VSIX file from the [GitHub Releases page](https://github.com/NaokiIshimura/vscode-panel/releases).
 2. Install via command line:
    ```bash
-   code --install-extension ai-coding-sidebar-0.8.31.vsix
+   code --install-extension ai-coding-sidebar-0.8.32.vsix
    ```
 3. Restart VS Code.
 
 #### Use a local build
 ```bash
 # Install directly from the releases directory
-code --install-extension releases/ai-coding-sidebar-0.8.31.vsix
+code --install-extension releases/ai-coding-sidebar-0.8.32.vsix
 ```
 
 #### Build the package yourself
@@ -301,7 +301,7 @@ code --install-extension releases/ai-coding-sidebar-0.8.31.vsix
    ```
 3. Install the generated VSIX file:
    ```bash
-   code --install-extension releases/ai-coding-sidebar-0.8.31.vsix
+   code --install-extension releases/ai-coding-sidebar-0.8.32.vsix
    ```
 4. Restart VS Code.
 

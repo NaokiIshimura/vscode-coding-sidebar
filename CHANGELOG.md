@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.42] - 2026-01-17
+
+### Fixed
+- **Configuration Loading**: Fixed settings path to correctly read `plans.defaultRelativePath` configuration
+  - Updated ConfigurationProvider.ts to use `plans.defaultRelativePath` instead of `defaultRelativePath`
+  - Updated extension.ts to properly read the Plans default path setting
+  - Updated EditorProvider.ts to use correct configuration path
+  - Updated workspaceSetup.ts to set correct configuration key
+  - This fix ensures the "Ai Coding Sidebar › Plans: Default Relative Path" setting in VS Code settings UI is properly recognized
+
 ## [0.8.33] - 2026-01-17
 
 ### Changed

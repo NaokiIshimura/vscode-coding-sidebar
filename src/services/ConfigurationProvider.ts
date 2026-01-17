@@ -18,7 +18,7 @@ export class ConfigurationProvider {
      * デフォルト相対パスを取得
      */
     getDefaultRelativePath(): string {
-        return this.getConfiguration().get<string>('defaultRelativePath', '');
+        return this.getConfiguration().get<string>('plans.defaultRelativePath', '');
     }
 
     /**
@@ -26,7 +26,7 @@ export class ConfigurationProvider {
      */
     async setDefaultRelativePath(path: string): Promise<void> {
         await this.getConfiguration().update(
-            'defaultRelativePath',
+            'plans.defaultRelativePath',
             path,
             vscode.ConfigurationTarget.Workspace
         );
@@ -171,7 +171,7 @@ export class ConfigurationProvider {
     async resetAllSettings(): Promise<void> {
         const config = this.getConfiguration();
         const keys = [
-            'defaultRelativePath',
+            'plans.defaultRelativePath',
             'sortBy',
             'sortOrder',
             'showHidden',

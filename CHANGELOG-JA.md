@@ -5,6 +5,16 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.42] - 2026-01-17
+
+### 修正
+- **設定読み込み**: `plans.defaultRelativePath` 設定を正しく読み込むように設定パスを修正
+  - ConfigurationProvider.tsを `defaultRelativePath` から `plans.defaultRelativePath` に更新
+  - extension.tsでPlansのデフォルトパス設定を正しく読み込むように修正
+  - EditorProvider.tsで正しい設定パスを使用するように更新
+  - workspaceSetup.tsで正しい設定キーを設定するように更新
+  - この修正により、VSCode設定UIの「Ai Coding Sidebar › Plans: Default Relative Path」設定が正しく認識されるようになります
+
 ## [0.8.33] - 2026-01-17
 
 ### 変更

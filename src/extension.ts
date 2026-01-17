@@ -69,7 +69,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         // 設定から相対パスを取得
         const config = vscode.workspace.getConfiguration('aiCodingSidebar');
-        const defaultRelativePath = config.get<string>('defaultRelativePath');
+        const defaultRelativePath = config.get<string>('plans.defaultRelativePath');
 
         let targetPath: string;
         let relativePath: string | undefined;
@@ -299,7 +299,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (saveChoice === 'Yes') {
                 const config = vscode.workspace.getConfiguration('aiCodingSidebar');
-                await config.update('defaultRelativePath', relativePathToSave, vscode.ConfigurationTarget.Workspace);
+                await config.update('plans.defaultRelativePath', relativePathToSave, vscode.ConfigurationTarget.Workspace);
                 vscode.window.showInformationMessage('Saved to settings');
             }
 

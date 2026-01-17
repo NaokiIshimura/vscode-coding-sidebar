@@ -591,7 +591,7 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
             } else {
                 // 優先度4: デフォルトパス
                 const config = vscode.workspace.getConfiguration('aiCodingSidebar');
-                const defaultRelativePath = config.get<string>('defaultRelativePath', '.claude/tasks');
+                const defaultRelativePath = config.get<string>('plans.defaultRelativePath', '.claude/plans');
                 savePath = path.join(workspaceRoot, defaultRelativePath);
             }
 

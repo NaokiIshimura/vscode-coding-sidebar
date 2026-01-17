@@ -19,7 +19,7 @@ import { loadTemplate } from './utils/templateUtils';
 import { setupSettingsJson, setupTemplate, setupClaudeFolder } from './utils/workspaceSetup';
 
 // プロバイダーのインポート
-import { TasksProvider, MenuProvider, EditorProvider, TerminalProvider, FileItem } from './providers';
+import { PlansProvider, MenuProvider, EditorProvider, TerminalProvider, FileItem } from './providers';
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('AI Coding Panel activated');
@@ -46,14 +46,14 @@ export function activate(context: vscode.ExtensionContext) {
 
     // TreeDataProviderを作成
     const menuProvider = new MenuProvider();
-    const tasksProvider = new TasksProvider(fileWatcherService);
+    const plansProvider = new PlansProvider(fileWatcherService);
     const editorProvider = new EditorProvider(context.extensionUri);
 
-    // EditorProviderをTasksProviderに設定
-    tasksProvider.setEditorProvider(editorProvider);
-    // TasksProviderをEditorProviderに設定
-    editorProvider.setDetailsProvider(tasksProvider);
-    editorProvider.setTasksProvider(tasksProvider);
+    // EditorProviderをPlansProviderに設定
+    plansProvider.setEditorProvider(editorProvider);
+    // PlansProviderをEditorProviderに設定
+    editorProvider.setDetailsProvider(plansProvider);
+    editorProvider.setPlansProvider(plansProvider);
 
     // Terminal Providerを作成（EditorProviderに設定するため先に作成）
     const terminalProvider = new TerminalProvider(context.extensionUri);
@@ -69,7 +69,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         // 設定から相対パスを取得
         const config = vscode.workspace.getConfiguration('aiCodingSidebar');
-        const defaultRelativePath = config.get<string>('defaultRelativePath');
+        const defaultRelativePath = config.get<string>('plans.defaultRelativePath');
 
         let targetPath: string;
         let relativePath: string | undefined;
@@ -84,7 +84,7 @@ export function activate(context: vscode.ExtensionContext) {
             relativePath = undefined;
         }
 
-        tasksProvider.setRootPath(targetPath, relativePath);
+        plansProvider.setRootPath(targetPath, relativePath);
     };
 
     // ビューを登録
@@ -94,21 +94,21 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const treeView = vscode.window.createTreeView('aiCodingSidebarExplorer', {
-        treeDataProvider: tasksProvider,
+        treeDataProvider: plansProvider,
         showCollapseAll: true,
         canSelectMany: false,
-        dragAndDropController: tasksProvider
+        dragAndDropController: plansProvider
     });
 
     // TreeViewをProviderに設定
-    tasksProvider.setTreeView(treeView);
+    plansProvider.setTreeView(treeView);
 
     // 初期状態でリスナーを有効化
-    tasksProvider.handleVisibilityChange(treeView.visible);
+    plansProvider.handleVisibilityChange(treeView.visible);
 
     // ビューの可視性変更を監視
     treeView.onDidChangeVisibility(() => {
-        tasksProvider.handleVisibilityChange(treeView.visible);
+        plansProvider.handleVisibilityChange(treeView.visible);
     });
 
     // Markdown Editor Viewを登録
@@ -157,7 +157,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     // 初期化後にルートフォルダを選択状態にする
     setTimeout(async () => {
-        const currentRootPath = tasksProvider.getRootPath();
+        const currentRootPath = plansProvider.getRootPath();
         if (currentRootPath) {
             await selectInitialFolder(treeView, currentRootPath);
         }
@@ -167,7 +167,7 @@ export function activate(context: vscode.ExtensionContext) {
     treeView.onDidChangeSelection(async (e) => {
         if (e.selection.length > 0) {
             const selectedItem = e.selection[0];
-            tasksProvider.setSelectedItem(selectedItem);
+            plansProvider.setSelectedItem(selectedItem);
 
             // ファイルの場合（Markdownファイル）
             if (!selectedItem.isDirectory && selectedItem.filePath.endsWith('.md')) {
@@ -192,32 +192,32 @@ export function activate(context: vscode.ExtensionContext) {
 
     // 更新コマンドを登録
     const refreshCommand = vscode.commands.registerCommand('aiCodingSidebar.refresh', () => {
-        tasksProvider.refresh();
+        plansProvider.refresh();
     });
 
     // 下ペイン表示コマンドを登録（互換性のために残す）
     const showInPanelCommand = vscode.commands.registerCommand('aiCodingSidebar.showInPanel', async (item: FileItem) => {
         if (item && item.isDirectory) {
-            tasksProvider.setActiveFolder(item.filePath);
+            plansProvider.setActiveFolder(item.filePath);
         }
     });
 
     // フォルダを開くコマンドを登録（互換性のために残す）
     const openFolderCommand = vscode.commands.registerCommand('aiCodingSidebar.openFolder', async (folderPath: string) => {
-        tasksProvider.setActiveFolder(folderPath);
+        plansProvider.setActiveFolder(folderPath);
     });
 
     // 親フォルダへ移動するコマンドを登録
     const goToParentCommand = vscode.commands.registerCommand('aiCodingSidebar.goToParent', async () => {
         // フォルダツリーviewの親フォルダへ移動
-        const currentPath = tasksProvider.getRootPath();
+        const currentPath = plansProvider.getRootPath();
         if (currentPath) {
             const parentPath = path.dirname(currentPath);
 
             // プロジェクトルートより上には移動しない
             const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
             if (workspaceRoot && parentPath.startsWith(workspaceRoot) && parentPath !== currentPath) {
-                tasksProvider.setRootPath(parentPath);
+                plansProvider.setRootPath(parentPath);
             } else {
                 vscode.window.showInformationMessage('No parent folder available');
             }
@@ -232,7 +232,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
-        const currentPath = tasksProvider.getRootPath() || workspaceRoot;
+        const currentPath = plansProvider.getRootPath() || workspaceRoot;
 
         // 現在のパスから相対パスを計算
         const currentRelativePath = path.relative(workspaceRoot, currentPath);
@@ -287,7 +287,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
 
             // パスを設定（存在しなくても設定）
-            tasksProvider.setRootPath(targetPath);
+            plansProvider.setRootPath(targetPath);
 
             // 設定に保存するかユーザーに確認
             const relativePathToSave = trimmedPath === '' || trimmedPath === '.' ? '' : trimmedPath;
@@ -299,7 +299,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (saveChoice === 'Yes') {
                 const config = vscode.workspace.getConfiguration('aiCodingSidebar');
-                await config.update('defaultRelativePath', relativePathToSave, vscode.ConfigurationTarget.Workspace);
+                await config.update('plans.defaultRelativePath', relativePathToSave, vscode.ConfigurationTarget.Workspace);
                 vscode.window.showInformationMessage('Saved to settings');
             }
 
@@ -317,9 +317,9 @@ export function activate(context: vscode.ExtensionContext) {
         await vscode.commands.executeCommand('workbench.action.openSettings', 'aiCodingSidebar');
     });
 
-    // Tasks設定を開くコマンドを登録
-    const openTasksSettingsCommand = vscode.commands.registerCommand('aiCodingSidebar.openTasksSettings', async () => {
-        await vscode.commands.executeCommand('workbench.action.openSettings', 'aiCodingSidebar.tasks');
+    // Plans設定を開くコマンドを登録
+    const openPlansSettingsCommand = vscode.commands.registerCommand('aiCodingSidebar.openPlansSettings', async () => {
+        await vscode.commands.executeCommand('workbench.action.openSettings', 'aiCodingSidebar.plans');
     });
 
     // Editor設定を開くコマンドを登録
@@ -428,9 +428,9 @@ export function activate(context: vscode.ExtensionContext) {
                 targetPath = path.dirname(item.filePath);
             }
         }
-        // 2. Tasks Viewで現在開いているフォルダ
+        // 2. Plans Viewで現在開いているフォルダ
         else {
-            const currentPath = tasksProvider.getCurrentPath();
+            const currentPath = plansProvider.getCurrentPath();
             if (!currentPath) {
                 vscode.window.showErrorMessage('No folder is open');
                 return;
@@ -474,7 +474,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (result.success) {
                 // ビューを更新
-                tasksProvider.refresh();
+                plansProvider.refresh();
 
                 // 作成したファイルをMarkdown Editor Viewで開く
                 await editorProvider.showFile(filePath);
@@ -503,7 +503,7 @@ export function activate(context: vscode.ExtensionContext) {
                 targetPath = path.dirname(item.filePath);
             }
         } else {
-            const currentPath = tasksProvider.getCurrentPath();
+            const currentPath = plansProvider.getCurrentPath();
             if (!currentPath) {
                 vscode.window.showErrorMessage('No folder is open');
                 return;
@@ -546,7 +546,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (result.success) {
                 // ビューを更新
-                tasksProvider.refresh();
+                plansProvider.refresh();
 
                 // 作成したファイルをMarkdown Editor Viewで開く
                 await editorProvider.showFile(filePath);
@@ -575,7 +575,7 @@ export function activate(context: vscode.ExtensionContext) {
                 targetPath = path.dirname(item.filePath);
             }
         } else {
-            const currentPath = tasksProvider.getCurrentPath();
+            const currentPath = plansProvider.getCurrentPath();
             if (!currentPath) {
                 vscode.window.showErrorMessage('No folder is open');
                 return;
@@ -618,7 +618,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (result.success) {
                 // ビューを更新
-                tasksProvider.refresh();
+                plansProvider.refresh();
 
                 // 作成したファイルをMarkdown Editor Viewで開く
                 await editorProvider.showFile(filePath);
@@ -642,8 +642,8 @@ export function activate(context: vscode.ExtensionContext) {
         if (item) {
             targetDirectory = item.isDirectory ? item.filePath : path.dirname(item.filePath);
         } else {
-            targetDirectory = tasksProvider.getCurrentPath()
-                || tasksProvider.getRootPath()
+            targetDirectory = plansProvider.getCurrentPath()
+                || plansProvider.getRootPath()
                 || vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
         }
 
@@ -700,7 +700,7 @@ export function activate(context: vscode.ExtensionContext) {
             const result = await fileOperationService.createFile(newFilePath);
 
             if (result.success) {
-                tasksProvider.refresh();
+                plansProvider.refresh();
 
                 const document = await vscode.workspace.openTextDocument(newFilePath);
                 await vscode.window.showTextDocument(document);
@@ -727,9 +727,9 @@ export function activate(context: vscode.ExtensionContext) {
                 targetPath = path.dirname(item.filePath);
             }
         }
-        // 2. Tasks Viewで現在開いているフォルダ
+        // 2. Plans Viewで現在開いているフォルダ
         else {
-            const currentPath = tasksProvider.getCurrentPath();
+            const currentPath = plansProvider.getCurrentPath();
             if (!currentPath) {
                 vscode.window.showErrorMessage('No folder is open');
                 return;
@@ -771,7 +771,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (result.success) {
                 // ビューを更新
-                tasksProvider.refresh();
+                plansProvider.refresh();
 
                 vscode.window.showInformationMessage(`Created folder "${trimmedFolderName}"`);
             } else {
@@ -825,10 +825,10 @@ export function activate(context: vscode.ExtensionContext) {
             if (result.success) {
                 // ディレクトリの場合はリネーム後のディレクトリに移動（Editorはクリアしない）
                 if (item.isDirectory) {
-                    tasksProvider.setActiveFolder(newPath, true);
+                    plansProvider.setActiveFolder(newPath, true);
                 } else {
                     // ファイルの場合はビューを更新
-                    tasksProvider.refresh();
+                    plansProvider.refresh();
                 }
 
                 vscode.window.showInformationMessage(`Renamed ${oldName} to ${newName}`);
@@ -870,29 +870,29 @@ export function activate(context: vscode.ExtensionContext) {
                 let treeUpdated = false;
 
                 if (item.isDirectory) {
-                    const rootPath = tasksProvider.getRootPath();
+                    const rootPath = plansProvider.getRootPath();
                     if (rootPath) {
                         if (item.filePath === rootPath) {
-                            tasksProvider.resetActiveFolder();
+                            plansProvider.resetActiveFolder();
                             treeUpdated = true;
                         } else {
                             const parentPath = path.dirname(item.filePath);
                             if (parentPath && parentPath.startsWith(rootPath) && fs.existsSync(parentPath)) {
-                                tasksProvider.setActiveFolder(parentPath, true);
+                                plansProvider.setActiveFolder(parentPath, true);
                                 treeUpdated = true;
                             } else {
-                                tasksProvider.resetActiveFolder();
+                                plansProvider.resetActiveFolder();
                                 treeUpdated = true;
                             }
                         }
                     } else {
-                        tasksProvider.resetActiveFolder();
+                        plansProvider.resetActiveFolder();
                         treeUpdated = true;
                     }
                 }
 
                 if (!treeUpdated) {
-                    tasksProvider.refresh();
+                    plansProvider.refresh();
                 }
 
                 vscode.window.showInformationMessage(`Deleted ${itemType} "${itemName}"`);
@@ -911,7 +911,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         // itemが渡されていない場合は、現在選択されているアイテムを取得
         if (!targetItem) {
-            targetItem = tasksProvider.getSelectedItem();
+            targetItem = plansProvider.getSelectedItem();
         }
 
         // 選択されたアイテムがディレクトリでない場合はルートパスを使用
@@ -919,7 +919,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (targetItem && targetItem.isDirectory) {
             targetPath = targetItem.filePath;
         } else {
-            const currentPath = tasksProvider.getRootPath();
+            const currentPath = plansProvider.getRootPath();
             if (!currentPath) {
                 vscode.window.showErrorMessage('No folder is open');
                 return;
@@ -961,10 +961,10 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showInformationMessage(`Created folder "${trimmedFolderName}"`);
 
             // ビューを更新
-            tasksProvider.refresh();
+            plansProvider.refresh();
 
             // 作成したディレクトリを選択状態にする
-            await tasksProvider.revealDirectory(folderPath);
+            await plansProvider.revealDirectory(folderPath);
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to create folder: ${error}`);
         }
@@ -972,7 +972,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     // 新しいディレクトリを作成してMarkdownファイルも作成するコマンド（タイトルメニュー用）
     const newDirectoryCommand = vscode.commands.registerCommand('aiCodingSidebar.newDirectory', async (item?: FileItem) => {
-        // Tasks Viewで開いているディレクトリ配下にディレクトリを作成
+        // Plans Viewで開いているディレクトリ配下にディレクトリを作成
         const workspaceFolders = vscode.workspace.workspaceFolders;
         if (!workspaceFolders || workspaceFolders.length === 0) {
             vscode.window.showErrorMessage('No workspace folder is open');
@@ -982,7 +982,7 @@ export function activate(context: vscode.ExtensionContext) {
         const workspaceRoot = workspaceFolders[0].uri.fsPath;
 
         // 現在開いているディレクトリを取得、取得できない場合はdefaultRelativePathを使用
-        const currentPath = tasksProvider.getCurrentPath();
+        const currentPath = plansProvider.getCurrentPath();
         let targetPath: string;
 
         if (currentPath) {
@@ -1030,7 +1030,7 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showInformationMessage(`Created folder "${trimmedFolderName}"`);
 
             // 作成したディレクトリに移動
-            tasksProvider.navigateToDirectory(folderPath);
+            plansProvider.navigateToDirectory(folderPath);
 
             // 作成したディレクトリ内にMarkdownファイルを作成
             const now = new Date();
@@ -1066,7 +1066,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (result.success) {
                 // ビューを更新してファイル一覧に新しいファイルを反映
-                tasksProvider.refresh();
+                plansProvider.refresh();
 
                 // ビューの更新を待つ
                 await new Promise(resolve => setTimeout(resolve, 300));
@@ -1085,7 +1085,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     // 新しいSpecディレクトリを作成してMarkdownファイルも作成するコマンド（タイトルメニュー用）
     const newSpecCommand = vscode.commands.registerCommand('aiCodingSidebar.newSpec', async (item?: FileItem) => {
-        // Tasks Viewで開いているディレクトリ配下にディレクトリを作成
+        // Plans Viewで開いているディレクトリ配下にディレクトリを作成
         const workspaceFolders = vscode.workspace.workspaceFolders;
         if (!workspaceFolders || workspaceFolders.length === 0) {
             vscode.window.showErrorMessage('No workspace folder is open');
@@ -1095,7 +1095,7 @@ export function activate(context: vscode.ExtensionContext) {
         const workspaceRoot = workspaceFolders[0].uri.fsPath;
 
         // 現在開いているディレクトリを取得、取得できない場合はdefaultRelativePathを使用
-        const currentPath = tasksProvider.getCurrentPath();
+        const currentPath = plansProvider.getCurrentPath();
         let targetPath: string;
 
         if (currentPath) {
@@ -1143,7 +1143,7 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showInformationMessage(`Created folder "${trimmedFolderName}"`);
 
             // 作成したディレクトリに移動
-            tasksProvider.navigateToDirectory(folderPath);
+            plansProvider.navigateToDirectory(folderPath);
 
             // 作成したディレクトリ内にMarkdownファイルを作成
             const now = new Date();
@@ -1179,7 +1179,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (result.success) {
                 // ビューを更新してファイル一覧に新しいファイルを反映
-                tasksProvider.refresh();
+                plansProvider.refresh();
 
                 // ビューの更新を待つ
                 await new Promise(resolve => setTimeout(resolve, 300));
@@ -1231,8 +1231,8 @@ export function activate(context: vscode.ExtensionContext) {
             }
         } else {
             // itemがない場合は現在のactiveFolderPathを使用
-            const activePath = tasksProvider.getActiveFolderPath();
-            const rootPath = tasksProvider.getRootPath();
+            const activePath = plansProvider.getActiveFolderPath();
+            const rootPath = plansProvider.getRootPath();
             if (!activePath || activePath === rootPath) {
                 vscode.window.showErrorMessage('Cannot archive root directory');
                 return;
@@ -1298,14 +1298,14 @@ export function activate(context: vscode.ExtensionContext) {
 
             // 現在のディレクトリをアーカイブした場合はルートディレクトリに戻る
             if (isCurrentDirectory) {
-                const rootPath = tasksProvider.getRootPath();
+                const rootPath = plansProvider.getRootPath();
                 if (rootPath) {
-                    tasksProvider.navigateToDirectory(rootPath);
+                    plansProvider.navigateToDirectory(rootPath);
                 }
             }
 
             // ビューを更新
-            tasksProvider.refresh();
+            plansProvider.refresh();
 
             // ユーザーフィードバック
             if (hasConflict) {
@@ -1539,7 +1539,7 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showInformationMessage(`Created directory: ${displayPath}`);
 
             // ビューを更新
-            tasksProvider.setRootPath(targetPath, relativePath);
+            plansProvider.setRootPath(targetPath, relativePath);
 
             // フォルダを選択状態にする
             setTimeout(async () => {
@@ -1554,7 +1554,7 @@ export function activate(context: vscode.ExtensionContext) {
     // ディレクトリ移動コマンド（フラットリスト表示用）
     const navigateToDirectoryCommand = vscode.commands.registerCommand('aiCodingSidebar.navigateToDirectory', (targetPath: string) => {
         if (targetPath) {
-            tasksProvider.navigateToDirectory(targetPath);
+            plansProvider.navigateToDirectory(targetPath);
         }
     });
 
@@ -1621,10 +1621,10 @@ export function activate(context: vscode.ExtensionContext) {
         await vscode.commands.executeCommand('markdown.showPreview', uri);
     });
 
-    // Tasks View Guideを開くコマンドを登録
-    const openTasksViewGuideCommand = vscode.commands.registerCommand('aiCodingSidebar.openTasksViewGuide', async () => {
+    // Plans View Guideを開くコマンドを登録
+    const openPlansViewGuideCommand = vscode.commands.registerCommand('aiCodingSidebar.openPlansViewGuide', async () => {
         const extensionPath = context.extensionPath;
-        const guidePath = path.join(extensionPath, 'docs', 'tasks-view.md');
+        const guidePath = path.join(extensionPath, 'docs', 'plans-view.md');
         const uri = vscode.Uri.file(guidePath);
         await vscode.commands.executeCommand('markdown.showPreview', uri);
     });
@@ -1653,12 +1653,12 @@ export function activate(context: vscode.ExtensionContext) {
         await vscode.commands.executeCommand('markdown.showPreview', uri);
     });
 
-    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openTasksSettingsCommand, openEditorSettingsCommand, openTerminalSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, createMarkdownFileCommand, createTaskFileCommand, createSpecFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, newDirectoryCommand, newSpecCommand, renameDirectoryCommand, deleteDirectoryCommand, archiveDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand, navigateToDirectoryCommand, insertPathToEditorCommand, insertPathToTerminalCommand, openDocumentationCommand, openGettingStartedCommand, openTasksViewGuideCommand, openEditorViewGuideCommand, openTerminalViewGuideCommand, openKeyboardShortcutsCommand);
+    context.subscriptions.push(refreshCommand, showInPanelCommand, openFolderCommand, goToParentCommand, setRelativePathCommand, openSettingsCommand, openPlansSettingsCommand, openEditorSettingsCommand, openTerminalSettingsCommand, setupWorkspaceCommand, openUserSettingsCommand, openWorkspaceSettingsCommand, setupTemplateCommand, createMarkdownFileCommand, createTaskFileCommand, createSpecFileCommand, createFileCommand, createFolderCommand, renameCommand, deleteCommand, addDirectoryCommand, newDirectoryCommand, newSpecCommand, renameDirectoryCommand, deleteDirectoryCommand, archiveDirectoryCommand, checkoutBranchCommand, openTerminalCommand, checkoutDefaultBranchCommand, gitPullCommand, copyRelativePathCommand, openInEditorCommand, copyRelativePathFromEditorCommand, createDefaultPathCommand, navigateToDirectoryCommand, insertPathToEditorCommand, insertPathToTerminalCommand, openDocumentationCommand, openGettingStartedCommand, openPlansViewGuideCommand, openEditorViewGuideCommand, openTerminalViewGuideCommand, openKeyboardShortcutsCommand);
 
     // プロバイダーのリソースクリーンアップを登録
     context.subscriptions.push({
         dispose: () => {
-            tasksProvider.dispose();
+            plansProvider.dispose();
             editorProvider.dispose();
         }
     });

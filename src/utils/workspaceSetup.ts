@@ -26,8 +26,8 @@ export async function setupSettingsJson(workspaceRoot: string): Promise<void> {
         }
 
         // デフォルト設定を追加
-        if (!settings.hasOwnProperty('aiCodingSidebar.defaultRelativePath')) {
-            settings['aiCodingSidebar.defaultRelativePath'] = '.claude';
+        if (!settings.hasOwnProperty('aiCodingSidebar.plans.defaultRelativePath')) {
+            settings['aiCodingSidebar.plans.defaultRelativePath'] = '.claude';
         }
 
         // settings.jsonに書き込み
@@ -97,7 +97,7 @@ export async function setupClaudeFolder(workspaceRoot: string): Promise<void> {
 
         // 設定を適用
         const config = vscode.workspace.getConfiguration('aiCodingSidebar');
-        await config.update('defaultRelativePath', '.claude', vscode.ConfigurationTarget.Workspace);
+        await config.update('plans.defaultRelativePath', '.claude', vscode.ConfigurationTarget.Workspace);
 
         vscode.window.showInformationMessage('Created .claude folder and updated settings');
     } catch (error) {

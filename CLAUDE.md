@@ -30,7 +30,7 @@ npm run package     # VSIXパッケージ作成
 src/
 ├── extension.ts          # activate関数、コマンド登録（~1,377行）
 ├── providers/            # UIコンポーネント
-│   ├── TasksProvider.ts  # Plansビュー（フラットリスト、Drag&Drop）
+│   ├── PlansProvider.ts  # Plansビュー（フラットリスト、Drag&Drop）
 │   ├── EditorProvider.ts # Markdown EditorのWebView
 │   ├── TerminalProvider.ts # xterm.jsターミナルのWebView（スクロール位置自動追従、Claude Code自動検知機能付き）
 │   ├── MenuProvider.ts   # 設定メニュー
@@ -53,7 +53,7 @@ src/
 
 循環参照を避けるため、インターフェースベースの依存性注入を使用：
 
-- `IEditorProvider`: EditorProviderが実装、TasksProviderが参照
+- `IEditorProvider`: EditorProviderが実装、PlansProviderが参照
 - `ITerminalProvider`: TerminalProviderが実装、EditorProviderが参照
 
 ### データフロー

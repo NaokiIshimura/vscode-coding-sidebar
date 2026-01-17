@@ -43,11 +43,11 @@ export class MenuProvider implements vscode.TreeDataProvider<MenuItem> {
                             new vscode.ThemeIcon('rocket')
                         ),
                         new MenuItem(
-                            'Tasks View',
+                            'Plans View',
                             'File browsing and management guide',
                             {
-                                command: 'aiCodingSidebar.openTasksViewGuide',
-                                title: 'Open Tasks View Guide'
+                                command: 'aiCodingSidebar.openPlansViewGuide',
+                                title: 'Open Plans View Guide'
                             },
                             new vscode.ThemeIcon('list-tree')
                         ),

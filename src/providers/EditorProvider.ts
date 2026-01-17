@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { TasksProvider } from './TasksProvider';
+import { PlansProvider } from './PlansProvider';
 
 // Forward declaration for TerminalProvider to avoid circular dependency
 export interface ITerminalProvider {
@@ -16,8 +16,8 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
     private _currentContent?: string;
     private _pendingContent?: string;
     private _isDirty: boolean = false;
-    private _detailsProvider?: TasksProvider;
-    private _tasksProvider?: TasksProvider;
+    private _detailsProvider?: PlansProvider;
+    private _plansProvider?: PlansProvider;
     private _terminalProvider?: ITerminalProvider;
     private _pendingFileToRestore?: string;
     private _disposables: vscode.Disposable[] = [];
@@ -220,7 +220,7 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
 
                         // Get the spec command template from settings
                         const config = vscode.workspace.getConfiguration('aiCodingSidebar');
-                        const commandTemplate = config.get<string>('editor.specCommand', 'claude "Review the file at ${filePath} and create specification documents. Save them as timestamped files (format: YYYY_MMDD_HHMM_SS_requirements.md, YYYY_MMDD_HHMM_SS_design.md, YYYY_MMDD_HHMM_SS_tasks.md) in the same directory as ${filePath}."');
+                        const commandTemplate = config.get<string>('editor.specCommand', 'claude "Review the file at ${filePath} and create specification documents. Save them as timestamped files (format: YYYY_MMDD_HHMM_SS_requirements.md, YYYY_MMDD_HHMM_SS_design.md, YYYY_MMDD_HHMM_SS_plans.md) in the same directory as ${filePath}."');
 
                         // Replace ${filePath} placeholder with actual file path
                         const command = commandTemplate.replace(/\$\{filePath\}/g, relativeFilePath.trim());
@@ -475,12 +475,12 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
         return this._currentFilePath;
     }
 
-    public setDetailsProvider(provider: TasksProvider): void {
+    public setDetailsProvider(provider: PlansProvider): void {
         this._detailsProvider = provider;
     }
 
-    public setTasksProvider(provider: TasksProvider): void {
-        this._tasksProvider = provider;
+    public setPlansProvider(provider: PlansProvider): void {
+        this._plansProvider = provider;
     }
 
     public setTerminalProvider(provider: ITerminalProvider): void {
@@ -582,7 +582,7 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
             // 優先度2: Docs viewで開いているディレクトリ
             const docsCurrentPath = this._detailsProvider?.getCurrentPath();
             // 優先度3: Tasks viewで選択しているディレクトリ
-            const tasksRootPath = this._tasksProvider?.getRootPath();
+            const tasksRootPath = this._plansProvider?.getRootPath();
 
             if (docsCurrentPath) {
                 savePath = docsCurrentPath;
@@ -591,7 +591,7 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
             } else {
                 // 優先度4: デフォルトパス
                 const config = vscode.workspace.getConfiguration('aiCodingSidebar');
-                const defaultRelativePath = config.get<string>('defaultRelativePath', '.claude/tasks');
+                const defaultRelativePath = config.get<string>('plans.defaultRelativePath', '.claude/plans');
                 savePath = path.join(workspaceRoot, defaultRelativePath);
             }
 
@@ -638,13 +638,13 @@ export class EditorProvider implements vscode.WebviewViewProvider, vscode.Dispos
                 });
 
                 // ツリービューを更新
-                this._tasksProvider?.refresh();
+                this._plansProvider?.refresh();
                 this._detailsProvider?.refresh();
 
                 // 保存したディレクトリに移動してファイルを選択
                 setTimeout(async () => {
                     // Tasks viewでディレクトリを表示
-                    await this._tasksProvider?.revealDirectory(savePath);
+                    await this._plansProvider?.revealDirectory(savePath);
                     // Tasks viewでファイルを選択
                     // アクティブフォルダが異なる場合は更新が必要
                     const currentActivePath = this._detailsProvider?.getCurrentPath();

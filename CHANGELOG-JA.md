@@ -7,6 +7,28 @@
 
 ## [0.8.42] - 2026-01-17
 
+### 変更 - 破壊的変更
+- **ファイル/クラス名**: Tasks→Plans への名称変更をコードベース全体で完了
+  - `TasksProvider.ts` → `PlansProvider.ts` にリネーム
+  - クラス名 `TasksProvider` → `PlansProvider` に変更
+  - **対応が必要**: カスタムキーバインディングやスクリプトで旧名称を参照している場合は更新してください
+
+- **コマンドID - 破壊的変更**: コマンド識別子を更新
+  - `aiCodingSidebar.openTasksSettings` → `aiCodingSidebar.openPlansSettings`
+  - `aiCodingSidebar.openTasksViewGuide` → `aiCodingSidebar.openPlansViewGuide`
+  - **対応が必要**: これらのコマンドにキーボードショートカットを設定している場合は、keybindings.jsonを更新してください
+
+- **設定キー - 破壊的変更**: 一貫性のため全ての設定キーを名称変更
+  - `aiCodingSidebar.tasks.sortBy` → `aiCodingSidebar.plans.sortBy`
+  - `aiCodingSidebar.tasks.sortOrder` → `aiCodingSidebar.plans.sortOrder`
+  - **対応が必要**: settings.jsonで新しい設定キーを使用するように更新してください
+
+- **ドキュメント**: Plans命名を反映するよう全ドキュメントファイルを更新
+  - `docs/tasks-view.md` → `docs/plans-view.md` にリネーム
+  - getting-started.md、keyboard-shortcuts.md、CLAUDE.mdを更新
+  - README.mdとREADME-JA.mdのテンプレート例を更新
+  - デフォルトテンプレートを `YYYY_MMDD_HHMM_SS_tasks.md` → `YYYY_MMDD_HHMM_SS_plans.md` に更新
+
 ### 修正
 - **設定読み込み**: `plans.defaultRelativePath` 設定を正しく読み込むように設定パスを修正
   - ConfigurationProvider.tsを `defaultRelativePath` から `plans.defaultRelativePath` に更新
@@ -14,6 +36,12 @@
   - EditorProvider.tsで正しい設定パスを使用するように更新
   - workspaceSetup.tsで正しい設定キーを設定するように更新
   - この修正により、VSCode設定UIの「Ai Coding Sidebar › Plans: Default Relative Path」設定が正しく認識されるようになります
+
+### マイグレーションガイド
+v0.8.33以前からアップグレードする場合:
+1. キーボードショートカットを更新: keybindings.jsonで旧コマンドIDを新しいものに置き換えてください
+2. 設定を更新: settings.jsonで `aiCodingSidebar.tasks.*` を `aiCodingSidebar.plans.*` に名称変更してください
+3. 自動マイグレーションは提供されません - 手動での更新が必要です
 
 ## [0.8.33] - 2026-01-17
 

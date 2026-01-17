@@ -51,7 +51,7 @@
         "icon": "$(settings-gear)"
       },
       {
-        "command": "aiCodingSidebar.openTasksSettings",
+        "command": "aiCodingSidebar.openPlansSettings",
         "title": "Plans Settings",
         "icon": "$(settings-gear)"
       },
@@ -221,8 +221,8 @@
         "icon": "$(rocket)"
       },
       {
-        "command": "aiCodingSidebar.openTasksViewGuide",
-        "title": "Open Tasks View Guide",
+        "command": "aiCodingSidebar.openPlansViewGuide",
+        "title": "Open Plans View Guide",
         "icon": "$(list-tree)"
       },
       {
@@ -296,7 +296,7 @@
           "group": "navigation@3"
         },
         {
-          "command": "aiCodingSidebar.openTasksSettings",
+          "command": "aiCodingSidebar.openPlansSettings",
           "when": "view == aiCodingSidebarExplorer",
           "group": "navigation@4"
         },
@@ -533,7 +533,7 @@
         },
         "aiCodingSidebar.editor.specCommand": {
           "type": "string",
-          "default": "claude --permission-mode plan \"Review the file at ${filePath} and create specification documents. Save them as timestamped files (format: YYYY_MMDD_HHMM_SS_requirements.md, YYYY_MMDD_HHMM_SS_design.md, YYYY_MMDD_HHMM_SS_tasks.md) in the same directory as ${filePath}.\"",
+          "default": "claude --permission-mode plan \"Review the file at ${filePath} and create specification documents. Save them as timestamped files (format: YYYY_MMDD_HHMM_SS_requirements.md, YYYY_MMDD_HHMM_SS_design.md, YYYY_MMDD_HHMM_SS_plans.md) in the same directory as ${filePath}.\"",
           "description": "Command template to execute when clicking the Spec button. Use ${filePath} as placeholder for the file path."
         },
         "aiCodingSidebar.terminal.shell": {

@@ -1,4 +1,4 @@
-export { TasksProvider, IEditorProvider } from './TasksProvider';
+export { PlansProvider, IEditorProvider } from './PlansProvider';
 export { MenuProvider } from './MenuProvider';
 export { EditorProvider, ITerminalProvider } from './EditorProvider';
 export { TerminalProvider, TerminalTab } from './TerminalProvider';

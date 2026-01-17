@@ -1,4 +1,4 @@
-# Tasks View
+# Plans View
 
 Browse and manage files in a flat list format.
 
@@ -48,7 +48,7 @@ The path header row displays the current path and provides quick action buttons:
 
 | Setting | Description | Default |
 |---------|-------------|---------|
-| `defaultRelativePath` | Default path for Tasks view | `.claude/tasks` |
+| `defaultRelativePath` | Default path for Tasks view | `.claude/plans` |
 | `markdownList.sortBy` | Sort criterion (name/created/modified) | `created` |
 | `markdownList.sortOrder` | Sort order (ascending/descending) | `ascending` |
 

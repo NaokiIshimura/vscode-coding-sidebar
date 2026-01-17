@@ -4,7 +4,7 @@
 
 ### menu
 
-### tasks
+### plans
 
 ### editor
 

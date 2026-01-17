@@ -12,7 +12,7 @@ Quick reference for all keyboard shortcuts in AI Coding Panel.
 
 | Shortcut | Action |
 |----------|--------|
-| `Cmd+S` / `Ctrl+S` | Create new Task (directory with markdown file) |
+| `Cmd+S` / `Ctrl+S` | Create new Plan (directory with markdown file) |
 | `Cmd+M` / `Ctrl+M` | Create new Markdown file |
 
 ## Editor Shortcuts
@@ -23,7 +23,7 @@ Quick reference for all keyboard shortcuts in AI Coding Panel.
 
 ## Quick Actions
 
-### Tasks View
+### Plans View
 - Click directory to navigate into it
 - Click ".." to go to parent directory
 - Right-click for context menu actions
@@ -41,7 +41,7 @@ Quick reference for all keyboard shortcuts in AI Coding Panel.
 ## Tips
 
 1. **Quick Panel Access**: Use `Cmd+Shift+A` to quickly focus the panel from anywhere
-2. **Fast Task Creation**: Press `Cmd+S` while in the panel to create a new task
+2. **Fast Plan Creation**: Press `Cmd+S` while in the panel to create a new plan
 3. **Rapid Iteration**: Use `Cmd+R` to quickly send commands to Terminal
 
 ---

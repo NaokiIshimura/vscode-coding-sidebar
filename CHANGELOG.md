@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.8.42] - 2026-01-17
 
+### Changed - BREAKING CHANGES
+- **File/Class Naming**: Completed Tasks→Plans renaming throughout codebase
+  - Renamed `TasksProvider.ts` → `PlansProvider.ts`
+  - Renamed class `TasksProvider` → `PlansProvider`
+  - **Action Required**: If you have custom keybindings or scripts referencing the old names, please update them
+
+- **Command IDs - Breaking Change**: Updated command identifiers
+  - `aiCodingSidebar.openTasksSettings` → `aiCodingSidebar.openPlansSettings`
+  - `aiCodingSidebar.openTasksViewGuide` → `aiCodingSidebar.openPlansViewGuide`
+  - **Action Required**: If you have keyboard shortcuts configured for these commands, update your keybindings.json
+
+- **Configuration Keys - Breaking Change**: Renamed all configuration keys for consistency
+  - `aiCodingSidebar.tasks.sortBy` → `aiCodingSidebar.plans.sortBy`
+  - `aiCodingSidebar.tasks.sortOrder` → `aiCodingSidebar.plans.sortOrder`
+  - **Action Required**: Update your settings.json to use the new configuration keys
+
+- **Documentation**: Updated all documentation files to reflect Plans naming
+  - Renamed `docs/tasks-view.md` → `docs/plans-view.md`
+  - Updated getting-started.md, keyboard-shortcuts.md, CLAUDE.md
+  - Updated README.md and README-JA.md template examples
+  - Updated default template from `YYYY_MMDD_HHMM_SS_tasks.md` → `YYYY_MMDD_HHMM_SS_plans.md`
+
 ### Fixed
 - **Configuration Loading**: Fixed settings path to correctly read `plans.defaultRelativePath` configuration
   - Updated ConfigurationProvider.ts to use `plans.defaultRelativePath` instead of `defaultRelativePath`
@@ -14,6 +36,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated EditorProvider.ts to use correct configuration path
   - Updated workspaceSetup.ts to set correct configuration key
   - This fix ensures the "Ai Coding Sidebar › Plans: Default Relative Path" setting in VS Code settings UI is properly recognized
+
+### Migration Guide
+If you are upgrading from v0.8.33 or earlier:
+1. Update keyboard shortcuts: Replace old command IDs with new ones in your keybindings.json
+2. Update settings: Rename `aiCodingSidebar.tasks.*` to `aiCodingSidebar.plans.*` in your settings.json
+3. No automatic migration is provided - manual updates are required
 
 ## [0.8.33] - 2026-01-17
 

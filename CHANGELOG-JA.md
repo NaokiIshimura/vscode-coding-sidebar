@@ -5,6 +5,11 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.43] - 2026-01-17
+
+### 変更
+- **ドキュメント**: README.mdとREADME-JA.mdのバージョン参照を0.8.42から0.8.43に更新
+
 ## [0.8.42] - 2026-01-17
 
 ### 変更 - 破壊的変更
@@ -916,3 +921,5 @@ v0.8.33以前からアップグレードする場合:
 [0.8.31]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.30...v0.8.31
 [0.8.32]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.31...v0.8.32
 [0.8.33]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.32...v0.8.33
+[0.8.42]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.33...v0.8.42
+[0.8.43]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.42...v0.8.43

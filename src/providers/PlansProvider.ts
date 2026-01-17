@@ -12,7 +12,7 @@ export interface IEditorProvider {
     showFile(filePath: string): Promise<void>;
 }
 
-export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDragAndDropController<FileItem> {
+export class PlansProvider implements vscode.TreeDataProvider<FileItem>, vscode.TreeDragAndDropController<FileItem> {
     private _onDidChangeTreeData: vscode.EventEmitter<FileItem | undefined | null | void> = new vscode.EventEmitter<FileItem | undefined | null | void>();
     readonly onDidChangeTreeData: vscode.Event<FileItem | undefined | null | void> = this._onDidChangeTreeData.event;
 
@@ -49,8 +49,8 @@ export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.
         }
         // 設定変更を監視してタイトルと表示を更新
         this.configChangeDisposable = vscode.workspace.onDidChangeConfiguration((e) => {
-            if (e.affectsConfiguration('aiCodingSidebar.tasks.sortBy') ||
-                e.affectsConfiguration('aiCodingSidebar.tasks.sortOrder')) {
+            if (e.affectsConfiguration('aiCodingSidebar.plans.sortBy') ||
+                e.affectsConfiguration('aiCodingSidebar.plans.sortOrder')) {
                 this.refresh();
             }
         });
@@ -126,8 +126,8 @@ export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.
 
     private updateTitle(): void {
         if (this.treeView) {
-            // タイトルは「TASKS」固定
-            this.treeView.title = 'TASKS';
+            // タイトルは「PLANS」固定
+            this.treeView.title = 'PLANS';
         }
     }
 
@@ -136,7 +136,7 @@ export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.
     }
 
     /**
-     * Tasks Viewで指定されたファイルを選択状態にする
+     * Plans Viewで指定されたファイルを選択状態にする
      */
     async revealFile(filePath: string): Promise<void> {
         if (!this.treeView || !this.rootPath) {
@@ -767,7 +767,7 @@ export class TasksProvider implements vscode.TreeDataProvider<FileItem>, vscode.
             }
 
             // ソート設定を取得
-            const config = vscode.workspace.getConfiguration('aiCodingSidebar.tasks');
+            const config = vscode.workspace.getConfiguration('aiCodingSidebar.plans');
             const sortBy = config.get<string>('sortBy', 'created');
             const sortOrder = config.get<string>('sortOrder', 'ascending');
 

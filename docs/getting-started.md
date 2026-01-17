@@ -9,7 +9,7 @@ Welcome to AI Coding Panel! This guide will help you get started quickly.
 
 ## First Steps
 
-1. **Create a task directory** in Tasks view using the rocket icon or `Cmd+S`
+1. **Create a plan directory** in Plans view using the rocket icon or `Cmd+S`
 2. **Create a markdown file** for your AI prompt
 3. **Edit the file** in Editor view
 4. **Run commands** in Terminal view using the Run button or `Cmd+R`
@@ -18,14 +18,14 @@ Welcome to AI Coding Panel! This guide will help you get started quickly.
 
 | View | Description |
 |------|-------------|
-| Tasks | Browse and manage files in a flat list format |
+| Plans | Browse and manage files in a flat list format |
 | Editor | Edit markdown files directly in the panel |
 | Terminal | Embedded terminal with PTY support |
 | Menu | Quick access to settings and actions |
 
 ## Recommended Workflow
 
-1. **Create Task**: Press `Cmd+S` to create a new task directory with markdown file
+1. **Create Plan**: Press `Cmd+S` to create a new plan directory with markdown file
 2. **Write Prompt**: Edit the markdown file in Editor view
 3. **Run AI**: Press `Cmd+R` to send command to Terminal
 4. **Review Output**: Check AI response in Terminal view
@@ -41,7 +41,7 @@ Welcome to AI Coding Panel! This guide will help you get started quickly.
 ---
 
 For detailed information on each view, see:
-- [Tasks View](tasks-view.md)
+- [Plans View](plans-view.md)
 - [Editor View](editor-view.md)
 - [Terminal View](terminal-view.md)
 - [Keyboard Shortcuts](keyboard-shortcuts.md)

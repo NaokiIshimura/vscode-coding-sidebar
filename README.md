@@ -207,7 +207,7 @@ If the default relative path doesn't exist, Plans displays a "Create directory" 
 | `editor.runCommand` | Command template to execute when clicking the Run button in the Editor view | string | `claude "Review the file at ${filePath}"` | Use `${filePath}` as placeholder for the file path |
 | `editor.runCommandWithoutFile` | Command template to execute when clicking the Run button without a file open | string | `claude "${editorContent}"` | Use `${editorContent}` as placeholder for the editor content |
 | `editor.planCommand` | Command template to execute when clicking the Plan button | string | `claude --permission-mode plan "Review the file at ${filePath} and create an implementation plan. Save it as a timestamped file (format: YYYY_MMDD_HHMM_SS_plan.md) in the same directory as ${filePath}."` | Use `${filePath}` as placeholder for the file path |
-| `editor.specCommand` | Command template to execute when clicking the Spec button | string | `claude --permission-mode plan "Review the file at ${filePath} and create specification documents. Save them as timestamped files (format: YYYY_MMDD_HHMM_SS_requirements.md, YYYY_MMDD_HHMM_SS_design.md, YYYY_MMDD_HHMM_SS_tasks.md) in the same directory as ${filePath}."` | Use `${filePath}` as placeholder for the file path |
+| `editor.specCommand` | Command template to execute when clicking the Spec button | string | `claude --permission-mode plan "Review the file at ${filePath} and create specification documents. Save them as timestamped files (format: YYYY_MMDD_HHMM_SS_requirements.md, YYYY_MMDD_HHMM_SS_design.md, YYYY_MMDD_HHMM_SS_plans.md) in the same directory as ${filePath}."` | Use `${filePath}` as placeholder for the file path |
 | `terminal.shell` | Shell executable path for Terminal view | string | `""` | Leave empty to use system default shell |
 | `terminal.fontSize` | Font size for Terminal view | number | `12` | Any positive number |
 | `terminal.fontFamily` | Font family for Terminal view | string | `"monospace"` | Any valid font family |
@@ -227,7 +227,7 @@ Add the following to `.vscode/settings.json`:
   "aiCodingSidebar.editor.runCommand": "claude \"Review the file at ${filePath}\"",
   "aiCodingSidebar.editor.runCommandWithoutFile": "claude \"${editorContent}\"",
   "aiCodingSidebar.editor.planCommand": "claude --permission-mode plan \"Review the file at ${filePath} and create an implementation plan. Save it as a timestamped file (format: YYYY_MMDD_HHMM_SS_plan.md) in the same directory as ${filePath}.\"",
-  "aiCodingSidebar.editor.specCommand": "claude --permission-mode plan \"Review the file at ${filePath} and create specification documents. Save them as timestamped files (format: YYYY_MMDD_HHMM_SS_requirements.md, YYYY_MMDD_HHMM_SS_design.md, YYYY_MMDD_HHMM_SS_tasks.md) in the same directory as ${filePath}.\"",
+  "aiCodingSidebar.editor.specCommand": "claude --permission-mode plan \"Review the file at ${filePath} and create specification documents. Save them as timestamped files (format: YYYY_MMDD_HHMM_SS_requirements.md, YYYY_MMDD_HHMM_SS_design.md, YYYY_MMDD_HHMM_SS_plans.md) in the same directory as ${filePath}.\"",
   "aiCodingSidebar.terminal.fontSize": 12,
   "aiCodingSidebar.terminal.cursorStyle": "block"
 }

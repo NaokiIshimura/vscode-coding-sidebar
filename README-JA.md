@@ -207,7 +207,7 @@ created: {{datetime}}
 | `editor.runCommand` | Editorビューのrunボタンで実行されるコマンドテンプレート | string | `claude "Review the file at ${filePath}"` | `${filePath}`をファイルパスのプレースホルダーとして使用 |
 | `editor.runCommandWithoutFile` | ファイル未開時にrunボタンで実行されるコマンドテンプレート | string | `claude "${editorContent}"` | `${editorContent}`をエディタ内容のプレースホルダーとして使用 |
 | `editor.planCommand` | Planボタンで実行されるコマンドテンプレート | string | `claude --permission-mode plan "Review the file at ${filePath} and create an implementation plan. Save it as a timestamped file (format: YYYY_MMDD_HHMM_SS_plan.md) in the same directory as ${filePath}."` | `${filePath}`をファイルパスのプレースホルダーとして使用 |
-| `editor.specCommand` | Specボタンで実行されるコマンドテンプレート | string | `claude --permission-mode plan "Review the file at ${filePath} and create specification documents. Save them as timestamped files (format: YYYY_MMDD_HHMM_SS_requirements.md, YYYY_MMDD_HHMM_SS_design.md, YYYY_MMDD_HHMM_SS_tasks.md) in the same directory as ${filePath}."` | `${filePath}`をファイルパスのプレースホルダーとして使用 |
+| `editor.specCommand` | Specボタンで実行されるコマンドテンプレート | string | `claude --permission-mode plan "Review the file at ${filePath} and create specification documents. Save them as timestamped files (format: YYYY_MMDD_HHMM_SS_requirements.md, YYYY_MMDD_HHMM_SS_design.md, YYYY_MMDD_HHMM_SS_plans.md) in the same directory as ${filePath}."` | `${filePath}`をファイルパスのプレースホルダーとして使用 |
 | `terminal.shell` | Terminalビューのシェル実行パス | string | `""` | 空欄の場合はシステムのデフォルトシェルを使用 |
 | `terminal.fontSize` | Terminalビューのフォントサイズ | number | `12` | 任意の正の数値 |
 | `terminal.fontFamily` | Terminalビューのフォントファミリー | string | `"monospace"` | 任意の有効なフォントファミリー |
@@ -227,7 +227,7 @@ created: {{datetime}}
   "aiCodingSidebar.editor.runCommand": "claude \"Review the file at ${filePath}\"",
   "aiCodingSidebar.editor.runCommandWithoutFile": "claude \"${editorContent}\"",
   "aiCodingSidebar.editor.planCommand": "claude --permission-mode plan \"Review the file at ${filePath} and create an implementation plan. Save it as a timestamped file (format: YYYY_MMDD_HHMM_SS_plan.md) in the same directory as ${filePath}.\"",
-  "aiCodingSidebar.editor.specCommand": "claude --permission-mode plan \"Review the file at ${filePath} and create specification documents. Save them as timestamped files (format: YYYY_MMDD_HHMM_SS_requirements.md, YYYY_MMDD_HHMM_SS_design.md, YYYY_MMDD_HHMM_SS_tasks.md) in the same directory as ${filePath}.\"",
+  "aiCodingSidebar.editor.specCommand": "claude --permission-mode plan \"Review the file at ${filePath} and create specification documents. Save them as timestamped files (format: YYYY_MMDD_HHMM_SS_requirements.md, YYYY_MMDD_HHMM_SS_design.md, YYYY_MMDD_HHMM_SS_plans.md) in the same directory as ${filePath}.\"",
   "aiCodingSidebar.terminal.fontSize": 12,
   "aiCodingSidebar.terminal.cursorStyle": "block"
 }

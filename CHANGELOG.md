@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.44] - 2026-01-17
+
+### Changed
+- **VSCode Marketplace Metadata**: Enhanced package.json keywords and categories for better discoverability
+  - Added category: "SCM Providers" (for Git integration features)
+  - Added keywords: "ai-coding", "claude", "copilot", "sidebar", "panel", "file-browser", "task-management", "plans", "terminal", "editor", "markdown", "git", "ai-tools"
+  - Improves search visibility and user reach on VSCode Marketplace
+
 ## [0.8.43] - 2026-01-17
 
 ### Changed
@@ -1451,3 +1459,4 @@ If you are upgrading from v0.8.33 or earlier:
 [0.8.33]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.32...v0.8.33
 [0.8.42]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.33...v0.8.42
 [0.8.43]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.42...v0.8.43
+[0.8.44]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.43...v0.8.44

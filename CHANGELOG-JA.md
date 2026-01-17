@@ -5,6 +5,14 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.44] - 2026-01-17
+
+### 変更
+- **VSCode Marketplaceメタデータ**: package.jsonのキーワードとカテゴリを強化し、検索性を向上
+  - カテゴリを追加: "SCM Providers"（Git統合機能のため）
+  - キーワードを追加: "ai-coding", "claude", "copilot", "sidebar", "panel", "file-browser", "task-management", "plans", "terminal", "editor", "markdown", "git", "ai-tools"
+  - VSCode Marketplaceでの検索表示とユーザーリーチを改善
+
 ## [0.8.43] - 2026-01-17
 
 ### 変更
@@ -923,3 +931,4 @@ v0.8.33以前からアップグレードする場合:
 [0.8.33]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.32...v0.8.33
 [0.8.42]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.33...v0.8.42
 [0.8.43]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.42...v0.8.43
+[0.8.44]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.43...v0.8.44

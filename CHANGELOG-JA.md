@@ -5,6 +5,15 @@
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に基づいており、
 このプロジェクトは [セマンティックバージョニング](https://semver.org/lang/ja/) に準拠しています。
 
+## [0.8.45] - 2026-01-18
+
+### 変更
+- **Editor設定**: PlanボタンとSpecボタンのデフォルトコマンドを簡素化
+  - `aiCodingSidebar.editor.planCommand` のデフォルト値から `--permission-mode plan` フラグを削除
+  - `aiCodingSidebar.editor.specCommand` のデフォルト値から `--permission-mode plan` フラグを削除
+  - 新しいデフォルトコマンドは `claude --permission-mode plan` の代わりに `claude` を使用
+  - 既存のユーザー設定には影響しません
+
 ## [0.8.44] - 2026-01-17
 
 ### 変更
@@ -932,3 +941,4 @@ v0.8.33以前からアップグレードする場合:
 [0.8.42]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.33...v0.8.42
 [0.8.43]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.42...v0.8.43
 [0.8.44]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.43...v0.8.44
+[0.8.45]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.44...v0.8.45

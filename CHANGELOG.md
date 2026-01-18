@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.45] - 2026-01-18
+
+### Changed
+- **Editor Settings**: Simplified default commands for Plan and Spec buttons
+  - Removed `--permission-mode plan` flag from `aiCodingSidebar.editor.planCommand` default value
+  - Removed `--permission-mode plan` flag from `aiCodingSidebar.editor.specCommand` default value
+  - New default commands use `claude` instead of `claude --permission-mode plan`
+  - Existing user configurations are not affected
+
 ## [0.8.44] - 2026-01-17
 
 ### Changed
@@ -1460,3 +1469,4 @@ If you are upgrading from v0.8.33 or earlier:
 [0.8.42]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.33...v0.8.42
 [0.8.43]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.42...v0.8.43
 [0.8.44]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.43...v0.8.44
+[0.8.45]: https://github.com/NaokiIshimura/vscode-ai-coding-sidebar/compare/v0.8.44...v0.8.45

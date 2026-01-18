@@ -1,6 +1,6 @@
 # AI Coding Panel
 
-[![Version](https://img.shields.io/vscode-marketplace/v/nacn.ai-coding-sidebar.svg)](https://marketplace.visualstudio.com/items?itemName=nacn.ai-coding-sidebar) [![Installs](https://img.shields.io/vscode-marketplace/i/nacn.ai-coding-sidebar.svg)](https://marketplace.visualstudio.com/items?itemName=nacn.ai-coding-sidebar) [![Rating](https://img.shields.io/vscode-marketplace/r/nacn.ai-coding-sidebar.svg)](https://marketplace.visualstudio.com/items?itemName=nacn.ai-coding-sidebar)
+[![Version](https://img.shields.io/badge/version-0.8.45-blue.svg)](https://marketplace.visualstudio.com/items?itemName=nacn.ai-coding-sidebar) [![VS Marketplace](https://img.shields.io/badge/VS%20Marketplace-Install-blue.svg)](https://marketplace.visualstudio.com/items?itemName=nacn.ai-coding-sidebar)
 
 A panel extension that strengthens integration with AI coding tools.
 
